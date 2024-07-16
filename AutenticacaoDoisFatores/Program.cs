@@ -28,6 +28,8 @@ var config = new MapperConfiguration(cfg =>
 var mapeamentos = config.CreateMapper();
 builder.Services.AddSingleton(mapeamentos);
 
+builder.Services.AddScoped<INotificador, Notificador>();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

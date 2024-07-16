@@ -6,18 +6,18 @@ namespace AutenticacaoDoisFatores.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class EntidadeAcessoController(IEntidadeAcessoServico servico) : ControllerBase
+    public class EntidadeAcessoController(IEntidadeAcessoServico servico, INotificador notificador) : BaseController(notificador)
     {
         private readonly IEntidadeAcessoServico _servico = servico;
 
         [HttpPost(Name = "CadastrarEntidadeAcesso")]
-        public async Task<ActionResult<EntidadeAcessoCadastrada>> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
+        public async Task<ActionResult<EntidadeAcessoCadastrada?>> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
         {
             try
             {
                 var entidadeAcessoCadastrada = await _servico.CadastrarAsync(entidadeAcessoCadastrar);
 
-                return StatusCode(201, entidadeAcessoCadastrada);
+                return CriadoComSucesso(entidadeAcessoCadastrada);
             }
             catch (Exception e)
             {

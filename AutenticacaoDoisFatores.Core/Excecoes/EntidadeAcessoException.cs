@@ -1,29 +1,28 @@
-﻿namespace AutenticacaoDoisFatores.Core.Excecoes
-{
-    internal class EntidadeAcessoException : ApplicationException
-    {
-        public EntidadeAcessoException(string? message) : base(message)
-        {
-        }
+﻿using AutenticacaoDoisFatores.Core.Enum;
+using AutenticacaoDoisFatores.Core.Extensoes;
 
+namespace AutenticacaoDoisFatores.Core.Excecoes
+{
+    internal class EntidadeAcessoException(NotificacoesEntidadeAcesso mensagem) : ApplicationException(mensagem.Descricao())
+    {
         internal static void IdInvalido()
         {
-            throw new EntidadeAcessoException("O ID da entidade de acesso é inválido");
+            throw new EntidadeAcessoException(NotificacoesEntidadeAcesso.IdInvalido);
         }
 
         internal static void NomeInvalido()
         {
-            throw new EntidadeAcessoException("O nome da entidade de acesso é inválido");
+            throw new EntidadeAcessoException(NotificacoesEntidadeAcesso.NomeInvalido);
         }
 
         internal static void ChaveInvalida()
         {
-            throw new EntidadeAcessoException("A chave da entidade de acesso é inválida");
+            throw new EntidadeAcessoException(NotificacoesEntidadeAcesso.ChaveInvalida);
         }
 
         internal static void EmailInvalido()
         {
-            throw new EntidadeAcessoException("O e-mail da entidade de acesso é inválido");
+            throw new EntidadeAcessoException(NotificacoesEntidadeAcesso.EmailInvalido);
         }
     }
 }

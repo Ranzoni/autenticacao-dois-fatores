@@ -4,6 +4,6 @@ namespace AutenticacaoDoisFatores.Servico.Interfaces
 {
     public interface IEntidadeAcessoServico
     {
-        Task<EntidadeAcessoCadastrada> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar);
+        Task<EntidadeAcessoCadastrada?> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar);
     }
 }
