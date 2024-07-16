@@ -8,10 +8,8 @@ namespace AutenticacaoDoisFatores.Core.Servicos
     {
         private readonly IEntidadeAcessoRepositorio _repositorio = repositorio;
 
-        public async Task<EntidadeAcesso> CadastrarAsync(string nomeEntidadeAcesso)
+        public async Task<EntidadeAcesso> CadastrarAsync(EntidadeAcesso entidadeAcesso)
         {
-            var entidadeAcesso = new EntidadeAcesso(nomeEntidadeAcesso);
-
             await _repositorio.CadastrarAsync(entidadeAcesso);
             await _repositorio.SalvarAlteracoesAsync();
 

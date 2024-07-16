@@ -1,4 +1,5 @@
-﻿using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
+﻿using AutenticacaoDoisFatores.Core.Entidades;
+using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Servico.DTO.EntidadeAcesso;
 using AutenticacaoDoisFatores.Servico.Interfaces;
 using AutoMapper;
@@ -12,7 +13,9 @@ namespace AutenticacaoDoisFatores.Servico
 
         public async Task<EntidadeAcessoCadastrada> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
         {
-            var entidadeAcesso = await _dominio.CadastrarAsync(entidadeAcessoCadastrar.Nome);
+            var entidadeAcessoMapeada = _mapeador.Map<EntidadeAcesso>(entidadeAcessoCadastrar);
+
+            var entidadeAcesso = await _dominio.CadastrarAsync(entidadeAcessoMapeada);
 
             var entidadeAcesssoCadastrada = _mapeador.Map<EntidadeAcessoCadastrada>(entidadeAcesso);
 

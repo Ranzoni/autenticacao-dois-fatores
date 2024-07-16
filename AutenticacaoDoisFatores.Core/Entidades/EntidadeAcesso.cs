@@ -7,24 +7,26 @@ namespace AutenticacaoDoisFatores.Core.Entidades
     {
         private readonly byte _tamanhoChave = 8;
         private readonly char[] _caracteres = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-        private readonly string _chaveSemCriptografia;
+        private readonly string? _chaveSemCriptografia;
 
-        [MaxLength(50)]
         public string Nome { get; private set; }
         public string Chave { get; private set; }
+        public string Email { get; private set; }
 
-        public EntidadeAcesso(string nome)
+        public EntidadeAcesso(string nome, string email)
         {
             Nome = nome;
             _chaveSemCriptografia = GerarChave();
             Chave = Criptografia.Criptografar(_chaveSemCriptografia);
+            Email = email;
         }
 
-        public EntidadeAcesso(int id, string nome, string chave)
+        public EntidadeAcesso(int id, string nome, string chave, string email)
         {
             Id = id;
             Nome = nome;
             Chave = chave;
+            Email = email;
         }
 
         private string GerarChave()
@@ -44,7 +46,7 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             return chave;
         }
 
-        private string RetornarChaveSemCriptografia()
+        private string? RetornarChaveSemCriptografia()
         {
             return _chaveSemCriptografia;
         }
