@@ -1,4 +1,5 @@
 ﻿using AutenticacaoDoisFatores.Core.Servicos;
+using AutenticacaoDoisFatores.Core.Validadores;
 using System.ComponentModel.DataAnnotations;
 
 namespace AutenticacaoDoisFatores.Core.Entidades
@@ -15,6 +16,8 @@ namespace AutenticacaoDoisFatores.Core.Entidades
 
         public EntidadeAcesso(string nome, string email)
         {
+            EntidadeAcessoValidador.ValidarNovaEntidade(nome, email);
+
             Nome = nome;
             _chaveSemCriptografia = GerarChave();
             Chave = Criptografia.Criptografar(_chaveSemCriptografia);
@@ -23,6 +26,8 @@ namespace AutenticacaoDoisFatores.Core.Entidades
 
         public EntidadeAcesso(int id, string nome, string chave, string email)
         {
+            EntidadeAcessoValidador.ValidarEntidadeCompleta(id, nome, chave, email);
+
             Id = id;
             Nome = nome;
             Chave = chave;
