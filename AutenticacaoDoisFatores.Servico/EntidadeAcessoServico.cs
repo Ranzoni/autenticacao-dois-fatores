@@ -23,6 +23,11 @@ namespace AutenticacaoDoisFatores.Servico
 
             var entidadeAcesso = await _dominio.CadastrarAsync(entidadeAcessoMapeada);
 
+            var chave = entidadeAcesso.RetornarChaveSemCriptografia();
+            VerificarChaveAcesso(chave);
+
+            EmailServico.EnviarSucessoCadastroDeAcesso(entidadeAcesso.Email, chave);
+
             var entidadeAcesssoCadastrada = _mapeador.Map<EntidadeAcessoCadastrada>(entidadeAcesso);
 
             return entidadeAcesssoCadastrada;
@@ -46,6 +51,12 @@ namespace AutenticacaoDoisFatores.Servico
             }
 
             return true;
+        }
+
+        private static void VerificarChaveAcesso(string chave)
+        {
+            if (chave.IsNullOrEmptyOrWhiteSpaces())
+                throw new ApplicationException("Não foi possível recuperar a chave de acesso");
         }
     }
 }

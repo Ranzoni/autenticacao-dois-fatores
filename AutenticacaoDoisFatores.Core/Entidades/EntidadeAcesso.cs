@@ -51,9 +51,9 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             return chave;
         }
 
-        private string? RetornarChaveSemCriptografia()
+        public string RetornarChaveSemCriptografia()
         {
-            return _chaveSemCriptografia;
+            return _chaveSemCriptografia ?? "";
         }
     }
 }
