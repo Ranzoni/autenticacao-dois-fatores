@@ -24,14 +24,16 @@ namespace AutenticacaoDoisFatores.Servico
             if (senha.IsNullOrEmptyOrWhiteSpaces())
                 throw new ApplicationException("A senha do servidor de e-mail não foi encontrada");
 
-            var email = new MailMessage(de, para, titulo, conteudo);
+            var email = new MailMessage(de, para, titulo, conteudo)
+            {
+                IsBodyHtml = true
+            };
 
             var smtpMail = new SmtpClient(host, int.Parse(porta))
             {
-                EnableSsl = true
+                EnableSsl = true,
+                Credentials = new NetworkCredential(de, senha)
             };
-            var cred = new NetworkCredential(de, senha);
-            smtpMail.Credentials = cred;
 
             smtpMail.Send(email);
         }
@@ -40,8 +42,24 @@ namespace AutenticacaoDoisFatores.Servico
         {
             var titulo = "Cadastro de acesso realizado";
 
-            var conteudo = "O cadastro de acesso foi realizado com sucesso.<br /><br />";
-            conteudo += $"Utilize a seguinte chave para realizar as requisições: <b>{chave}</b>";
+            var styleCss = @"<style>
+                                body {font-family: Arial, sans-serif; }
+                                h1 {color: #333; }
+                                p {color: #555; }
+                                .content {padding: 10px; border: 1px solid #ccc; }
+                            </style>";
+
+            var conteudo = $@"<html>
+                                <head>
+                                    {styleCss}
+                                </head>
+                                <body>
+                                    <div class='content'>
+                                        <p>O cadastro de acesso foi realizado com sucesso.</p>
+                                        <p>Utilize a seguinte chave para realizar as requisições: <b>{chave}</b></p>
+                                    </div>
+                                </body>
+                             </html>";
 
             Enviar(para, titulo, conteudo);
         }
