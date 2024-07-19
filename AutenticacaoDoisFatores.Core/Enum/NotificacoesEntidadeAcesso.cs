@@ -6,7 +6,7 @@ namespace AutenticacaoDoisFatores.Core.Enum
     {
         [Description("O ID da entidade de acesso é inválido")]
         IdInvalido,
-        [Description("O nome da entidade de acesso é inválido")]
+        [Description("O nome da entidade de acesso é inválido, ele deve conter ao menos 3 caracteres e 50 no máximo")]
         NomeInvalido,
         [Description("A chave da entidade de acesso é inválida")]
         ChaveInvalida,

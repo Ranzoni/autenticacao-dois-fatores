@@ -38,13 +38,15 @@ namespace AutenticacaoDoisFatores.Servico
     {
         private async Task<bool> CadastroEhValidoAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
         {
-            if (entidadeAcessoCadastrar.Nome.IsNullOrEmptyOrWhiteSpaces())
+            var nome = entidadeAcessoCadastrar.Nome;
+            if (nome.IsNullOrEmptyOrWhiteSpaces() || nome.Length < 3 || nome.Length > 50)
             {
                 _notificador.AddMensagem(NotificacoesEntidadeAcesso.NomeInvalido);
                 return false;
             }
 
-            if (entidadeAcessoCadastrar.Email.IsNullOrEmptyOrWhiteSpaces())
+            var email = entidadeAcessoCadastrar.Email;
+            if (email.IsNullOrEmptyOrWhiteSpaces() || email.Length < 5 || email.Length > 80)
             {
                 _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido);
                 return false;

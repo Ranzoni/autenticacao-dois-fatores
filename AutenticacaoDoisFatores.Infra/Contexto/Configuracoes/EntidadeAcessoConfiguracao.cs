@@ -26,10 +26,8 @@ namespace AutenticacaoDoisFatores.Infra.Contexto.Configuracoes
                 .HasMaxLength(80);
 
             builder
-                .HasIndex(p => p.Chave);
-
-            builder
-                .HasIndex(p => p.Email);
+                .HasIndex(p => p.Email)
+                .IsUnique();
         }
     }
 }
