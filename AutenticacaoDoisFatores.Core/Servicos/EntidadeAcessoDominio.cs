@@ -15,5 +15,12 @@ namespace AutenticacaoDoisFatores.Core.Servicos
 
             return entidadeAcesso;
         }
+
+        public async Task<bool> ExisteEntidadeComEmailAsync(string email)
+        {
+            var existe = await _repositorio.ExisteEntidadeComEmailAsync(email);
+
+            return existe;
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AutenticacaoDoisFatores.Core.Entidades;
 using AutenticacaoDoisFatores.Core.Repositorios;
 using AutenticacaoDoisFatores.Infra.Contexto;
+using Microsoft.EntityFrameworkCore;
 
 namespace AutenticacaoDoisFatores.Infra.Repositorios
 {
@@ -9,6 +10,13 @@ namespace AutenticacaoDoisFatores.Infra.Repositorios
         public async Task CadastrarAsync(EntidadeAcesso entidadeAcesso)
         {
             await _contexto.AddAsync(entidadeAcesso);
+        }
+
+        public async Task<bool> ExisteEntidadeComEmailAsync(string email)
+        {
+            var existe = await _contexto.EntidadesAcesso.AnyAsync(e => e.Email == email);
+
+            return existe;
         }
     }
 }

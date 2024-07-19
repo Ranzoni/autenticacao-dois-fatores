@@ -11,6 +11,8 @@ namespace AutenticacaoDoisFatores.Core.Enum
         [Description("A chave da entidade de acesso é inválida")]
         ChaveInvalida,
         [Description("O e-mail da entidade de acesso é inválido")]
-        EmailInvalido
+        EmailInvalido,
+        [Description("O e-mail informado já está cadastrado")]
+        EmailJaCadastrado
     }
 }

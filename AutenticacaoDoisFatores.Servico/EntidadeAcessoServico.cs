@@ -16,7 +16,7 @@ namespace AutenticacaoDoisFatores.Servico
 
         public async Task<EntidadeAcessoCadastrada?> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
         {
-            if (!CadastroEhValido(entidadeAcessoCadastrar))
+            if (!await CadastroEhValidoAsync(entidadeAcessoCadastrar))
                 return null;
 
             var entidadeAcessoMapeada = _mapeador.Map<EntidadeAcesso>(entidadeAcessoCadastrar);
@@ -36,7 +36,7 @@ namespace AutenticacaoDoisFatores.Servico
 
     public partial class EntidadeAcessoServico
     {
-        private bool CadastroEhValido(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
+        private async Task<bool> CadastroEhValidoAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
         {
             if (entidadeAcessoCadastrar.Nome.IsNullOrEmptyOrWhiteSpaces())
             {
@@ -47,6 +47,13 @@ namespace AutenticacaoDoisFatores.Servico
             if (entidadeAcessoCadastrar.Email.IsNullOrEmptyOrWhiteSpaces())
             {
                 _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido);
+                return false;
+            }
+
+            var emailJaCadastrado = await _dominio.ExisteEntidadeComEmailAsync(entidadeAcessoCadastrar.Email);
+            if (emailJaCadastrado)
+            {
+                _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailJaCadastrado);
                 return false;
             }
 
