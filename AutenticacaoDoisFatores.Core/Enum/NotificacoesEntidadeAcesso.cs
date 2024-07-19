@@ -10,6 +10,8 @@ namespace AutenticacaoDoisFatores.Core.Enum
         NomeInvalido,
         [Description("A chave da entidade de acesso é inválida")]
         ChaveInvalida,
+        [Description("Não foi possível recuperar a chave de acesso")]
+        FalhaAoRecuperarChaveAcesso,
         [Description("O e-mail da entidade de acesso é inválido")]
         EmailInvalido,
         [Description("O e-mail informado já está cadastrado")]

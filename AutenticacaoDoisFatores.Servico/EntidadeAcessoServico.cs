@@ -3,6 +3,7 @@ using AutenticacaoDoisFatores.Core.Enum;
 using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Servico.DTO.EntidadeAcesso;
+using AutenticacaoDoisFatores.Servico.Excecoes;
 using AutenticacaoDoisFatores.Servico.Interfaces;
 using AutoMapper;
 
@@ -65,7 +66,7 @@ namespace AutenticacaoDoisFatores.Servico
         private static void VerificarChaveAcesso(string chave)
         {
             if (chave.IsNullOrEmptyOrWhiteSpaces())
-                throw new ApplicationException("Não foi possível recuperar a chave de acesso");
+                EntidadeAcessoServicoException.FalhaAoRecuperarChaveAcesso();
         }
     }
 }
