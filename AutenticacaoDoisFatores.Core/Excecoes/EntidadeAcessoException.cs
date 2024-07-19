@@ -3,7 +3,7 @@ using AutenticacaoDoisFatores.Core.Extensoes;
 
 namespace AutenticacaoDoisFatores.Core.Excecoes
 {
-    internal class EntidadeAcessoException(NotificacoesEntidadeAcesso mensagem) : ApplicationException(mensagem.Descricao())
+    public class EntidadeAcessoException(NotificacoesEntidadeAcesso mensagem) : ApplicationException(mensagem.Descricao())
     {
         internal static void IdInvalido()
         {
