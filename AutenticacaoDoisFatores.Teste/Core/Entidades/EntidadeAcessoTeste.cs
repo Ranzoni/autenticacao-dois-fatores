@@ -13,6 +13,8 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         [Fact]
         internal void DeveCriarEntidadeAcesso()
         {
+            var chaveCriptografia = _faker.Random.AlphaNumeric(16);
+            Environment.SetEnvironmentVariable("ENCRYPT_KEY", chaveCriptografia);
             var nome = _faker.Company.CompanyName();
             var email = _faker.Person.Email;
 
@@ -22,6 +24,18 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             Assert.Equal(nome, entidadeAcesso.Nome);
             Assert.Equal(email, entidadeAcesso.Email);
             Assert.NotEmpty(entidadeAcesso.Chave);
+        }
+
+        [Fact]
+        internal void NaoDeveCriarEntidadeAcessoQuandoNaoHaChaveCriptografia()
+        {
+            var chaveCriptografia = _faker.Random.AlphaNumeric(16);
+            var nome = _faker.Company.CompanyName();
+            var email = _faker.Person.Email;
+
+            var exception = Assert.Throws<CriptografiaException>(() => new EntidadeAcesso(nome, email));
+
+            Assert.Equal(NotificacoesCriptografia.ChaveNaoEncontrada.Descricao(), exception.Message);
         }
 
         [Theory]
