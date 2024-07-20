@@ -56,14 +56,14 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
             var chave = _faker.Random.AlphaNumeric(32);
             var email = _faker.Person.Email;
             var entidadeAcessoCadastrada = new EntidadeAcesso(id, nome, chave, email);
-            _mock.GetMock<IEntidadeAcessoRepositorio>().Setup(r => r.BuscarAsync(id)).ReturnsAsync(entidadeAcessoCadastrada);
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Setup(r => r.BuscarPorEmailAsync(email)).ReturnsAsync(entidadeAcessoCadastrada);
             var dominio = _mock.CreateInstance<EntidadeAcessoDominio>();
 
-            var retorno = await dominio.GerarNovaChaveAsync(id);
+            var retorno = await dominio.GerarNovaChaveAsync(email);
 
             Assert.NotNull(retorno);
             Assert.NotEqual(chave, retorno.Chave);
-            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.BuscarAsync(id), Times.Once);
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.BuscarPorEmailAsync(email), Times.Once);
             _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.Alterar(entidadeAcessoCadastrada), Times.Once);
             _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.SalvarAlteracoesAsync(), Times.Once);
 
@@ -73,13 +73,13 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
         [Fact]
         internal async Task NaoDeveAlterarChaveQuandoEntidadeAcessoNaoExiste()
         {
-            var id = _faker.Random.Int(1);
+            var email = _faker.Person.Email;
             var dominio = _mock.CreateInstance<EntidadeAcessoDominio>();
 
-            var retorno = await dominio.GerarNovaChaveAsync(id);
+            var retorno = await dominio.GerarNovaChaveAsync(email);
 
             Assert.Null(retorno);
-            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.BuscarAsync(id), Times.Once);
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.BuscarPorEmailAsync(email), Times.Once);
             _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.Alterar(It.IsAny<EntidadeAcesso>()), Times.Never);
             _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.SalvarAlteracoesAsync(), Times.Never);
         }

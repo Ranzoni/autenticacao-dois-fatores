@@ -64,5 +64,30 @@ namespace AutenticacaoDoisFatores.Servico
 
             Enviar(para, titulo, conteudo);
         }
+
+        internal static void ReenviarChaveDeAcesso(string para, string chave)
+        {
+            var titulo = "Reenvio de chave de acesso";
+
+            var styleCss = @"<style>
+                                body {font-family: Arial, sans-serif; }
+                                h1 {color: #333; }
+                                p {color: #555; }
+                                .content {padding: 10px; border: 1px solid #ccc; }
+                            </style>";
+
+            var conteudo = $@"<html>
+                                <head>
+                                    {styleCss}
+                                </head>
+                                <body>
+                                    <div class='content'>
+                                        <p>Utilize a seguinte chave para realizar as requisições: <b>{chave}</b></p>
+                                    </div>
+                                </body>
+                             </html>";
+
+            Enviar(para, titulo, conteudo);
+        }
     }
 }

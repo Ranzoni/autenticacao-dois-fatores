@@ -13,7 +13,6 @@ namespace AutenticacaoDoisFatores.Servico
     {
         protected readonly IEntidadeAcessoDominio _dominio = dominio;
         private readonly IMapper _mapeador = mapeador;
-        private readonly INotificador _notificador = notificador;
 
         public async Task<EntidadeAcessoCadastrada?> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
         {
@@ -33,10 +32,24 @@ namespace AutenticacaoDoisFatores.Servico
 
             return entidadeAcesssoCadastrada;
         }
+
+        public async Task ReenviarChaveAcessoAsync(ReenviarChaveAcesso reenviarChaveAcesso)
+        {
+            if (!ReenvioEhValido(reenviarChaveAcesso))
+                return;
+
+            var entidadeAcesso = await _dominio.GerarNovaChaveAsync(reenviarChaveAcesso.Email);
+            if (!GeracaoChaveValida(entidadeAcesso))
+                return;
+
+            EmailServico.ReenviarChaveDeAcesso(entidadeAcesso?.Email ?? "", entidadeAcesso?.RetornarChaveSemCriptografia() ?? "");
+        }
     }
 
     public partial class EntidadeAcessoServico
     {
+        private readonly INotificador _notificador = notificador;
+
         private async Task<bool> CadastroEhValidoAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
         {
             var nome = entidadeAcessoCadastrar.Nome;
@@ -67,6 +80,31 @@ namespace AutenticacaoDoisFatores.Servico
         {
             if (chave.IsNullOrEmptyOrWhiteSpaces())
                 EntidadeAcessoServicoException.FalhaAoRecuperarChaveAcesso();
+        }
+
+        private bool ReenvioEhValido(ReenviarChaveAcesso? reenviarChaveAcesso)
+        {
+            if (reenviarChaveAcesso?.Email.IsNullOrEmptyOrWhiteSpaces() ?? false)
+            {
+                _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido);
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool GeracaoChaveValida(EntidadeAcesso? entidadeAcesso)
+        {
+            if (entidadeAcesso is null)
+            {
+                _notificador.AddMensagem(NotificacoesEntidadeAcesso.NaoEncontrada);
+                return false;
+            }
+
+            if (entidadeAcesso.Chave.IsNullOrEmptyOrWhiteSpaces())
+                EntidadeAcessoServicoException.FalhaAoRecuperarChaveAcesso();
+
+            return true;
         }
     }
 }

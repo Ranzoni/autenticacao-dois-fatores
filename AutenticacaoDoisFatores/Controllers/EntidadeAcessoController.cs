@@ -24,5 +24,20 @@ namespace AutenticacaoDoisFatores.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpPut(Name = "ReenviarChaveAcesso")]
+        public async Task<ActionResult> ReenviarChaveAcessoAsync(ReenviarChaveAcesso reenviarChaveAcesso)
+        {
+            try
+            {
+                await _servico.ReenviarChaveAcessoAsync(reenviarChaveAcesso);
+
+                return AlteradoComSucesso();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

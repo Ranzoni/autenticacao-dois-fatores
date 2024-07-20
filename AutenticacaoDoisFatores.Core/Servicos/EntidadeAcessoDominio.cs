@@ -23,9 +23,9 @@ namespace AutenticacaoDoisFatores.Core.Servicos
             return existe;
         }
 
-        public async Task<EntidadeAcesso?> GerarNovaChaveAsync(int id)
+        public async Task<EntidadeAcesso?> GerarNovaChaveAsync(string email)
         {
-            var entidadeAcesso = await _repositorio.BuscarAsync(id);
+            var entidadeAcesso = await _repositorio.BuscarPorEmailAsync(email);
             if (entidadeAcesso is null)
                 return null;
 
