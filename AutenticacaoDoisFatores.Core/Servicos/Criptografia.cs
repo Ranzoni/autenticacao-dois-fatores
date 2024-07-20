@@ -7,17 +7,16 @@ namespace AutenticacaoDoisFatores.Core.Servicos
 {
     internal static class Criptografia
     {
-        private static readonly string _chaveCriptografia = Environment.GetEnvironmentVariable("ENCRYPT_KEY") ?? "";
-
         internal static string Criptografar(string valor)
         {
-            if (_chaveCriptografia.IsNullOrEmptyOrWhiteSpaces())
+            var chaveCriptografia = Environment.GetEnvironmentVariable("ENCRYPT_KEY") ?? "";
+            if (chaveCriptografia.IsNullOrEmptyOrWhiteSpaces())
                 CriptografiaException.ChaveNaoEncontrada();
 
             if (string.IsNullOrEmpty(valor))
                 return valor;
 
-            var key = Encoding.UTF8.GetBytes(_chaveCriptografia);
+            var key = Encoding.UTF8.GetBytes(chaveCriptografia);
 
             using var aes = Aes.Create();
             using var criptografia = aes.CreateEncryptor(key, aes.IV);

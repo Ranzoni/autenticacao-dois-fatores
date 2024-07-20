@@ -7,6 +7,16 @@ namespace AutenticacaoDoisFatores.Infra.Repositorios
 {
     public class EntidadeAcessoRepositorio(AutenticacaoDoisFatoresContexto contexto) : RepositorioBase(contexto), IEntidadeAcessoRepositorio
     {
+        public void Alterar(EntidadeAcesso entidadeAcesso)
+        {
+            _contexto.EntidadesAcesso.Update(entidadeAcesso);
+        }
+
+        public async Task<EntidadeAcesso?> BuscarAsync(int id)
+        {
+            return await _contexto.EntidadesAcesso.AsNoTracking().FirstOrDefaultAsync(e => e.Id.Equals(id));
+        }
+
         public async Task CadastrarAsync(EntidadeAcesso entidadeAcesso)
         {
             await _contexto.AddAsync(entidadeAcesso);

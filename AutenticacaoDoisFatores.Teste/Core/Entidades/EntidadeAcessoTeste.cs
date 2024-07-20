@@ -29,6 +29,8 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         [Fact]
         internal void NaoDeveCriarEntidadeAcessoQuandoNaoHaChaveCriptografia()
         {
+            Environment.SetEnvironmentVariable("ENCRYPT_KEY", null);
+
             var chaveCriptografia = _faker.Random.AlphaNumeric(16);
             var nome = _faker.Company.CompanyName();
             var email = _faker.Person.Email;

@@ -6,5 +6,6 @@ namespace AutenticacaoDoisFatores.Core.Servicos.Interfaces
     {
         Task<EntidadeAcesso> CadastrarAsync(EntidadeAcesso entidadeAcesso);
         Task<bool> ExisteEntidadeComEmailAsync(string email);
+        Task<EntidadeAcesso?> GerarNovaChaveAsync(int id);
     }
 }

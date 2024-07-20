@@ -8,7 +8,7 @@ namespace AutenticacaoDoisFatores.Core.Entidades
     {
         private readonly byte _tamanhoChave = 8;
         private readonly char[] _caracteres = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-        private readonly string? _chaveSemCriptografia;
+        private string? _chaveSemCriptografia;
 
         public string Nome { get; private set; }
         public string Chave { get; private set; }
@@ -18,10 +18,10 @@ namespace AutenticacaoDoisFatores.Core.Entidades
         {
             EntidadeAcessoValidador.ValidarNovaEntidade(nome, email);
 
+            Chave = "";
             Nome = nome;
-            _chaveSemCriptografia = GerarChave();
-            Chave = Criptografia.Criptografar(_chaveSemCriptografia);
             Email = email;
+            GerarChave();
         }
 
         public EntidadeAcesso(int id, string nome, string chave, string email)
@@ -34,7 +34,7 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             Email = email;
         }
 
-        private string GerarChave()
+        internal void GerarChave()
         {
             var chave = "";
             var geradorRandomicoNum = new Random();
@@ -48,7 +48,8 @@ namespace AutenticacaoDoisFatores.Core.Entidades
                 chave += carectereSorteado;
             }
 
-            return chave;
+            _chaveSemCriptografia = chave;
+            Chave = Criptografia.Criptografar(_chaveSemCriptografia);
         }
 
         public string RetornarChaveSemCriptografia()
