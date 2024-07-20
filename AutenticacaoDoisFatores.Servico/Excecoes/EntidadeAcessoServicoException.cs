@@ -1,13 +1,13 @@
-﻿using AutenticacaoDoisFatores.Core.Enum;
-using AutenticacaoDoisFatores.Core.Extensoes;
+﻿using AutenticacaoDoisFatores.Core.Extensoes;
+using AutenticacaoDoisFatores.Servico.Enum;
 
 namespace AutenticacaoDoisFatores.Servico.Excecoes
 {
-    internal class EntidadeAcessoServicoException(NotificacoesEntidadeAcesso message) : ApplicationException(message.Descricao())
+    internal class EntidadeAcessoServicoException(NotificacoesEntidadeAcessoServico message) : ApplicationException(message.Descricao())
     {
         internal static void FalhaAoRecuperarChaveAcesso()
         {
-            throw new EntidadeAcessoServicoException(NotificacoesEntidadeAcesso.FalhaAoRecuperarChaveAcesso);
+            throw new EntidadeAcessoServicoException(NotificacoesEntidadeAcessoServico.FalhaAoRecuperarChaveAcesso);
         }
     }
 }

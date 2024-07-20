@@ -1,4 +1,5 @@
 ﻿using AutenticacaoDoisFatores.Core.Extensoes;
+using AutenticacaoDoisFatores.Servico.Excecoes;
 using System.Net;
 using System.Net.Mail;
 
@@ -10,19 +11,19 @@ namespace AutenticacaoDoisFatores.Servico
         {
             var host = Environment.GetEnvironmentVariable("EMAIL_HOST") ?? "";
             if (host.IsNullOrEmptyOrWhiteSpaces())
-                throw new ApplicationException("O host do servidor de e-mail não foi encontrado");
+                EmailServicoException.HostNaoEncontrado();
 
             var porta = Environment.GetEnvironmentVariable("EMAIL_PORT") ?? "";
             if (porta.IsNullOrEmptyOrWhiteSpaces())
-                throw new ApplicationException("A porta do servidor de e-mail não foi encontrada");
+                EmailServicoException.PortaNaoEncontrada();
 
             var de = Environment.GetEnvironmentVariable("EMAIL_ADDRESS") ?? "";
             if (de.IsNullOrEmptyOrWhiteSpaces())
-                throw new ApplicationException("O endereço de e-mail do remetente não foi encontrado para realizar o envio");
+                EmailServicoException.EmailRemetenteNaoEncontrado();
 
             var senha = Environment.GetEnvironmentVariable("EMAIL_PASSWORD") ?? "";
             if (senha.IsNullOrEmptyOrWhiteSpaces())
-                throw new ApplicationException("A senha do servidor de e-mail não foi encontrada");
+                EmailServicoException.SenhaEmailNaoEncontrada();
 
             var email = new MailMessage(de, para, titulo, conteudo)
             {

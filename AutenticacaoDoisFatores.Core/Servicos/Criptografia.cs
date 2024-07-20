@@ -1,14 +1,19 @@
-﻿using System.Security.Cryptography;
+﻿using AutenticacaoDoisFatores.Core.Excecoes;
+using AutenticacaoDoisFatores.Core.Extensoes;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace AutenticacaoDoisFatores.Core.Servicos
 {
     internal static class Criptografia
     {
-        private static readonly string _chaveCriptografia = "E548C8DF278CD5931269B532E195D4F2";
+        private static readonly string _chaveCriptografia = Environment.GetEnvironmentVariable("ENCRYPT_KEY") ?? "";
 
         internal static string Criptografar(string valor)
         {
+            if (_chaveCriptografia.IsNullOrEmptyOrWhiteSpaces())
+                CriptografiaException.ChaveNaoEncontrada();
+
             if (string.IsNullOrEmpty(valor))
                 return valor;
 
