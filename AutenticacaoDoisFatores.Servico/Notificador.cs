@@ -5,11 +5,11 @@ namespace AutenticacaoDoisFatores.Servico
 {
     public class Notificador : INotificador
     {
-        private readonly List<string?> _mensagens = [];
+        private readonly List<string> _mensagens = [];
 
         public void AddMensagem<T>(T mensagem) where T : struct, IConvertible
         {
-            var mensagemEmString = mensagem.Descricao();
+            var mensagemEmString = mensagem.Descricao() ?? "";
             _mensagens.Add(mensagemEmString);
         }
 

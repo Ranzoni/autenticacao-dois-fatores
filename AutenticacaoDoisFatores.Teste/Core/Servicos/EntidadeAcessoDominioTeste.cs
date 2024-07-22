@@ -36,13 +36,13 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        internal void DeveRetornarEntidadeSeExistente(bool retornoRep)
+        internal async Task DeveRetornarEntidadeSeExistente(bool retornoRep)
         {
             var email = _faker.Person.Email;
             _mock.GetMock<IEntidadeAcessoRepositorio>().Setup(r => r.ExisteEntidadeComEmailAsync(email)).ReturnsAsync(retornoRep);
             var dominio = _mock.CreateInstance<EntidadeAcessoDominio>();
 
-            var retorno = dominio.ExisteEntidadeComEmailAsync(email).Result;
+            var retorno = await dominio.ExisteEntidadeComEmailAsync(email);
 
             _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.ExisteEntidadeComEmailAsync(email), Times.Once);
             Assert.Equal(retornoRep, retorno);
@@ -55,7 +55,9 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
             var nome = _faker.Company.CompanyName();
             var chave = _faker.Random.AlphaNumeric(32);
             var email = _faker.Person.Email;
-            var entidadeAcessoCadastrada = new EntidadeAcesso(id, nome, chave, email);
+            var dataCadastro = _faker.Date.Past();
+            var dataUltimoAcesso = _faker.Date.Recent();
+            var entidadeAcessoCadastrada = new EntidadeAcesso(id, nome, chave, email, dataCadastro, dataUltimoAcesso);
             _mock.GetMock<IEntidadeAcessoRepositorio>().Setup(r => r.BuscarPorEmailAsync(email)).ReturnsAsync(entidadeAcessoCadastrada);
             var dominio = _mock.CreateInstance<EntidadeAcessoDominio>();
 

@@ -1,6 +1,5 @@
 ﻿using AutenticacaoDoisFatores.Core.Servicos;
 using AutenticacaoDoisFatores.Core.Validadores;
-using System.ComponentModel.DataAnnotations;
 
 namespace AutenticacaoDoisFatores.Core.Entidades
 {
@@ -13,6 +12,8 @@ namespace AutenticacaoDoisFatores.Core.Entidades
         public string Nome { get; private set; }
         public string Chave { get; private set; }
         public string Email { get; private set; }
+        public DateTime DataCadastro { get; private set; }
+        public DateTime? DataUltimoAcesso { get; private set; }
 
         public EntidadeAcesso(string nome, string email)
         {
@@ -21,10 +22,12 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             Chave = "";
             Nome = nome;
             Email = email;
+            DataCadastro = DateTime.UtcNow;
+
             GerarChave();
         }
 
-        public EntidadeAcesso(int id, string nome, string chave, string email)
+        public EntidadeAcesso(int id, string nome, string chave, string email, DateTime dataCadastro, DateTime? dataUltimoAcesso)
         {
             EntidadeAcessoValidador.ValidarEntidadeCompleta(id, nome, chave, email);
 
@@ -32,6 +35,8 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             Nome = nome;
             Chave = chave;
             Email = email;
+            DataCadastro = dataCadastro;
+            DataUltimoAcesso = dataUltimoAcesso;
         }
 
         internal void GerarChave()

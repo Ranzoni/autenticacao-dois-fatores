@@ -80,8 +80,10 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var nome = _faker.Company.CompanyName();
             var chave = _faker.Random.AlphaNumeric(8);
             var email = _faker.Person.Email;
+            var dataCadastro = _faker.Date.Past();
+            var dataUltimoAcesso = _faker.Date.Recent();
 
-            var entidadeAcesso = new EntidadeAcesso(id, nome, chave, email);
+            var entidadeAcesso = new EntidadeAcesso(id, nome, chave, email, dataCadastro, dataUltimoAcesso);
 
             Assert.NotNull(entidadeAcesso);
             Assert.Equal(id, entidadeAcesso.Id);
@@ -97,8 +99,9 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var nome = _faker.Company.CompanyName();
             var chave = _faker.Random.AlphaNumeric(8);
             var email = _faker.Person.Email;
+            var dataCadastro = _faker.Date.Past();
 
-            var excecao = Assert.Throws<EntidadeAcessoException>(() => new EntidadeAcesso(idInvalido, nome, chave, email));
+            var excecao = Assert.Throws<EntidadeAcessoException>(() => new EntidadeAcesso(idInvalido, nome, chave, email, dataCadastro, null));
 
             Assert.Equal(NotificacoesEntidadeAcesso.IdInvalido.Descricao(), excecao.Message);
         }
@@ -115,8 +118,9 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var id = _faker.Random.Int(1);
             var chave = _faker.Random.AlphaNumeric(8);
             var email = _faker.Person.Email;
+            var dataCadastro = _faker.Date.Past();
 
-            var excecao = Assert.Throws<EntidadeAcessoException>(() => new EntidadeAcesso(id, nomeInvalido, chave, email));
+            var excecao = Assert.Throws<EntidadeAcessoException>(() => new EntidadeAcesso(id, nomeInvalido, chave, email, dataCadastro, null));
 
             Assert.Equal(NotificacoesEntidadeAcesso.NomeInvalido.Descricao(), excecao.Message);
         }
@@ -130,8 +134,9 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var id = _faker.Random.Int(1);
             var nome = _faker.Company.CompanyName();
             var email = _faker.Person.Email;
+            var dataCadastro = _faker.Date.Past();
 
-            var excecao = Assert.Throws<EntidadeAcessoException>(() => new EntidadeAcesso(id, nome, chaveInvalida, email));
+            var excecao = Assert.Throws<EntidadeAcessoException>(() => new EntidadeAcesso(id, nome, chaveInvalida, email, dataCadastro, null));
 
             Assert.Equal(NotificacoesEntidadeAcesso.ChaveInvalida.Descricao(), excecao.Message);
         }
@@ -149,8 +154,9 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var id = _faker.Random.Int(1);
             var nome = _faker.Company.CompanyName();
             var chave = _faker.Random.AlphaNumeric(8);
+            var dataCadastro = _faker.Date.Past();
 
-            var excecao = Assert.Throws<EntidadeAcessoException>(() => new EntidadeAcesso(id, nome, chave, emailInvalido));
+            var excecao = Assert.Throws<EntidadeAcessoException>(() => new EntidadeAcesso(id, nome, chave, emailInvalido, dataCadastro, null));
 
             Assert.Equal(NotificacoesEntidadeAcesso.EmailInvalido.Descricao(), excecao.Message);
         }
