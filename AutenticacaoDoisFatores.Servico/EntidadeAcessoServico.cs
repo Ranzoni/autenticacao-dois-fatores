@@ -14,6 +14,17 @@ namespace AutenticacaoDoisFatores.Servico
         protected readonly IEntidadeAcessoDominio _dominio = dominio;
         private readonly IMapper _mapeador = mapeador;
 
+        public async Task AlterarChaveAcessoAsync(string token)
+        {
+            var email = Token.RetornarEmail(token) ?? "";
+            var entidadeAcesso = await _dominio.GerarNovaChaveAsync(email);
+            if (!GeracaoChaveValida(entidadeAcesso))
+                return;
+
+            var chaveSemCriptografia = entidadeAcesso?.RetornarChaveSemCriptografia() ?? "";
+            EmailServico.ReenviarChaveDeAcesso(email, chaveSemCriptografia);
+        }
+
         public async Task<EntidadeAcessoCadastrada?> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
         {
             if (!await CadastroEhValidoAsync(entidadeAcessoCadastrar))
@@ -33,16 +44,18 @@ namespace AutenticacaoDoisFatores.Servico
             return entidadeAcesssoCadastrada;
         }
 
-        public async Task ReenviarChaveAcessoAsync(ReenviarChaveAcesso reenviarChaveAcesso)
+        public async Task ReenviarChaveAcessoAsync(ReenviarChaveAcesso reenviarChaveAcesso, string urlBase)
         {
             if (!ReenvioEhValido(reenviarChaveAcesso))
                 return;
 
-            var entidadeAcesso = await _dominio.GerarNovaChaveAsync(reenviarChaveAcesso.Email);
-            if (!GeracaoChaveValida(entidadeAcesso))
+            if (!await EntidadeExisteAsync(reenviarChaveAcesso.Email))
                 return;
 
-            EmailServico.ReenviarChaveDeAcesso(entidadeAcesso?.Email ?? "", entidadeAcesso?.RetornarChaveSemCriptografia() ?? "");
+            var token = Token.GerarTokenReenvioChave(reenviarChaveAcesso.Email);
+            var urlConfirmacaoGeracaoNovaChave = $"{urlBase}{token}";
+
+            EmailServico.EnviarConfirmacaoAlteracaoChaveAcesso(reenviarChaveAcesso.Email, urlConfirmacaoGeracaoNovaChave);
         }
     }
 
@@ -87,6 +100,18 @@ namespace AutenticacaoDoisFatores.Servico
             if (reenviarChaveAcesso?.Email.IsNullOrEmptyOrWhiteSpaces() ?? false)
             {
                 _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido);
+                return false;
+            }
+
+            return true;
+        }
+
+        private async Task<bool> EntidadeExisteAsync(string email)
+        {
+            var existe = await _dominio.ExisteEntidadeComEmailAsync(email);
+            if (!existe)
+            {
+                _notificador.AddMensagem(NotificacoesEntidadeAcesso.NaoEncontrada);
                 return false;
             }
 

@@ -6,11 +6,12 @@ namespace AutenticacaoDoisFatores.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class EntidadeAcessoController(IEntidadeAcessoServico servico, INotificador notificador) : BaseController(notificador)
+    public class EntidadeAcessoController(IEntidadeAcessoServico servico, INotificador notificador, IConfiguration config) : BaseController(notificador)
     {
         private readonly IEntidadeAcessoServico _servico = servico;
+        private readonly IConfiguration _config = config;
 
-        [HttpPost(Name = "CadastrarEntidadeAcesso")]
+        [HttpPost("CadastrarEntidadeAcesso")]
         public async Task<ActionResult<EntidadeAcessoCadastrada?>> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
         {
             try
@@ -25,14 +26,32 @@ namespace AutenticacaoDoisFatores.Controllers
             }
         }
 
-        [HttpPut(Name = "ReenviarChaveAcesso")]
+        [HttpPost("ReenviarChaveAcesso")]
         public async Task<ActionResult> ReenviarChaveAcessoAsync(ReenviarChaveAcesso reenviarChaveAcesso)
         {
             try
             {
-                await _servico.ReenviarChaveAcessoAsync(reenviarChaveAcesso);
+                var urlAplicacao = _config.GetValue<string>("AutenticacaoDoisFatores:UrlBase");
+                var urlBase = $"{urlAplicacao}EntidadeAcesso/NovaChaveAcesso/";
 
-                return AlteradoComSucesso();
+                await _servico.ReenviarChaveAcessoAsync(reenviarChaveAcesso, urlBase);
+
+                return Sucesso("Um e-mail de recuperação foi enviado");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("NovaChaveAcesso/{token}")]
+        public async Task<ActionResult> NovaChaveAcessoAsync(string token)
+        {
+            try
+            {
+                await _servico.AlterarChaveAcessoAsync(token);
+
+                return Sucesso("Foi enviado um novo e-mail com a nova chave de acesso");
             }
             catch (Exception e)
             {

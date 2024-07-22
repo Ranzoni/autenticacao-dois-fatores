@@ -15,12 +15,12 @@ namespace AutenticacaoDoisFatores.Controllers
             return StatusCode(201, retorno);
         }
 
-        protected ActionResult AlteradoComSucesso()
+        protected ActionResult Sucesso(string mensagem)
         {
             if (_notificador.ExisteMensagem())
                 return UnprocessableEntity(_notificador.Mensagens());
 
-            return base.Ok("Alteração realizada com sucesso");
+            return base.Ok(mensagem);
         }
     }
 }

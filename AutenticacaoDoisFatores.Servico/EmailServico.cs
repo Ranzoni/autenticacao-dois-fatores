@@ -1,5 +1,6 @@
 ﻿using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Servico.Excecoes;
+using System;
 using System.Net;
 using System.Net.Mail;
 
@@ -58,6 +59,31 @@ namespace AutenticacaoDoisFatores.Servico
                                     <div class='content'>
                                         <p>O cadastro de acesso foi realizado com sucesso.</p>
                                         <p>Utilize a seguinte chave para realizar as requisições: <b>{chave}</b></p>
+                                    </div>
+                                </body>
+                             </html>";
+
+            Enviar(para, titulo, conteudo);
+        }
+
+        internal static void EnviarConfirmacaoAlteracaoChaveAcesso(string para, string linkConfirmacao)
+        {
+            var titulo = "Confirmar nova chave de acesso";
+
+            var styleCss = @"<style>
+                                body {font-family: Arial, sans-serif; }
+                                h1 {color: #333; }
+                                p {color: #555; }
+                                .content {padding: 10px; border: 1px solid #ccc; }
+                            </style>";
+
+            var conteudo = $@"<html>
+                                <head>
+                                    {styleCss}
+                                </head>
+                                <body>
+                                    <div class='content'>
+                                        <p>Para confirmar a geração da nova chave de acesso clique no seguinte link: <a href='{linkConfirmacao}'>Clique aqui!</a></p>
                                     </div>
                                 </body>
                              </html>";
