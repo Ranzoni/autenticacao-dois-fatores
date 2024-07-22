@@ -29,6 +29,7 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
             var retorno = await dominio.CadastrarAsync(entidadeAcesso);
 
             Assert.NotNull(retorno);
+            Assert.False(retorno.Ativo);
             _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.CadastrarAsync(entidadeAcesso), Times.Once);
             _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.SalvarAlteracoesAsync(), Times.Once);
         }
@@ -57,7 +58,8 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
             var email = _faker.Person.Email;
             var dataCadastro = _faker.Date.Past();
             var dataUltimoAcesso = _faker.Date.Recent();
-            var entidadeAcessoCadastrada = new EntidadeAcesso(id, nome, chave, email, dataCadastro, dataUltimoAcesso);
+            var ativo = _faker.Random.Bool();
+            var entidadeAcessoCadastrada = new EntidadeAcesso(id, nome, chave, email, dataCadastro, dataUltimoAcesso, ativo);
             _mock.GetMock<IEntidadeAcessoRepositorio>().Setup(r => r.BuscarPorEmailAsync(email)).ReturnsAsync(entidadeAcessoCadastrada);
             var dominio = _mock.CreateInstance<EntidadeAcessoDominio>();
 

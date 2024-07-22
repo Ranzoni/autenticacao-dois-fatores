@@ -14,6 +14,7 @@ namespace AutenticacaoDoisFatores.Core.Entidades
         public string Email { get; private set; }
         public DateTime DataCadastro { get; private set; }
         public DateTime? DataUltimoAcesso { get; private set; }
+        public bool Ativo { get; private set; }
 
         public EntidadeAcesso(string nome, string email)
         {
@@ -23,11 +24,12 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             Nome = nome;
             Email = email;
             DataCadastro = DateTime.UtcNow;
+            Ativo = false;
 
             GerarChave();
         }
 
-        public EntidadeAcesso(int id, string nome, string chave, string email, DateTime dataCadastro, DateTime? dataUltimoAcesso)
+        public EntidadeAcesso(int id, string nome, string chave, string email, DateTime dataCadastro, DateTime? dataUltimoAcesso, bool ativo)
         {
             EntidadeAcessoValidador.ValidarEntidadeCompleta(id, nome, chave, email);
 
@@ -37,6 +39,7 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             Email = email;
             DataCadastro = dataCadastro;
             DataUltimoAcesso = dataUltimoAcesso;
+            Ativo = ativo;
         }
 
         internal void GerarChave()
@@ -60,6 +63,11 @@ namespace AutenticacaoDoisFatores.Core.Entidades
         public string RetornarChaveSemCriptografia()
         {
             return _chaveSemCriptografia ?? "";
+        }
+
+        public void Ativar(bool valor)
+        {
+            Ativo = valor;
         }
     }
 }
