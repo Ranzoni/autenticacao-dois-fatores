@@ -1,6 +1,7 @@
 using AutenticacaoDoisFatores.Servico.DTO.EntidadeAcesso;
 using AutenticacaoDoisFatores.Servico.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AutenticacaoDoisFatores.Controllers
 {
@@ -48,32 +49,40 @@ namespace AutenticacaoDoisFatores.Controllers
         }
 
         [HttpGet("NovaChaveAcesso/{token}")]
-        public async Task<ActionResult> NovaChaveAcessoAsync(string token)
+        public async Task<ContentResult> NovaChaveAcessoAsync(string token)
         {
             try
             {
                 await _servico.AlterarChaveAcessoAsync(token);
 
-                return Sucesso("Foi enviado um novo e-mail com a nova chave de acesso");
+                return MensagemHtml("Confirmação", "Confirmação de reenvio de chave", "Foi enviado um novo e-mail com a nova chave de acesso");
             }
-            catch (Exception e)
+            catch (SecurityTokenExpiredException)
             {
-                return BadRequest(e.Message);
+                return MensagemHtml("Falha", "Link expirado", "Será necessário solicitar um novo link");
+            }
+            catch
+            {
+                return MensagemHtml("Falha", "Falha ao completar a solicitação", "Por favor, entre em contato com o responsável pelo sistema");
             }
         }
 
         [HttpGet("ConfirmarCadastro/{token}")]
-        public async Task<ActionResult> ConfirmarCadastroAsync(string token)
+        public async Task<ContentResult> ConfirmarCadastroAsync(string token)
         {
             try
             {
                 await _servico.AtivarCadastroAsync(token);
 
-                return Sucesso("O cadastro foi ativado com sucesso");
+                return MensagemHtml("Confirmação", "Confirmação de cadastro", "O cadastro foi ativado com sucesso!");
             }
-            catch (Exception e)
+            catch (SecurityTokenExpiredException)
             {
-                return BadRequest(e.Message);
+                return MensagemHtml("Falha", "Link expirado", "Será necessário solicitar um novo link");
+            }
+            catch
+            {
+                return MensagemHtml("Falha", "Falha ao completar a solicitação", "Por favor, entre em contato com o responsável pelo sistema");
             }
         }
     }

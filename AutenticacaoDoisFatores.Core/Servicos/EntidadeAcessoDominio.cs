@@ -24,6 +24,13 @@ namespace AutenticacaoDoisFatores.Core.Servicos
             await _repositorio.SalvarAlteracoesAsync();
         }
 
+        public async Task<EntidadeAcesso?> BuscarComEmailAsync(string email)
+        {
+            var entidadeAcesso = await _repositorio.BuscarPorEmailAsync(email);
+
+            return entidadeAcesso;
+        }
+
         public async Task<EntidadeAcesso> CadastrarAsync(EntidadeAcesso entidadeAcesso)
         {
             await _repositorio.CadastrarAsync(entidadeAcesso);

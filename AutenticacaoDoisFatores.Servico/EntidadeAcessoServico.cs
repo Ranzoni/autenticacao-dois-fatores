@@ -28,7 +28,7 @@ namespace AutenticacaoDoisFatores.Servico
         public async Task AtivarCadastroAsync(string token)
         {
             var email = Token.RetornarEmailEnvio(token) ?? "";
-            if (!await EntidadeExisteAsync(email))
+            if (!await AtivacaoEhValidaAsync(email))
                 return;
 
             await _dominio.AtivarEntidadeAcessoAsync(email, true);
@@ -124,6 +124,24 @@ namespace AutenticacaoDoisFatores.Servico
             if (!existe)
             {
                 _notificador.AddMensagem(NotificacoesEntidadeAcesso.NaoEncontrada);
+                return false;
+            }
+
+            return true;
+        }
+
+        private async Task<bool> AtivacaoEhValidaAsync(string email)
+        {
+            var entidadeAcesso = await _dominio.BuscarComEmailAsync(email);
+            if (entidadeAcesso is null)
+            {
+                _notificador.AddMensagem(NotificacoesEntidadeAcesso.NaoEncontrada);
+                return false;
+            }
+
+            if (entidadeAcesso.Ativo)
+            {
+                _notificador.AddMensagem(NotificacoesEntidadeAcesso.JaAtiva);
                 return false;
             }
 

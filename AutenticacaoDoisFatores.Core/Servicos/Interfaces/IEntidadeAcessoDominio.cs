@@ -8,5 +8,6 @@ namespace AutenticacaoDoisFatores.Core.Servicos.Interfaces
         Task<bool> ExisteEntidadeComEmailAsync(string email);
         Task<EntidadeAcesso?> GerarNovaChaveAsync(string email);
         Task AtivarEntidadeAcessoAsync(string email, bool ativar);
+        Task<EntidadeAcesso?> BuscarComEmailAsync(string email);
     }
 }

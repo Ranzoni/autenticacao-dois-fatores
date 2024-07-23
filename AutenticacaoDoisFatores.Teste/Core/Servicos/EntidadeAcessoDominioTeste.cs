@@ -4,7 +4,6 @@ using AutenticacaoDoisFatores.Core.Excecoes;
 using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Core.Repositorios;
 using AutenticacaoDoisFatores.Core.Servicos;
-using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using Bogus;
 using Moq;
 using Moq.AutoMock;
@@ -127,6 +126,38 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
             _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.BuscarPorEmailAsync(email), Times.Once);
             _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.Alterar(It.IsAny<EntidadeAcesso>()), Times.Never);
             _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.SalvarAlteracoesAsync(), Times.Never);
+        }
+
+        [Fact]
+        internal async Task DeveRetornarEntidadePorEmail()
+        {
+            var id = _faker.Random.Int(1);
+            var nome = _faker.Company.CompanyName();
+            var chave = _faker.Random.AlphaNumeric(32);
+            var email = _faker.Person.Email;
+            var dataCadastro = _faker.Date.Past();
+            var dataUltimoAcesso = _faker.Date.Recent();
+            var ativo = _faker.Random.Bool();
+            var entidadeAcessoCadastrada = new EntidadeAcesso(id, nome, chave, email, dataCadastro, dataUltimoAcesso, ativo);
+            var dominio = _mock.CreateInstance<EntidadeAcessoDominio>();
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Setup(r => r.BuscarPorEmailAsync(email)).ReturnsAsync(entidadeAcessoCadastrada);
+            
+            var entidadeAcesso = await dominio.BuscarComEmailAsync(email);
+
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.BuscarPorEmailAsync(email), Times.Once);
+            Assert.Equal(entidadeAcesso, entidadeAcessoCadastrada);
+        }
+
+        [Fact]
+        internal async Task DeveRetornarNuloQuandoNaoExistirEntidadeComEmail()
+        {
+            var email = _faker.Person.Email;
+            var dominio = _mock.CreateInstance<EntidadeAcessoDominio>();
+
+            var entidadeAcesso = await dominio.BuscarComEmailAsync(email);
+
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.BuscarPorEmailAsync(email), Times.Once);
+            Assert.Null(entidadeAcesso);
         }
     }
 }
