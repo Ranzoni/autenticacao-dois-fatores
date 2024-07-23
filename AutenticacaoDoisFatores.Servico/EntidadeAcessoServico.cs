@@ -25,7 +25,7 @@ namespace AutenticacaoDoisFatores.Servico
             EmailServico.ReenviarChaveDeAcesso(email, chaveSemCriptografia);
         }
 
-        public async Task<EntidadeAcessoCadastrada?> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
+        public async Task<EntidadeAcessoCadastrada?> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar, string urlBase)
         {
             if (!await CadastroEhValidoAsync(entidadeAcessoCadastrar))
                 return null;
@@ -37,7 +37,10 @@ namespace AutenticacaoDoisFatores.Servico
             var chave = entidadeAcesso.RetornarChaveSemCriptografia();
             VerificarChaveAcesso(chave);
 
-            EmailServico.EnviarSucessoCadastroDeAcesso(entidadeAcesso.Email, chave);
+            var token = Token.GerarTokenReenvioChave(entidadeAcesso.Email);
+            var urlConfirmacaoCadastro = $"{urlBase}{token}";
+
+            EmailServico.EnviarSucessoCadastroDeAcesso(entidadeAcesso.Email, chave, urlConfirmacaoCadastro);
 
             var entidadeAcesssoCadastrada = _mapeador.Map<EntidadeAcessoCadastrada>(entidadeAcesso);
 

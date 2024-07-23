@@ -24,5 +24,10 @@ namespace AutenticacaoDoisFatores.Core.Excecoes
         {
             throw new EntidadeAcessoException(NotificacoesEntidadeAcesso.EmailInvalido);
         }
+
+        internal static void NaoEncontrada()
+        {
+            throw new EntidadeAcessoException(NotificacoesEntidadeAcesso.NaoEncontrada);
+        }
     }
 }

@@ -9,7 +9,8 @@ namespace AutenticacaoDoisFatores.Servico
 {
     internal static class Token
     {
-        private const string EMAIL_REENVIO_CHAVE = "EMAIL";
+        private const string EMAIL_ENVIO_CHAVE = "ENVIO_EMAIL_CHAVE";
+        private const string EMAIL_REENVIO_CHAVE = "REENVIO_EMAIL_CHAVE";
 
         private static string GerarToken(string sub, Claim claim)
         {
@@ -41,6 +42,14 @@ namespace AutenticacaoDoisFatores.Servico
         {
             var claim = new Claim(ClaimTypes.Email, email);
             var token = GerarToken(EMAIL_REENVIO_CHAVE, claim);
+
+            return token;
+        }
+
+        internal static string GerarTokenEnvioChave(string email)
+        {
+            var claim = new Claim(ClaimTypes.Email, email);
+            var token = GerarToken(EMAIL_ENVIO_CHAVE, claim);
 
             return token;
         }

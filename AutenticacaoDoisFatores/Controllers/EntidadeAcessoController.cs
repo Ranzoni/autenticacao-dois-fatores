@@ -16,7 +16,10 @@ namespace AutenticacaoDoisFatores.Controllers
         {
             try
             {
-                var entidadeAcessoCadastrada = await _servico.CadastrarAsync(entidadeAcessoCadastrar);
+                var urlAplicacao = _config.GetValue<string>("AutenticacaoDoisFatores:UrlBase");
+                var urlBase = $"{urlAplicacao}EntidadeAcesso/ConfirmarCadastro/";
+
+                var entidadeAcessoCadastrada = await _servico.CadastrarAsync(entidadeAcessoCadastrar, urlBase);
 
                 return CriadoComSucesso(entidadeAcessoCadastrada);
             }

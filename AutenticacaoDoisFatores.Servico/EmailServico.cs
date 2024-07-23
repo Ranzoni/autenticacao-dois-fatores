@@ -40,7 +40,7 @@ namespace AutenticacaoDoisFatores.Servico
             smtpMail.Send(email);
         }
 
-        internal static void EnviarSucessoCadastroDeAcesso(string para, string chave)
+        internal static void EnviarSucessoCadastroDeAcesso(string para, string chave, string linkConfirmacao)
         {
             var titulo = "Cadastro de acesso realizado";
 
@@ -59,6 +59,7 @@ namespace AutenticacaoDoisFatores.Servico
                                     <div class='content'>
                                         <p>O cadastro de acesso foi realizado com sucesso.</p>
                                         <p>Utilize a seguinte chave para realizar as requisições: <b>{chave}</b></p>
+                                        <p>Para confirmar a sua chave de acesso clique no seguinte link: <a href='{linkConfirmacao}'>Clique aqui!</a></p>
                                     </div>
                                 </body>
                              </html>";
