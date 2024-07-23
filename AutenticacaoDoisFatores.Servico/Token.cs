@@ -76,11 +76,22 @@ namespace AutenticacaoDoisFatores.Servico
             return principal;
         }
 
-        internal static string? RetornarEmail(string token)
+        internal static string? RetornarEmailReenvio(string token)
         {
             var principal = ValidarToken(token);
             var subjectClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
             if (subjectClaim?.Value != EMAIL_REENVIO_CHAVE)
+                return null;
+
+            var emailClaim = principal.FindFirst(ClaimTypes.Email);
+            return emailClaim?.Value;
+        }
+
+        internal static string? RetornarEmailEnvio(string token)
+        {
+            var principal = ValidarToken(token);
+            var subjectClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
+            if (subjectClaim?.Value != EMAIL_ENVIO_CHAVE)
                 return null;
 
             var emailClaim = principal.FindFirst(ClaimTypes.Email);

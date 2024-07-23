@@ -16,13 +16,22 @@ namespace AutenticacaoDoisFatores.Servico
 
         public async Task AlterarChaveAcessoAsync(string token)
         {
-            var email = Token.RetornarEmail(token) ?? "";
+            var email = Token.RetornarEmailReenvio(token) ?? "";
             var entidadeAcesso = await _dominio.GerarNovaChaveAsync(email);
             if (!GeracaoChaveValida(entidadeAcesso))
                 return;
 
             var chaveSemCriptografia = entidadeAcesso?.RetornarChaveSemCriptografia() ?? "";
             EmailServico.ReenviarChaveDeAcesso(email, chaveSemCriptografia);
+        }
+
+        public async Task AtivarCadastroAsync(string token)
+        {
+            var email = Token.RetornarEmailEnvio(token) ?? "";
+            if (!await EntidadeExisteAsync(email))
+                return;
+
+            await _dominio.AtivarEntidadeAcessoAsync(email, true);
         }
 
         public async Task<EntidadeAcessoCadastrada?> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar, string urlBase)
@@ -37,7 +46,7 @@ namespace AutenticacaoDoisFatores.Servico
             var chave = entidadeAcesso.RetornarChaveSemCriptografia();
             VerificarChaveAcesso(chave);
 
-            var token = Token.GerarTokenReenvioChave(entidadeAcesso.Email);
+            var token = Token.GerarTokenEnvioChave(entidadeAcesso.Email);
             var urlConfirmacaoCadastro = $"{urlBase}{token}";
 
             EmailServico.EnviarSucessoCadastroDeAcesso(entidadeAcesso.Email, chave, urlConfirmacaoCadastro);

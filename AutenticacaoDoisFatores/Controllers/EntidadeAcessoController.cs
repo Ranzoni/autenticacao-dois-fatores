@@ -11,7 +11,7 @@ namespace AutenticacaoDoisFatores.Controllers
         private readonly IEntidadeAcessoServico _servico = servico;
         private readonly IConfiguration _config = config;
 
-        [HttpPost("CadastrarEntidadeAcesso")]
+        [HttpPost("Cadastrar")]
         public async Task<ActionResult<EntidadeAcessoCadastrada?>> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
         {
             try
@@ -55,6 +55,21 @@ namespace AutenticacaoDoisFatores.Controllers
                 await _servico.AlterarChaveAcessoAsync(token);
 
                 return Sucesso("Foi enviado um novo e-mail com a nova chave de acesso");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("ConfirmarCadastro/{token}")]
+        public async Task<ActionResult> ConfirmarCadastroAsync(string token)
+        {
+            try
+            {
+                await _servico.AtivarCadastroAsync(token);
+
+                return Sucesso("O cadastro foi ativado com sucesso");
             }
             catch (Exception e)
             {
