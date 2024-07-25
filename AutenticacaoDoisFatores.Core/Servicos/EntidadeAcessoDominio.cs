@@ -46,18 +46,21 @@ namespace AutenticacaoDoisFatores.Core.Servicos
             return existe;
         }
 
-        public async Task<EntidadeAcesso?> GerarNovaChaveAsync(string email)
+        public async Task<string> GerarNovaChaveAsync(string email)
         {
             var entidadeAcesso = await _repositorio.BuscarPorEmailAsync(email);
             if (entidadeAcesso is null)
-                return null;
+            {
+                EntidadeAcessoException.NaoEncontrada();
+                return "";
+            }
 
             entidadeAcesso.GerarChave();
 
             _repositorio.Alterar(entidadeAcesso);
             await _repositorio.SalvarAlteracoesAsync();
 
-            return entidadeAcesso;
+            return entidadeAcesso.RetornarChaveSemCriptografia();
         }
     }
 }

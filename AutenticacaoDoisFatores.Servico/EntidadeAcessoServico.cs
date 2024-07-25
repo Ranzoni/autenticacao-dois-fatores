@@ -17,12 +17,14 @@ namespace AutenticacaoDoisFatores.Servico
         public async Task AlterarChaveAcessoAsync(string token)
         {
             var email = Token.RetornarEmailReenvio(token) ?? "";
-            var entidadeAcesso = await _dominio.GerarNovaChaveAsync(email);
-            if (!GeracaoChaveValida(entidadeAcesso))
+            if (!await EntidadeExisteAsync(email))
                 return;
 
-            var chaveSemCriptografia = entidadeAcesso?.RetornarChaveSemCriptografia() ?? "";
-            EmailServico.ReenviarChaveDeAcesso(email, chaveSemCriptografia);
+            var chave = await _dominio.GerarNovaChaveAsync(email);
+            if (!GeracaoChaveValida(chave))
+                return;
+
+            EmailServico.ReenviarChaveDeAcesso(email, chave);
         }
 
         public async Task AtivarCadastroAsync(string token)
@@ -58,7 +60,7 @@ namespace AutenticacaoDoisFatores.Servico
 
         public async Task ReenviarChaveAcessoAsync(ReenviarChaveAcesso reenviarChaveAcesso, string urlBase)
         {
-            if (!ReenvioEhValido(reenviarChaveAcesso))
+            if (!await ReenvioEhValidoAsync(reenviarChaveAcesso))
                 return;
 
             if (!await EntidadeExisteAsync(reenviarChaveAcesso.Email))
@@ -107,11 +109,17 @@ namespace AutenticacaoDoisFatores.Servico
                 EntidadeAcessoServicoException.FalhaAoRecuperarChaveAcesso();
         }
 
-        private bool ReenvioEhValido(ReenviarChaveAcesso? reenviarChaveAcesso)
+        private async Task<bool> ReenvioEhValidoAsync(ReenviarChaveAcesso reenviarChaveAcesso)
         {
-            if (reenviarChaveAcesso?.Email.IsNullOrEmptyOrWhiteSpaces() ?? false)
+            if (reenviarChaveAcesso.Email.IsNullOrEmptyOrWhiteSpaces())
             {
                 _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido);
+                return false;
+            }
+
+            if (!await EntidadeExisteAsync(reenviarChaveAcesso.Email))
+            {
+                _notificador.AddMensagem(NotificacoesEntidadeAcesso.NaoEncontrada);
                 return false;
             }
 
@@ -148,15 +156,9 @@ namespace AutenticacaoDoisFatores.Servico
             return true;
         }
 
-        private bool GeracaoChaveValida(EntidadeAcesso? entidadeAcesso)
+        private static bool GeracaoChaveValida(string chave)
         {
-            if (entidadeAcesso is null)
-            {
-                _notificador.AddMensagem(NotificacoesEntidadeAcesso.NaoEncontrada);
-                return false;
-            }
-
-            if (entidadeAcesso.Chave.IsNullOrEmptyOrWhiteSpaces())
+            if (chave.IsNullOrEmptyOrWhiteSpaces())
                 EntidadeAcessoServicoException.FalhaAoRecuperarChaveAcesso();
 
             return true;
