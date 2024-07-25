@@ -7,7 +7,7 @@ namespace AutenticacaoDoisFatores.Core.Validadores
     {
         internal static void ValidarNovaEntidade(string nome, string email)
         {
-            if (nome.IsNullOrEmptyOrWhiteSpaces() || nome.Length < 3 || nome.Length > 50)
+            if (!NomeEhValido(nome))
                 EntidadeAcessoException.NomeInvalido();
 
             if (email.IsNullOrEmptyOrWhiteSpaces() || email.Length < 5 || email.Length > 80)
@@ -19,7 +19,7 @@ namespace AutenticacaoDoisFatores.Core.Validadores
             if (id == 0)
                 EntidadeAcessoException.IdInvalido();
 
-            if (nome.IsNullOrEmptyOrWhiteSpaces() || nome.Length < 3 || nome.Length > 50)
+            if (!NomeEhValido(nome))
                 EntidadeAcessoException.NomeInvalido();
 
             if (chave.IsNullOrEmptyOrWhiteSpaces())
@@ -27,6 +27,11 @@ namespace AutenticacaoDoisFatores.Core.Validadores
 
             if (email.IsNullOrEmptyOrWhiteSpaces() || email.Length < 5 || email.Length > 80)
                 EntidadeAcessoException.EmailInvalido();
+        }
+
+        internal static bool NomeEhValido(string nome)
+        {
+            return !nome.IsNullOrEmptyOrWhiteSpaces() && nome.Length >= 3 && nome.Length <= 50;
         }
     }
 }

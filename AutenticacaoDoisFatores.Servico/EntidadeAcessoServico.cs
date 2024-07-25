@@ -27,6 +27,16 @@ namespace AutenticacaoDoisFatores.Servico
             EmailServico.ReenviarChaveDeAcesso(email, chave);
         }
 
+        public async Task AlterarEntidadeAcessoAsync(string token)
+        {
+            var email = Token.RetornarEmailReenvio(token) ?? "";
+            var nome = Token.RetornarEmailReenvio(token) ?? "";
+            if (!await EntidadeExisteAsync(email))
+                return;
+
+            await _dominio.AlterarAsync(email, nome);
+        }
+
         public async Task AtivarCadastroAsync(string token)
         {
             var email = Token.RetornarEmailEnvio(token) ?? "";

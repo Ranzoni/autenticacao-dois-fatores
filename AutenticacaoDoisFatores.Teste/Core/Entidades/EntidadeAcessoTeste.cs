@@ -201,5 +201,42 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
 
             Assert.Equal(novoValor, entidadeAcesso.Ativo);
         }
+
+        [Fact]
+        internal void DeveAlterarNomeEntidadeAcesso()
+        {
+            var chaveCriptografia = _faker.Random.AlphaNumeric(16);
+            Environment.SetEnvironmentVariable("ENCRYPT_KEY", chaveCriptografia);
+            var nomeAnterior = _faker.Company.CompanyName();
+            var email = _faker.Person.Email;
+            var entidadeAcesso = new EntidadeAcesso(nomeAnterior, email);
+            var novoNome = $"{_faker.Company.CompanyName()}_NOVO";
+
+            entidadeAcesso.AlterarNome(novoNome);
+
+            Assert.NotEqual(nomeAnterior, entidadeAcesso.Nome);
+            Assert.Equal(novoNome, entidadeAcesso.Nome);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("    ")]
+        [InlineData("a")]
+        [InlineData("ab")]
+        [InlineData("123456789012345678901234567890123456789012345678901")]
+        internal void DeveRetornarExcecaoAoTentarAlterarNomeComValorInvalido(string nomeInvalido)
+        {
+            var chaveCriptografia = _faker.Random.AlphaNumeric(16);
+            Environment.SetEnvironmentVariable("ENCRYPT_KEY", chaveCriptografia);
+            var nomeAnterior = _faker.Company.CompanyName();
+            var email = _faker.Person.Email;
+            var entidadeAcesso = new EntidadeAcesso(nomeAnterior, email);
+
+            var excecao = Assert.Throws<EntidadeAcessoException>(() => entidadeAcesso.AlterarNome(nomeInvalido));
+
+            Assert.Equal(NotificacoesEntidadeAcesso.NomeInvalido.Descricao(), excecao.Message);
+            Assert.Equal(nomeAnterior, entidadeAcesso.Nome);
+        }
     }
 }

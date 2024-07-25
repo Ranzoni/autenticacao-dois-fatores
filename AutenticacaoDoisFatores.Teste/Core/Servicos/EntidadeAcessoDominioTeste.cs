@@ -160,5 +160,45 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
             _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.BuscarPorEmailAsync(email), Times.Once);
             Assert.Null(entidadeAcesso);
         }
+
+        [Fact]
+        internal async Task DeveAlterarEntidadeAcesso()
+        {
+            var id = _faker.Random.Int(1);
+            var nome = _faker.Company.CompanyName();
+            var chave = _faker.Random.AlphaNumeric(32);
+            var email = _faker.Person.Email;
+            var dataCadastro = _faker.Date.Past();
+            var dataUltimoAcesso = _faker.Date.Recent();
+            var ativo = _faker.Random.Bool();
+            var entidadeAcessoCadastrada = new EntidadeAcesso(id, nome, chave, email, dataCadastro, dataUltimoAcesso, ativo);
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Setup(r => r.BuscarPorEmailAsync(email)).ReturnsAsync(entidadeAcessoCadastrada);
+            var dominio = _mock.CreateInstance<EntidadeAcessoDominio>();
+            var novoNome = $"{_faker.Company.CompanyName()}_NOVO";
+
+            var entidadeAcesso = await dominio.AlterarAsync(email, novoNome);
+
+            Assert.NotNull(entidadeAcesso);
+            Assert.NotEqual(nome, entidadeAcesso.Nome);
+            Assert.Equal(novoNome, entidadeAcessoCadastrada.Nome);
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.BuscarPorEmailAsync(email), Times.Once);
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.Alterar(entidadeAcessoCadastrada), Times.Once);
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.SalvarAlteracoesAsync(), Times.Once);
+        }
+
+        [Fact]
+        internal async Task DeveRetornarExcecaoAoAlterarQuandoEntidadeAcessoNaoExiste()
+        {
+            var email = _faker.Person.Email;
+            var dominio = _mock.CreateInstance<EntidadeAcessoDominio>();
+            var novoNome = $"{_faker.Company.CompanyName()}_NOVO";
+
+            var excecao = await Assert.ThrowsAsync<EntidadeAcessoException>(() => dominio.AlterarAsync(email, novoNome));
+
+            Assert.Equal(NotificacoesEntidadeAcesso.NaoEncontrada.Descricao(), excecao.Message);
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.BuscarPorEmailAsync(email), Times.Once);
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.Alterar(It.IsAny<EntidadeAcesso>()), Times.Never);
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.SalvarAlteracoesAsync(), Times.Never);
+        }
     }
 }

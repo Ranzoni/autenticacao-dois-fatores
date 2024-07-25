@@ -1,4 +1,5 @@
-﻿using AutenticacaoDoisFatores.Core.Servicos;
+﻿using AutenticacaoDoisFatores.Core.Excecoes;
+using AutenticacaoDoisFatores.Core.Servicos;
 using AutenticacaoDoisFatores.Core.Validadores;
 
 namespace AutenticacaoDoisFatores.Core.Entidades
@@ -40,6 +41,14 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             DataCadastro = dataCadastro;
             DataUltimoAcesso = dataUltimoAcesso;
             Ativo = ativo;
+        }
+
+        public void AlterarNome(string nome)
+        {
+            if (!EntidadeAcessoValidador.NomeEhValido(nome))
+                EntidadeAcessoException.NomeInvalido();
+
+            Nome = nome;
         }
 
         internal void GerarChave()
