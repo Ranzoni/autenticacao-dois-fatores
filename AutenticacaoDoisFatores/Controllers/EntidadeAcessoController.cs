@@ -30,7 +30,7 @@ namespace AutenticacaoDoisFatores.Controllers
             }
         }
 
-        [HttpPost("ReenviarChaveAcesso")]
+        [HttpPut("ReenviarChaveAcesso")]
         public async Task<ActionResult> ReenviarChaveAcessoAsync(ReenviarChaveAcesso reenviarChaveAcesso)
         {
             try
@@ -75,6 +75,43 @@ namespace AutenticacaoDoisFatores.Controllers
                 await _servico.AtivarCadastroAsync(token);
 
                 return MensagemHtml("Confirmação", "Confirmação de cadastro", "O cadastro foi ativado com sucesso!");
+            }
+            catch (SecurityTokenExpiredException)
+            {
+                return MensagemHtml("Falha", "Link expirado", "Será necessário solicitar um novo link");
+            }
+            catch
+            {
+                return MensagemHtml("Falha", "Falha ao completar a solicitação", "Por favor, entre em contato com o responsável pelo sistema");
+            }
+        }
+
+        [HttpPut("Alterar")]
+        public async Task<ActionResult> AlterarAsync(EntidadeAcessoAlterar entidadeAcessoAlterar)
+        {
+            try
+            {
+                var urlAplicacao = _config.GetValue<string>("AutenticacaoDoisFatores:UrlBase");
+                var urlBase = $"{urlAplicacao}EntidadeAcesso/ConfirmarAlteracao/";
+
+                await _servico.EnviarEmailAlteracaoEntidadeAsync(entidadeAcessoAlterar, urlBase);
+
+                return Sucesso("Um e-mail de confirmação foi enviado");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("ConfirmarAlteracao/{token}")]
+        public async Task<ContentResult> ConfirmarAlteracaoAsync(string token)
+        {
+            try
+            {
+                await _servico.AlterarEntidadeAcessoAsync(token);
+
+                return MensagemHtml("Confirmação", "Confirmação de alteração", "A alteração foi realizada com sucesso!");
             }
             catch (SecurityTokenExpiredException)
             {

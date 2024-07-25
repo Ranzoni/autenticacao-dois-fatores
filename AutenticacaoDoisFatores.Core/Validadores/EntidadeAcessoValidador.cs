@@ -3,14 +3,14 @@ using AutenticacaoDoisFatores.Core.Extensoes;
 
 namespace AutenticacaoDoisFatores.Core.Validadores
 {
-    internal static class EntidadeAcessoValidador
+    public static class EntidadeAcessoValidador
     {
         internal static void ValidarNovaEntidade(string nome, string email)
         {
             if (!NomeEhValido(nome))
                 EntidadeAcessoException.NomeInvalido();
 
-            if (email.IsNullOrEmptyOrWhiteSpaces() || email.Length < 5 || email.Length > 80)
+            if (!EmailEhValido(email))
                 EntidadeAcessoException.EmailInvalido();
         }
 
@@ -25,13 +25,18 @@ namespace AutenticacaoDoisFatores.Core.Validadores
             if (chave.IsNullOrEmptyOrWhiteSpaces())
                 EntidadeAcessoException.ChaveInvalida();
 
-            if (email.IsNullOrEmptyOrWhiteSpaces() || email.Length < 5 || email.Length > 80)
+            if (!EmailEhValido(email))
                 EntidadeAcessoException.EmailInvalido();
         }
 
-        internal static bool NomeEhValido(string nome)
+        public static bool NomeEhValido(string nome)
         {
             return !nome.IsNullOrEmptyOrWhiteSpaces() && nome.Length >= 3 && nome.Length <= 50;
+        }
+
+        public static bool EmailEhValido(string email)
+        {
+            return !email.IsNullOrEmptyOrWhiteSpaces() && email.Length >= 5 && email.Length <= 80;
         }
     }
 }

@@ -2,6 +2,7 @@
 using AutenticacaoDoisFatores.Core.Enum;
 using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
+using AutenticacaoDoisFatores.Core.Validadores;
 using AutenticacaoDoisFatores.Servico.DTO.EntidadeAcesso;
 using AutenticacaoDoisFatores.Servico.Excecoes;
 using AutenticacaoDoisFatores.Servico.Interfaces;
@@ -16,7 +17,7 @@ namespace AutenticacaoDoisFatores.Servico
 
         public async Task AlterarChaveAcessoAsync(string token)
         {
-            var email = Token.RetornarEmailReenvio(token) ?? "";
+            var email = Token.RetornarEmailReenvioChave(token) ?? "";
             if (!await EntidadeExisteAsync(email))
                 return;
 
@@ -29,8 +30,10 @@ namespace AutenticacaoDoisFatores.Servico
 
         public async Task AlterarEntidadeAcessoAsync(string token)
         {
-            var email = Token.RetornarEmailReenvio(token) ?? "";
-            var nome = Token.RetornarEmailReenvio(token) ?? "";
+            var dadosToken = Token.RetornarEmailNomeAlteracaoCadastro(token);
+            var email = dadosToken.email ?? "";
+            var nome = dadosToken.nome ?? "";
+
             if (!await EntidadeExisteAsync(email))
                 return;
 
@@ -39,7 +42,7 @@ namespace AutenticacaoDoisFatores.Servico
 
         public async Task AtivarCadastroAsync(string token)
         {
-            var email = Token.RetornarEmailEnvio(token) ?? "";
+            var email = Token.RetornarEmailEnvioConfirmacaoCadastro(token) ?? "";
             if (!await AtivacaoEhValidaAsync(email))
                 return;
 
@@ -68,12 +71,19 @@ namespace AutenticacaoDoisFatores.Servico
             return entidadeAcesssoCadastrada;
         }
 
+        public async Task EnviarEmailAlteracaoEntidadeAsync(EntidadeAcessoAlterar entidadeAcessoAlterar, string urlBase)
+        {
+            if (!await EnvioAlteracaoEhValidoAsync(entidadeAcessoAlterar))
+                return;
+
+            var token = Token.GerarTokenAlterarEntidadeAcesso(entidadeAcessoAlterar.Email, entidadeAcessoAlterar.Nome);
+            var linkConfirmacao = $"{urlBase}{token}";
+            EmailServico.EnviarConfirmacaoAlteracaoEntidadeAcesso(entidadeAcessoAlterar.Email, linkConfirmacao);
+        }
+
         public async Task ReenviarChaveAcessoAsync(ReenviarChaveAcesso reenviarChaveAcesso, string urlBase)
         {
             if (!await ReenvioEhValidoAsync(reenviarChaveAcesso))
-                return;
-
-            if (!await EntidadeExisteAsync(reenviarChaveAcesso.Email))
                 return;
 
             var token = Token.GerarTokenReenvioChave(reenviarChaveAcesso.Email);
@@ -89,15 +99,13 @@ namespace AutenticacaoDoisFatores.Servico
 
         private async Task<bool> CadastroEhValidoAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
         {
-            var nome = entidadeAcessoCadastrar.Nome;
-            if (nome.IsNullOrEmptyOrWhiteSpaces() || nome.Length < 3 || nome.Length > 50)
+            if (!EntidadeAcessoValidador.NomeEhValido(entidadeAcessoCadastrar.Nome))
             {
                 _notificador.AddMensagem(NotificacoesEntidadeAcesso.NomeInvalido);
                 return false;
             }
 
-            var email = entidadeAcessoCadastrar.Email;
-            if (email.IsNullOrEmptyOrWhiteSpaces() || email.Length < 5 || email.Length > 80)
+            if (!EntidadeAcessoValidador.EmailEhValido(entidadeAcessoCadastrar.Email))
             {
                 _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido);
                 return false;
@@ -121,17 +129,14 @@ namespace AutenticacaoDoisFatores.Servico
 
         private async Task<bool> ReenvioEhValidoAsync(ReenviarChaveAcesso reenviarChaveAcesso)
         {
-            if (reenviarChaveAcesso.Email.IsNullOrEmptyOrWhiteSpaces())
+            if (!EntidadeAcessoValidador.EmailEhValido(reenviarChaveAcesso.Email))
             {
                 _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido);
                 return false;
             }
 
             if (!await EntidadeExisteAsync(reenviarChaveAcesso.Email))
-            {
-                _notificador.AddMensagem(NotificacoesEntidadeAcesso.NaoEncontrada);
                 return false;
-            }
 
             return true;
         }
@@ -170,6 +175,26 @@ namespace AutenticacaoDoisFatores.Servico
         {
             if (chave.IsNullOrEmptyOrWhiteSpaces())
                 EntidadeAcessoServicoException.FalhaAoRecuperarChaveAcesso();
+
+            return true;
+        }
+
+        private async Task<bool> EnvioAlteracaoEhValidoAsync(EntidadeAcessoAlterar entidadeAcessoAlterar)
+        {
+            if (!EntidadeAcessoValidador.EmailEhValido(entidadeAcessoAlterar.Email))
+            {
+                _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido);
+                return false;
+            }
+
+            if (!EntidadeAcessoValidador.NomeEhValido(entidadeAcessoAlterar.Nome))
+            {
+                _notificador.AddMensagem(NotificacoesEntidadeAcesso.NomeInvalido);
+                return false;
+            }
+
+            if (!await EntidadeExisteAsync(entidadeAcessoAlterar.Email))
+                return false;
 
             return true;
         }

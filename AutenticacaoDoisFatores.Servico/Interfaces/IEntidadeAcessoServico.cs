@@ -9,5 +9,6 @@ namespace AutenticacaoDoisFatores.Servico.Interfaces
         Task AlterarChaveAcessoAsync(string token);
         Task AtivarCadastroAsync(string token);
         Task AlterarEntidadeAcessoAsync(string token);
+        Task EnviarEmailAlteracaoEntidadeAsync(EntidadeAcessoAlterar entidadeAcessoAlterar, string urlBase);
     }
 }

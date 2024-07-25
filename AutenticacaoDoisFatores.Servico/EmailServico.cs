@@ -43,26 +43,10 @@ namespace AutenticacaoDoisFatores.Servico
         internal static void EnviarSucessoCadastroDeAcesso(string para, string chave, string linkConfirmacao)
         {
             var titulo = "Cadastro de acesso realizado";
-
-            var styleCss = @"<style>
-                                body {font-family: Arial, sans-serif; }
-                                h1 {color: #333; }
-                                p {color: #555; }
-                                .content {padding: 10px; border: 1px solid #ccc; }
-                            </style>";
-
-            var conteudo = $@"<html>
-                                <head>
-                                    {styleCss}
-                                </head>
-                                <body>
-                                    <div class='content'>
-                                        <p>O cadastro de acesso foi realizado com sucesso.</p>
-                                        <p>Utilize a seguinte chave para realizar as requisições: <b>{chave}</b></p>
-                                        <p>Para confirmar a sua chave de acesso clique no seguinte link: <a href='{linkConfirmacao}'>Clique aqui!</a></p>
-                                    </div>
-                                </body>
-                             </html>";
+            var mensagem = $@"<p>O cadastro de acesso foi realizado com sucesso.</p>
+                              <p>Utilize a seguinte chave para realizar as requisições: <b>{chave}</b></p>
+                              <p>Para confirmar a sua chave de acesso clique no seguinte link: <a href='{linkConfirmacao}'>Clique aqui!</a></p>";
+            var conteudo = HtmlMensagem(mensagem);
 
             Enviar(para, titulo, conteudo);
         }
@@ -70,24 +54,7 @@ namespace AutenticacaoDoisFatores.Servico
         internal static void EnviarConfirmacaoAlteracaoChaveAcesso(string para, string linkConfirmacao)
         {
             var titulo = "Confirmar nova chave de acesso";
-
-            var styleCss = @"<style>
-                                body {font-family: Arial, sans-serif; }
-                                h1 {color: #333; }
-                                p {color: #555; }
-                                .content {padding: 10px; border: 1px solid #ccc; }
-                            </style>";
-
-            var conteudo = $@"<html>
-                                <head>
-                                    {styleCss}
-                                </head>
-                                <body>
-                                    <div class='content'>
-                                        <p>Para confirmar a geração da nova chave de acesso clique no seguinte link: <a href='{linkConfirmacao}'>Clique aqui!</a></p>
-                                    </div>
-                                </body>
-                             </html>";
+            var conteudo = HtmlMensagem($"<p>Para confirmar a geração da nova chave de acesso clique no seguinte link: <a href='{linkConfirmacao}'>Clique aqui!</a></p>");
 
             Enviar(para, titulo, conteudo);
         }
@@ -95,7 +62,21 @@ namespace AutenticacaoDoisFatores.Servico
         internal static void ReenviarChaveDeAcesso(string para, string chave)
         {
             var titulo = "Reenvio de chave de acesso";
+            var conteudo = HtmlMensagem($"<p>Utilize a seguinte chave para realizar as requisições: <b>{chave}</b></p>");
 
+            Enviar(para, titulo, conteudo);
+        }
+
+        internal static void EnviarConfirmacaoAlteracaoEntidadeAcesso(string para, string linkConfirmacao)
+        {
+            var titulo = "Confirmar alteração nos dados de acesso";
+            var conteudo = HtmlMensagem($"<p>Para confirmar a geração da nova chave de acesso clique no seguinte link: <a href='{linkConfirmacao}'>Clique aqui!</a></p>");
+
+            Enviar(para, titulo, conteudo);
+        }
+
+        private static string HtmlMensagem(string mensagem)
+        {
             var styleCss = @"<style>
                                 body {font-family: Arial, sans-serif; }
                                 h1 {color: #333; }
@@ -109,12 +90,12 @@ namespace AutenticacaoDoisFatores.Servico
                                 </head>
                                 <body>
                                     <div class='content'>
-                                        <p>Utilize a seguinte chave para realizar as requisições: <b>{chave}</b></p>
+                                        {mensagem}
                                     </div>
                                 </body>
                              </html>";
 
-            Enviar(para, titulo, conteudo);
+            return conteudo;
         }
     }
 }
