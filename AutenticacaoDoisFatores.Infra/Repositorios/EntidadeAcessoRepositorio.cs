@@ -14,7 +14,9 @@ namespace AutenticacaoDoisFatores.Infra.Repositorios
 
         public async Task<EntidadeAcesso?> BuscarPorEmailAsync(string email)
         {
-            return await _contexto.EntidadesAcesso.AsNoTracking().FirstOrDefaultAsync(e => e.Email.ToLower().Equals(email.ToLower()));
+            return await _contexto.EntidadesAcesso
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Email.ToLower().Equals(email.ToLower()));
         }
 
         public async Task CadastrarAsync(EntidadeAcesso entidadeAcesso)
@@ -24,7 +26,9 @@ namespace AutenticacaoDoisFatores.Infra.Repositorios
 
         public async Task<bool> ExisteEntidadeComEmailAsync(string email)
         {
-            var existe = await _contexto.EntidadesAcesso.AsNoTracking().AnyAsync(e => e.Email == email);
+            var existe = await _contexto.EntidadesAcesso
+                .AsNoTracking()
+                .AnyAsync(e => e.Email == email);
 
             return existe;
         }

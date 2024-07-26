@@ -158,7 +158,7 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var email = _faker.Person.Email;
 
             var entidadeAcesso = new EntidadeAcesso(nome, email);
-            var chaveSemCriptografia = entidadeAcesso.RetornarChaveSemCriptografia();
+            var chaveSemCriptografia = "";
 
             Assert.NotNull(chaveSemCriptografia);
             Assert.Equal(8, chaveSemCriptografia.Length);

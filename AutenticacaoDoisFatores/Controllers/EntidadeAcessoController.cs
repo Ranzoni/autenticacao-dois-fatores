@@ -13,7 +13,7 @@ namespace AutenticacaoDoisFatores.Controllers
         private readonly IConfiguration _config = config;
 
         [HttpPost("Cadastrar")]
-        public async Task<ActionResult<EntidadeAcessoCadastrada?>> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
+        public async Task<ActionResult<EntidadeAcessoResposta?>> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
         {
             try
             {
@@ -86,15 +86,15 @@ namespace AutenticacaoDoisFatores.Controllers
             }
         }
 
-        [HttpPut("Alterar")]
-        public async Task<ActionResult> AlterarAsync(EntidadeAcessoAlterar entidadeAcessoAlterar)
+        [HttpPut("AlterarNome")]
+        public async Task<ActionResult> AlterarNomeAsync(EntidadeAcessoAlterar entidadeAcessoAlterar)
         {
             try
             {
                 var urlAplicacao = _config.GetValue<string>("AutenticacaoDoisFatores:UrlBase");
                 var urlBase = $"{urlAplicacao}EntidadeAcesso/ConfirmarAlteracao/";
 
-                await _servico.EnviarEmailAlteracaoEntidadeAsync(entidadeAcessoAlterar, urlBase);
+                await _servico.EnviarEmailAlteracaoNomeAsync(entidadeAcessoAlterar, urlBase);
 
                 return Sucesso("Um e-mail de confirmação foi enviado");
             }
@@ -109,7 +109,7 @@ namespace AutenticacaoDoisFatores.Controllers
         {
             try
             {
-                await _servico.AlterarEntidadeAcessoAsync(token);
+                await _servico.AlterarNomeAsync(token);
 
                 return MensagemHtml("Confirmação", "Confirmação de alteração", "A alteração foi realizada com sucesso!");
             }
@@ -120,6 +120,23 @@ namespace AutenticacaoDoisFatores.Controllers
             catch
             {
                 return MensagemHtml("Falha", "Falha ao completar a solicitação", "Por favor, entre em contato com o responsável pelo sistema");
+            }
+        }
+
+        [HttpPut("AlterarEmail/{emailAtual}")]
+        public async Task<ActionResult> AlterarEmailAsync(string emailAtual, [FromBody] EntidadeAcessoAlterarEmail entidadeAcessoAlterarEmail)
+        {
+            try
+            {
+                var retorno = await _servico.AlterarEmailAsync(emailAtual, entidadeAcessoAlterarEmail);
+                if (retorno is null)
+                    return NaoEncontrado("A entidade de acesso não foi encontrada");
+
+                return Sucesso(retorno);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
             }
         }
     }

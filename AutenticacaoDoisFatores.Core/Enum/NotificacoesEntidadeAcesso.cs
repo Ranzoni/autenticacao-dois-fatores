@@ -17,6 +17,10 @@ namespace AutenticacaoDoisFatores.Core.Enum
         [Description("A entidade de acesso não foi encontrada")]
         NaoEncontrada,
         [Description("A entidade de acesso já está ativa")]
-        JaAtiva
+        JaAtiva,
+        [Description("O e-mail definido como o atual da entidade de acesso não é válido")]
+        EmailAtualInvalido,
+        [Description("O novo e-mail para a entidade de acesso não é válido")]
+        EmailNovoInvalido
     }
 }

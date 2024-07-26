@@ -38,5 +38,10 @@ namespace AutenticacaoDoisFatores.Core.Validadores
         {
             return !email.IsNullOrEmptyOrWhiteSpaces() && email.Length >= 5 && email.Length <= 80;
         }
+
+        public static bool ChaveEhValida(string chave)
+        {
+            return !chave.IsNullOrEmptyOrWhiteSpaces() && chave.Length == 8;
+        }
     }
 }

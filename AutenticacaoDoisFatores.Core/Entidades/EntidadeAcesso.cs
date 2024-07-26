@@ -1,5 +1,5 @@
 ﻿using AutenticacaoDoisFatores.Core.Excecoes;
-using AutenticacaoDoisFatores.Core.Servicos;
+using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Core.Validadores;
 
 namespace AutenticacaoDoisFatores.Core.Entidades
@@ -8,7 +8,6 @@ namespace AutenticacaoDoisFatores.Core.Entidades
     {
         private readonly byte _tamanhoChave = 8;
         private readonly char[] _caracteres = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-        private string? _chaveSemCriptografia;
 
         public string Nome { get; private set; }
         public string Chave { get; private set; }
@@ -59,7 +58,15 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             Email = email;
         }
 
-        internal void GerarChave()
+        internal void AlterarChave(string chave)
+        {
+            if (chave.IsNullOrEmptyOrWhiteSpaces())
+                EntidadeAcessoException.ChaveInvalida();
+
+            Chave = chave;
+        }
+
+        internal string GerarChave()
         {
             var chave = "";
             var geradorRandomicoNum = new Random();
@@ -73,13 +80,9 @@ namespace AutenticacaoDoisFatores.Core.Entidades
                 chave += carectereSorteado;
             }
 
-            _chaveSemCriptografia = chave;
-            Chave = Criptografia.Criptografar(_chaveSemCriptografia);
-        }
+            Chave = chave;
 
-        public string RetornarChaveSemCriptografia()
-        {
-            return _chaveSemCriptografia ?? "";
+            return Chave;
         }
 
         public void Ativar(bool valor)

@@ -21,7 +21,23 @@ namespace AutenticacaoDoisFatores.Controllers
             if (_notificador.ExisteMensagem())
                 return UnprocessableEntity(_notificador.Mensagens());
 
-            return base.Ok(mensagem);
+            return Ok(mensagem);
+        }
+
+        protected ActionResult Sucesso(object modelo)
+        {
+            if (_notificador.ExisteMensagem())
+                return UnprocessableEntity(_notificador.Mensagens());
+
+            return Ok(modelo);
+        }
+
+        protected ActionResult NaoEncontrado(string mensagem)
+        {
+            if (_notificador.ExisteMensagem())
+                return UnprocessableEntity(_notificador.Mensagens());
+
+            return NotFound(mensagem);
         }
 
         protected ContentResult MensagemHtml(string cabecalho, string titulo, string mensagem)

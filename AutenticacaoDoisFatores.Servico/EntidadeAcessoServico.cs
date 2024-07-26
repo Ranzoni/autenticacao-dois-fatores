@@ -15,81 +15,108 @@ namespace AutenticacaoDoisFatores.Servico
         protected readonly IEntidadeAcessoDominio _dominio = dominio;
         private readonly IMapper _mapeador = mapeador;
 
-        public async Task AlterarChaveAcessoAsync(string token)
+        public async Task<EntidadeAcessoResposta?> CadastrarAsync(EntidadeAcessoCadastrar entidadeCadastrar, string urlBase)
         {
-            var email = Token.RetornarEmailReenvioChave(token) ?? "";
-            if (!await EntidadeExisteAsync(email))
-                return;
+            if (!await CadastroEhValidoAsync(entidadeCadastrar))
+                return null;
 
-            var chave = await _dominio.GerarNovaChaveAsync(email);
-            if (!GeracaoChaveValida(chave))
-                return;
+            var entidade = _mapeador.Map<EntidadeAcesso>(entidadeCadastrar);
 
-            EmailServico.ReenviarChaveDeAcesso(email, chave);
+            var entidadeCadastrada = await _dominio.CadastrarAsync(entidade);
+
+            var token = Token.GerarTokenEnvioChave(entidade.Email);
+            var urlConfirmacaoCadastro = $"{urlBase}{token}";
+
+            EmailServico.EnviarSucessoCadastroDeAcesso(entidade.Email, entidade.Chave, urlConfirmacaoCadastro);
+
+            var entidadeResposta = _mapeador.Map<EntidadeAcessoResposta>(entidadeCadastrada);
+
+            return entidadeResposta;
         }
 
-        public async Task AlterarEntidadeAcessoAsync(string token)
+        public async Task<EntidadeAcessoResposta?> AtivarCadastroAsync(string token)
+        {
+            var email = Token.RetornarEmailEnvioConfirmacaoCadastro(token) ?? "";
+            if (email.IsNullOrEmptyOrWhiteSpaces())
+            {
+                NotificarEmailInvalido();
+                return null;
+            }
+
+            if (!await AtivacaoEhValidaAsync(email))
+                return null;
+
+            var entidade = await _dominio.AtivarEntidadeAcessoAsync(email, true);
+
+            var entidadeResposta = _mapeador.Map<EntidadeAcessoResposta>(entidade);
+
+            return entidadeResposta;
+        }
+
+        public async Task<bool> ReenviarChaveAcessoAsync(ReenviarChaveAcesso reenviarChave, string urlBase)
+        {
+            if (!await EntidadeExisteAsync(reenviarChave.Email))
+                return false;
+
+            var token = Token.GerarTokenReenvioChave(reenviarChave.Email);
+            var urlConfirmacaoGeracaoNovaChave = $"{urlBase}{token}";
+
+            EmailServico.EnviarConfirmacaoAlteracaoChaveAcesso(reenviarChave.Email, urlConfirmacaoGeracaoNovaChave);
+
+            return true;
+        }
+
+        public async Task<bool> AlterarChaveAcessoAsync(string token)
+        {
+            var email = Token.RetornarEmailReenvioChave(token) ?? "";
+
+            var chave = await _dominio.GerarNovaChaveAsync(email) ?? "";
+            if (chave.IsNullOrEmptyOrWhiteSpaces())
+                return false;
+
+            EmailServico.ReenviarChaveDeAcesso(email, chave);
+
+            return true;
+        }
+
+        public async Task<bool> EnviarEmailAlteracaoNomeAsync(EntidadeAcessoAlterar entidadeAlterar, string urlBase)
+        {
+            if (!await EnvioAlteracaoEhValidoAsync(entidadeAlterar))
+                return false;
+
+            var token = Token.GerarTokenAlterarEntidadeAcesso(entidadeAlterar.Email, entidadeAlterar.Nome);
+            var linkConfirmacao = $"{urlBase}{token}";
+
+            EmailServico.EnviarConfirmacaoAlteracaoEntidadeAcesso(entidadeAlterar.Email, linkConfirmacao);
+
+            return true;
+        }
+
+        public async Task<EntidadeAcessoResposta?> AlterarNomeAsync(string token)
         {
             var dadosToken = Token.RetornarEmailNomeAlteracaoCadastro(token);
             var email = dadosToken.email ?? "";
             var nome = dadosToken.nome ?? "";
 
-            if (!await EntidadeExisteAsync(email))
-                return;
+            var entidade = await _dominio.AlterarNomeAsync(email, nome);
 
-            await _dominio.AlterarNomeAsync(email, nome);
+            var entidadeResposta = _mapeador.Map<EntidadeAcessoResposta?>(entidade);
+
+            return entidadeResposta;
         }
 
-        public async Task AtivarCadastroAsync(string token)
+        public async Task<EntidadeAcessoResposta?> AlterarEmailAsync(string emailAtual, EntidadeAcessoAlterarEmail entidadeAcessoAlterarEmail)
         {
-            var email = Token.RetornarEmailEnvioConfirmacaoCadastro(token) ?? "";
-            if (!await AtivacaoEhValidaAsync(email))
-                return;
-
-            await _dominio.AtivarEntidadeAcessoAsync(email, true);
-        }
-
-        public async Task<EntidadeAcessoCadastrada?> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar, string urlBase)
-        {
-            if (!await CadastroEhValidoAsync(entidadeAcessoCadastrar))
+            if (!AlteracaoEmailEhValida(emailAtual, entidadeAcessoAlterarEmail.Chave, entidadeAcessoAlterarEmail.Email))
                 return null;
 
-            var entidadeAcessoMapeada = _mapeador.Map<EntidadeAcesso>(entidadeAcessoCadastrar);
+            var entidadeAcesso = await _dominio.AlterarEmailAsync(emailAtual, entidadeAcessoAlterarEmail.Chave, entidadeAcessoAlterarEmail.Email);
+            if (entidadeAcesso is null)
+                NotificarNaoEncontrada();
 
-            var entidadeAcesso = await _dominio.CadastrarAsync(entidadeAcessoMapeada);
+            var entidadeMapeada = _mapeador.Map<EntidadeAcessoResposta>(entidadeAcesso);
 
-            var chave = entidadeAcesso.RetornarChaveSemCriptografia();
-            VerificarChaveAcesso(chave);
-
-            var token = Token.GerarTokenEnvioChave(entidadeAcesso.Email);
-            var urlConfirmacaoCadastro = $"{urlBase}{token}";
-
-            EmailServico.EnviarSucessoCadastroDeAcesso(entidadeAcesso.Email, chave, urlConfirmacaoCadastro);
-
-            var entidadeAcesssoCadastrada = _mapeador.Map<EntidadeAcessoCadastrada>(entidadeAcesso);
-
-            return entidadeAcesssoCadastrada;
-        }
-
-        public async Task EnviarEmailAlteracaoEntidadeAsync(EntidadeAcessoAlterar entidadeAcessoAlterar, string urlBase)
-        {
-            if (!await EnvioAlteracaoEhValidoAsync(entidadeAcessoAlterar))
-                return;
-
-            var token = Token.GerarTokenAlterarEntidadeAcesso(entidadeAcessoAlterar.Email, entidadeAcessoAlterar.Nome);
-            var linkConfirmacao = $"{urlBase}{token}";
-            EmailServico.EnviarConfirmacaoAlteracaoEntidadeAcesso(entidadeAcessoAlterar.Email, linkConfirmacao);
-        }
-
-        public async Task ReenviarChaveAcessoAsync(ReenviarChaveAcesso reenviarChaveAcesso, string urlBase)
-        {
-            if (!await ReenvioEhValidoAsync(reenviarChaveAcesso))
-                return;
-
-            var token = Token.GerarTokenReenvioChave(reenviarChaveAcesso.Email);
-            var urlConfirmacaoGeracaoNovaChave = $"{urlBase}{token}";
-
-            EmailServico.EnviarConfirmacaoAlteracaoChaveAcesso(reenviarChaveAcesso.Email, urlConfirmacaoGeracaoNovaChave);
+            return entidadeMapeada;
         }
     }
 
@@ -121,34 +148,11 @@ namespace AutenticacaoDoisFatores.Servico
             return true;
         }
 
-        private static void VerificarChaveAcesso(string chave)
-        {
-            if (chave.IsNullOrEmptyOrWhiteSpaces())
-                EntidadeAcessoServicoException.FalhaAoRecuperarChaveAcesso();
-        }
-
-        private async Task<bool> ReenvioEhValidoAsync(ReenviarChaveAcesso reenviarChaveAcesso)
-        {
-            if (!EntidadeAcessoValidador.EmailEhValido(reenviarChaveAcesso.Email))
-            {
-                _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido);
-                return false;
-            }
-
-            if (!await EntidadeExisteAsync(reenviarChaveAcesso.Email))
-                return false;
-
-            return true;
-        }
-
         private async Task<bool> EntidadeExisteAsync(string email)
         {
             var existe = await _dominio.ExisteEntidadeComEmailAsync(email);
             if (!existe)
-            {
-                _notificador.AddMensagem(NotificacoesEntidadeAcesso.NaoEncontrada);
                 return false;
-            }
 
             return true;
         }
@@ -157,24 +161,13 @@ namespace AutenticacaoDoisFatores.Servico
         {
             var entidadeAcesso = await _dominio.BuscarComEmailAsync(email);
             if (entidadeAcesso is null)
-            {
-                _notificador.AddMensagem(NotificacoesEntidadeAcesso.NaoEncontrada);
                 return false;
-            }
 
             if (entidadeAcesso.Ativo)
             {
                 _notificador.AddMensagem(NotificacoesEntidadeAcesso.JaAtiva);
                 return false;
             }
-
-            return true;
-        }
-
-        private static bool GeracaoChaveValida(string chave)
-        {
-            if (chave.IsNullOrEmptyOrWhiteSpaces())
-                EntidadeAcessoServicoException.FalhaAoRecuperarChaveAcesso();
 
             return true;
         }
@@ -197,6 +190,39 @@ namespace AutenticacaoDoisFatores.Servico
                 return false;
 
             return true;
+        }
+
+        private bool AlteracaoEmailEhValida(string emailAtual, string chave, string emailNovo)
+        {
+            if (!EntidadeAcessoValidador.EmailEhValido(emailAtual))
+            {
+                _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailAtualInvalido);
+                return false;
+            }
+
+            if (!EntidadeAcessoValidador.ChaveEhValida(chave))
+            {
+                _notificador.AddMensagem(NotificacoesEntidadeAcesso.ChaveInvalida);
+                return false;
+            }
+
+            if (!EntidadeAcessoValidador.EmailEhValido(emailNovo))
+            {
+                _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailNovoInvalido);
+                return false;
+            }
+
+            return true;
+        }
+        
+        private void NotificarNaoEncontrada()
+        {
+            _notificador.AddMensagem(NotificacoesEntidadeAcesso.NaoEncontrada);
+        }
+
+        private void NotificarEmailInvalido()
+        {
+            _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido);
         }
     }
 }
