@@ -13,8 +13,6 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         [Fact]
         internal void DeveCriarEntidadeAcesso()
         {
-            var chaveCriptografia = _faker.Random.AlphaNumeric(16);
-            Environment.SetEnvironmentVariable("ENCRYPT_KEY", chaveCriptografia);
             var nome = _faker.Company.CompanyName();
             var email = _faker.Person.Email;
 
@@ -25,20 +23,6 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             Assert.Equal(email, entidadeAcesso.Email);
             Assert.NotEmpty(entidadeAcesso.Chave);
             Assert.False(entidadeAcesso.Ativo);
-        }
-
-        [Fact]
-        internal void NaoDeveCriarEntidadeAcessoQuandoNaoHaChaveCriptografia()
-        {
-            Environment.SetEnvironmentVariable("ENCRYPT_KEY", null);
-
-            var chaveCriptografia = _faker.Random.AlphaNumeric(16);
-            var nome = _faker.Company.CompanyName();
-            var email = _faker.Person.Email;
-
-            var exception = Assert.Throws<CriptografiaException>(() => new EntidadeAcesso(nome, email));
-
-            Assert.Equal(NotificacoesCriptografia.ChaveNaoEncontrada.Descricao(), exception.Message);
         }
 
         [Theory]
@@ -170,8 +154,6 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         [Fact]
         internal void DeveRetornarChaveAcessoSemCriptografia()
         {
-            var chaveCriptografia = _faker.Random.AlphaNumeric(16);
-            Environment.SetEnvironmentVariable("ENCRYPT_KEY", chaveCriptografia);
             var nome = _faker.Company.CompanyName();
             var email = _faker.Person.Email;
 
@@ -205,8 +187,6 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         [Fact]
         internal void DeveAlterarNomeEntidadeAcesso()
         {
-            var chaveCriptografia = _faker.Random.AlphaNumeric(16);
-            Environment.SetEnvironmentVariable("ENCRYPT_KEY", chaveCriptografia);
             var nomeAnterior = _faker.Company.CompanyName();
             var email = _faker.Person.Email;
             var entidadeAcesso = new EntidadeAcesso(nomeAnterior, email);
@@ -227,8 +207,6 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         [InlineData("123456789012345678901234567890123456789012345678901")]
         internal void DeveRetornarExcecaoAoTentarAlterarNomeComValorInvalido(string nomeInvalido)
         {
-            var chaveCriptografia = _faker.Random.AlphaNumeric(16);
-            Environment.SetEnvironmentVariable("ENCRYPT_KEY", chaveCriptografia);
             var nomeAnterior = _faker.Company.CompanyName();
             var email = _faker.Person.Email;
             var entidadeAcesso = new EntidadeAcesso(nomeAnterior, email);
@@ -237,6 +215,40 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
 
             Assert.Equal(NotificacoesEntidadeAcesso.NomeInvalido.Descricao(), excecao.Message);
             Assert.Equal(nomeAnterior, entidadeAcesso.Nome);
+        }
+
+        [Fact]
+        internal void DeveAlterarEmailEntidadeAcesso()
+        {
+            var nome = _faker.Company.CompanyName();
+            var emailAnterior = _faker.Person.Email;
+            var entidadeAcesso = new EntidadeAcesso(nome, emailAnterior);
+            var novoEmail = $"novo_{_faker.Person.Email}";
+
+            entidadeAcesso.AlterarEmail(novoEmail);
+
+            Assert.NotEqual(nome, entidadeAcesso.Email);
+            Assert.Equal(novoEmail, entidadeAcesso.Email);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("    ")]
+        [InlineData("a")]
+        [InlineData("ab")]
+        [InlineData("a@.c")]
+        [InlineData("a@12345678901234567890123456789012345678901234567890123456789012345678901234567.c")]
+        internal void DeveRetornarExcecaoAoTentarAlterarEmailComValorInvalido(string emailInvalido)
+        {
+            var nome = _faker.Company.CompanyName();
+            var emailAnterior = _faker.Person.Email;
+            var entidadeAcesso = new EntidadeAcesso(nome, emailAnterior);
+
+            var excecao = Assert.Throws<EntidadeAcessoException>(() => entidadeAcesso.AlterarEmail(emailInvalido));
+
+            Assert.Equal(NotificacoesEntidadeAcesso.EmailInvalido.Descricao(), excecao.Message);
+            Assert.Equal(emailAnterior, entidadeAcesso.Email);
         }
     }
 }

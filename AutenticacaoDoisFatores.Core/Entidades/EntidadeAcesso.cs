@@ -51,6 +51,14 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             Nome = nome;
         }
 
+        public void AlterarEmail(string email)
+        {
+            if (!EntidadeAcessoValidador.EmailEhValido(email))
+                EntidadeAcessoException.EmailInvalido();
+
+            Email = email;
+        }
+
         internal void GerarChave()
         {
             var chave = "";

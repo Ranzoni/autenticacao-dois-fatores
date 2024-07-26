@@ -9,7 +9,31 @@ namespace AutenticacaoDoisFatores.Core.Servicos
     {
         private readonly IEntidadeAcessoRepositorio _repositorio = repositorio;
 
-        public async Task<EntidadeAcesso?> AlterarAsync(string email, string nome)
+        public async Task<EntidadeAcesso?> AlterarEmailAsync(string emailAtual, string chave, string emailNovo)
+        {
+            var entidadeAcesso = await _repositorio.BuscarPorEmailAsync(emailAtual);
+            if (entidadeAcesso is null)
+            {
+                EntidadeAcessoException.NaoEncontrada();
+                return null;
+            }
+
+            var chavesSaoIguais = Criptografia.SaoIguais(chave, entidadeAcesso.Chave);
+            if (!chavesSaoIguais)
+            {
+                EntidadeAcessoException.NaoEncontrada();
+                return null;
+            }
+
+            entidadeAcesso.AlterarEmail(emailNovo);
+
+            _repositorio.Alterar(entidadeAcesso);
+            await _repositorio.SalvarAlteracoesAsync();
+
+            return entidadeAcesso;
+        }
+
+        public async Task<EntidadeAcesso?> AlterarNomeAsync(string email, string nome)
         {
             var entidadeAcesso = await _repositorio.BuscarPorEmailAsync(email);
             if (entidadeAcesso is null)

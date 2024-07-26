@@ -37,7 +37,7 @@ namespace AutenticacaoDoisFatores.Servico
             if (!await EntidadeExisteAsync(email))
                 return;
 
-            await _dominio.AlterarAsync(email, nome);
+            await _dominio.AlterarNomeAsync(email, nome);
         }
 
         public async Task AtivarCadastroAsync(string token)
