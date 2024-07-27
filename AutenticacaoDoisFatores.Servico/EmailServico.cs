@@ -1,6 +1,5 @@
 ﻿using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Servico.Excecoes;
-using System;
 using System.Net;
 using System.Net.Mail;
 

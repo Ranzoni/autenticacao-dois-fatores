@@ -20,50 +20,13 @@ namespace AutenticacaoDoisFatores.Controllers
                 var urlAplicacao = _config.GetValue<string>("AutenticacaoDoisFatores:UrlBase");
                 var urlBase = $"{urlAplicacao}EntidadeAcesso/ConfirmarCadastro/";
 
-                var entidadeAcessoCadastrada = await _servico.CadastrarAsync(entidadeAcessoCadastrar, urlBase);
+                var retorno = await _servico.CadastrarAsync(entidadeAcessoCadastrar, urlBase);
 
-                return CriadoComSucesso(entidadeAcessoCadastrada);
+                return CriadoComSucesso(retorno);
             }
             catch (Exception e)
             {
                 return BadRequest(e.Message);
-            }
-        }
-
-        [HttpPut("ReenviarChaveAcesso")]
-        public async Task<ActionResult> ReenviarChaveAcessoAsync(ReenviarChaveAcesso reenviarChaveAcesso)
-        {
-            try
-            {
-                var urlAplicacao = _config.GetValue<string>("AutenticacaoDoisFatores:UrlBase");
-                var urlBase = $"{urlAplicacao}EntidadeAcesso/NovaChaveAcesso/";
-
-                await _servico.ReenviarChaveAcessoAsync(reenviarChaveAcesso, urlBase);
-
-                return Sucesso("Um e-mail de recuperação foi enviado");
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
-
-        [HttpGet("NovaChaveAcesso/{token}")]
-        public async Task<ContentResult> NovaChaveAcessoAsync(string token)
-        {
-            try
-            {
-                await _servico.AlterarChaveAcessoAsync(token);
-
-                return MensagemHtml("Confirmação", "Confirmação de reenvio de chave", "Foi enviado um novo e-mail com a nova chave de acesso");
-            }
-            catch (SecurityTokenExpiredException)
-            {
-                return MensagemHtml("Falha", "Link expirado", "Será necessário solicitar um novo link");
-            }
-            catch
-            {
-                return MensagemHtml("Falha", "Falha ao completar a solicitação", "Por favor, entre em contato com o responsável pelo sistema");
             }
         }
 
@@ -72,7 +35,9 @@ namespace AutenticacaoDoisFatores.Controllers
         {
             try
             {
-                await _servico.AtivarCadastroAsync(token);
+                var retorno = await _servico.AtivarCadastroAsync(token);
+                if (retorno is null)
+                    return MensagemHtml("Falha", "Não encontrada", "Não foi encontrada uma entidade com este endereço de e-mail");
 
                 return MensagemHtml("Confirmação", "Confirmação de cadastro", "O cadastro foi ativado com sucesso!");
             }
@@ -86,15 +51,58 @@ namespace AutenticacaoDoisFatores.Controllers
             }
         }
 
-        [HttpPut("AlterarNome")]
-        public async Task<ActionResult> AlterarNomeAsync(EntidadeAcessoAlterar entidadeAcessoAlterar)
+        [HttpPut("ReenviarChaveAcesso")]
+        public async Task<ActionResult> ReenviarChaveAcessoAsync(ReenviarChaveAcesso reenviarChaveAcesso)
         {
             try
             {
                 var urlAplicacao = _config.GetValue<string>("AutenticacaoDoisFatores:UrlBase");
-                var urlBase = $"{urlAplicacao}EntidadeAcesso/ConfirmarAlteracao/";
+                var urlBase = $"{urlAplicacao}EntidadeAcesso/GerarNovaChaveAcesso/";
 
-                await _servico.EnviarEmailAlteracaoNomeAsync(entidadeAcessoAlterar, urlBase);
+                var retorno = await _servico.ReenviarChaveAcessoAsync(reenviarChaveAcesso, urlBase);
+                if (!retorno)
+                    return NaoEncontrado("Não foi encontrada uma entidade com este endereço de e-mail");
+
+                return Sucesso("Um e-mail de recuperação foi enviado");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("GerarNovaChaveAcesso/{token}")]
+        public async Task<ContentResult> GerarNovaChaveAcessoAsync(string token)
+        {
+            try
+            {
+                var retorno = await _servico.AlterarChaveAcessoAsync(token);
+                if (!retorno)
+                    return MensagemHtml("Falha", "Não encontrada", "Não foi encontrada uma entidade com este endereço de e-mail");
+
+                return MensagemHtml("Confirmação", "Confirmação de reenvio de chave", "Foi enviado um novo e-mail com a nova chave de acesso");
+            }
+            catch (SecurityTokenExpiredException)
+            {
+                return MensagemHtml("Falha", "Link expirado", "Será necessário solicitar um novo link");
+            }
+            catch
+            {
+                return MensagemHtml("Falha", "Falha ao completar a solicitação", "Por favor, entre em contato com o responsável pelo sistema");
+            }
+        }
+
+        [HttpPut("AlterarNome")]
+        public async Task<ActionResult> AlterarNomeAsync(EntidadeAcessoAlterarNome entidadeAcessoAlterar)
+        {
+            try
+            {
+                var urlAplicacao = _config.GetValue<string>("AutenticacaoDoisFatores:UrlBase");
+                var urlBase = $"{urlAplicacao}EntidadeAcesso/ConfirmarAlteracaoNome/";
+
+                var retorno = await _servico.EnviarEmailAlteracaoNomeAsync(entidadeAcessoAlterar, urlBase);
+                if (!retorno)
+                    return NaoEncontrado("Não foi encontrada uma entidade com este endereço de e-mail");
 
                 return Sucesso("Um e-mail de confirmação foi enviado");
             }
@@ -104,12 +112,14 @@ namespace AutenticacaoDoisFatores.Controllers
             }
         }
 
-        [HttpGet("ConfirmarAlteracao/{token}")]
-        public async Task<ContentResult> ConfirmarAlteracaoAsync(string token)
+        [HttpGet("ConfirmarAlteracaoNome/{token}")]
+        public async Task<ContentResult> ConfirmarAlteracaoNomeAsync(string token)
         {
             try
             {
-                await _servico.AlterarNomeAsync(token);
+                var retorno = await _servico.AlterarNomeAsync(token);
+                if (retorno is null)
+                    return MensagemHtml("Falha", "Não encontrada", "Não foi encontrada uma entidade com este endereço de e-mail");
 
                 return MensagemHtml("Confirmação", "Confirmação de alteração", "A alteração foi realizada com sucesso!");
             }
@@ -123,13 +133,16 @@ namespace AutenticacaoDoisFatores.Controllers
             }
         }
 
-        [HttpPut("AlterarEmail/{emailAtual}")]
-        public async Task<ActionResult> AlterarEmailAsync(string emailAtual, [FromBody] EntidadeAcessoAlterarEmail entidadeAcessoAlterarEmail)
+        [HttpPut("AlterarEmail")]
+        public async Task<ActionResult> AlterarEmailAsync(EntidadeAcessoAlterarEmail entidadeAcessoAlterarEmail)
         {
             try
             {
-                var retorno = await _servico.AlterarEmailAsync(emailAtual, entidadeAcessoAlterarEmail);
-                if (retorno is null)
+                var urlAplicacao = _config.GetValue<string>("AutenticacaoDoisFatores:UrlBase");
+                var urlBase = $"{urlAplicacao}EntidadeAcesso/ConfirmarAlteracaoEmail/";
+
+                var retorno = await _servico.EnviarEmailAlteracaoEmailAsync(entidadeAcessoAlterarEmail, urlBase);
+                if (!retorno)
                     return NaoEncontrado("A entidade de acesso não foi encontrada");
 
                 return Sucesso(retorno);
@@ -137,6 +150,27 @@ namespace AutenticacaoDoisFatores.Controllers
             catch (Exception e)
             {
                 return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet("ConfirmarAlteracaoEmail/{token}")]
+        public async Task<ContentResult> ConfirmarAlteracaoEmailAsync(string token)
+        {
+            try
+            {
+                var retorno = await _servico.AlterarEmailAsync(token);
+                if (retorno is null)
+                    return MensagemHtml("Falha", "Não encontrada", "Não foi encontrada uma entidade com este endereço de e-mail");
+
+                return MensagemHtml("Confirmação", "Confirmação de alteração", "A alteração foi realizada com sucesso!");
+            }
+            catch (SecurityTokenExpiredException)
+            {
+                return MensagemHtml("Falha", "Link expirado", "Será necessário solicitar um novo link");
+            }
+            catch
+            {
+                return MensagemHtml("Falha", "Falha ao completar a solicitação", "Por favor, entre em contato com o responsável pelo sistema");
             }
         }
     }

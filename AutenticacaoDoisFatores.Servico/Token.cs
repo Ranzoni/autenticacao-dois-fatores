@@ -11,7 +11,8 @@ namespace AutenticacaoDoisFatores.Servico
     {
         private const string EMAIL_ENVIO_CHAVE = "ENVIO_EMAIL_CHAVE";
         private const string EMAIL_REENVIO_CHAVE = "REENVIO_EMAIL_CHAVE";
-        private const string EMAIL_ALTERACAO_ENTIDADE_ACESSO = "ENVIO_EMAIL_ALTERACAO_ENTIDADE_ACESSO";
+        private const string EMAIL_ALTERACAO_NOME_ENTIDADE_ACESSO = "EMAIL_ALTERACAO_NOME_ENTIDADE_ACESSO";
+        private const string EMAIL_ALTERACAO_EMAIL_ENTIDADE_ACESSO = "EMAIL_ALTERACAO_EMAIL_ENTIDADE_ACESSO";
 
         private static string GerarToken(string sub, Claim claim)
         {
@@ -122,23 +123,23 @@ namespace AutenticacaoDoisFatores.Servico
             return emailClaim?.Value;
         }
 
-        internal static string GerarTokenAlterarEntidadeAcesso(string email, string nome)
+        internal static string GerarTokenAlterarNomeEntidadeAcesso(string email, string nome)
         {
             var claims = new List<Claim>()
             {
                 new(ClaimTypes.Email, email),
                 new(ClaimTypes.Name, nome)
             };
-            var token = GerarToken(EMAIL_ALTERACAO_ENTIDADE_ACESSO, claims);
+            var token = GerarToken(EMAIL_ALTERACAO_NOME_ENTIDADE_ACESSO, claims);
 
             return token;
         }
         
-        internal static (string? email, string? nome) RetornarEmailNomeAlteracaoCadastro(string token)
+        internal static (string? email, string? nome) RetornarEmailNomeAlteracaoEntidadeAcesso(string token)
         {
             var principal = ValidarToken(token);
             var subjectClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
-            if (subjectClaim?.Value != EMAIL_ALTERACAO_ENTIDADE_ACESSO)
+            if (subjectClaim?.Value != EMAIL_ALTERACAO_NOME_ENTIDADE_ACESSO)
                 return (null, null);
 
             var emailClaim = principal.FindFirst(ClaimTypes.Email);
@@ -148,6 +149,35 @@ namespace AutenticacaoDoisFatores.Servico
             var nome = nomeClaim?.Value;
 
             return (email, nome);
+        }
+
+        internal static string GerarTokenAlterarEmailEntidadeAcesso(int id, string email)
+        {
+            var claims = new List<Claim>()
+            {
+                new(ClaimTypes.Hash, id.ToString()),
+                new(ClaimTypes.Email, email)
+            };
+            var token = GerarToken(EMAIL_ALTERACAO_EMAIL_ENTIDADE_ACESSO, claims);
+
+            return token;
+        }
+
+        internal static (int? id, string? email) RetornarIdEmailAlteracaoEmailEntidadeAcesso(string token)
+        {
+            var principal = ValidarToken(token);
+            var subjectClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
+            if (subjectClaim?.Value != EMAIL_ALTERACAO_EMAIL_ENTIDADE_ACESSO)
+                return (null, null);
+
+            var nomeClaim = principal.FindFirst(ClaimTypes.Hash);
+            var idString = nomeClaim?.Value;
+            int? id = idString is not null ? int.Parse(idString) : null;
+
+            var emailClaim = principal.FindFirst(ClaimTypes.Email);
+            var email = emailClaim?.Value;
+
+            return (id, email);
         }
     }
 }

@@ -1,12 +1,14 @@
 using AutenticacaoDoisFatores.Core.Repositorios;
 using AutenticacaoDoisFatores.Core.Servicos;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
+using AutenticacaoDoisFatores.Core.Validadores;
 using AutenticacaoDoisFatores.Infra;
 using AutenticacaoDoisFatores.Infra.Contexto;
 using AutenticacaoDoisFatores.Infra.Repositorios;
 using AutenticacaoDoisFatores.Servico;
 using AutenticacaoDoisFatores.Servico.Interfaces;
 using AutenticacaoDoisFatores.Servico.Mapeadores;
+using AutenticacaoDoisFatores.Servico.Validacoes;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,6 +36,7 @@ builder.Services.AddTransient<IEntidadeAcessoRepositorio, EntidadeAcessoReposito
 builder.Services.AddTransient<IEntidadeAcessoDominio, EntidadeAcessoDominio>();
 
 builder.Services.AddTransient<IEntidadeAcessoServico, EntidadeAcessoServico>();
+builder.Services.AddTransient<EntidadeAcessoServicoValidacao>();
 
 var config = new MapperConfiguration(cfg =>
 {

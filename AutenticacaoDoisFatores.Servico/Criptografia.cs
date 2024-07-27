@@ -2,9 +2,9 @@
 
 namespace AutenticacaoDoisFatores.Core.Servicos
 {
-    internal static class Criptografia
+    public static class Criptografia
     {
-        internal static string Criptografar(string valor)
+        public static string Criptografar(string valor)
         {
             var salt = new byte[16];
             RandomNumberGenerator.Fill(salt);

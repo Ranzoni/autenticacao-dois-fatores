@@ -5,10 +5,13 @@ namespace AutenticacaoDoisFatores.Core.Validadores
 {
     public static class EntidadeAcessoValidador
     {
-        internal static void ValidarNovaEntidade(string nome, string email)
+        internal static void ValidarNovaEntidade(string nome, string chave, string email)
         {
             if (!NomeEhValido(nome))
                 EntidadeAcessoException.NomeInvalido();
+
+            if (chave.IsNullOrEmptyOrWhiteSpaces())
+                EntidadeAcessoException.ChaveInvalida();
 
             if (!EmailEhValido(email))
                 EntidadeAcessoException.EmailInvalido();
@@ -37,11 +40,6 @@ namespace AutenticacaoDoisFatores.Core.Validadores
         public static bool EmailEhValido(string email)
         {
             return !email.IsNullOrEmptyOrWhiteSpaces() && email.Length >= 5 && email.Length <= 80;
-        }
-
-        public static bool ChaveEhValida(string chave)
-        {
-            return !chave.IsNullOrEmptyOrWhiteSpaces() && chave.Length == 8;
         }
     }
 }

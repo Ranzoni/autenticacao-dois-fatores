@@ -6,9 +6,6 @@ namespace AutenticacaoDoisFatores.Core.Entidades
 {
     public class EntidadeAcesso: EntidadeBase
     {
-        private readonly byte _tamanhoChave = 8;
-        private readonly char[] _caracteres = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-
         public string Nome { get; private set; }
         public string Chave { get; private set; }
         public string Email { get; private set; }
@@ -16,17 +13,15 @@ namespace AutenticacaoDoisFatores.Core.Entidades
         public DateTime? DataUltimoAcesso { get; private set; }
         public bool Ativo { get; private set; }
 
-        public EntidadeAcesso(string nome, string email)
+        public EntidadeAcesso(string nome, string chave, string email)
         {
-            EntidadeAcessoValidador.ValidarNovaEntidade(nome, email);
+            EntidadeAcessoValidador.ValidarNovaEntidade(nome, chave, email);
 
-            Chave = "";
             Nome = nome;
+            Chave = chave;
             Email = email;
             DataCadastro = DateTime.UtcNow;
             Ativo = false;
-
-            GerarChave();
         }
 
         public EntidadeAcesso(int id, string nome, string chave, string email, DateTime dataCadastro, DateTime? dataUltimoAcesso, bool ativo)
@@ -57,32 +52,13 @@ namespace AutenticacaoDoisFatores.Core.Entidades
 
             Email = email;
         }
-
-        internal void AlterarChave(string chave)
+        
+        public void AlterarChave(string chave)
         {
             if (chave.IsNullOrEmptyOrWhiteSpaces())
                 EntidadeAcessoException.ChaveInvalida();
 
             Chave = chave;
-        }
-
-        internal string GerarChave()
-        {
-            var chave = "";
-            var geradorRandomicoNum = new Random();
-            var qtdTotalCaracteres = _caracteres.Length - 1;
-
-            for (var i = 1; i <= _tamanhoChave; i++)
-            {
-                var idxRandomico = geradorRandomicoNum.Next(qtdTotalCaracteres);
-                var carectereSorteado = _caracteres[idxRandomico];
-
-                chave += carectereSorteado;
-            }
-
-            Chave = chave;
-
-            return Chave;
         }
 
         public void Ativar(bool valor)

@@ -4,12 +4,13 @@ namespace AutenticacaoDoisFatores.Servico.Interfaces
 {
     public interface IEntidadeAcessoServico
     {
-        Task<EntidadeAcessoResposta?> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar, string urlBase);
+        Task<EntidadeAcessoResposta?> CadastrarAsync(EntidadeAcessoCadastrar entidadeCadastrar, string urlBase);
+        Task<EntidadeAcessoResposta?> AtivarCadastroAsync(string token);
         Task<bool> ReenviarChaveAcessoAsync(ReenviarChaveAcesso reenviarChaveAcesso, string urlBase);
         Task<bool> AlterarChaveAcessoAsync(string token);
-        Task<EntidadeAcessoResposta?> AtivarCadastroAsync(string token);
+        Task<bool> EnviarEmailAlteracaoNomeAsync(EntidadeAcessoAlterarNome entidadeAlterarNome, string urlBase);
         Task<EntidadeAcessoResposta?> AlterarNomeAsync(string token);
-        Task<bool> EnviarEmailAlteracaoNomeAsync(EntidadeAcessoAlterar entidadeAcessoAlterar, string urlBase);
-        Task<EntidadeAcessoResposta?> AlterarEmailAsync(string emailAtual, EntidadeAcessoAlterarEmail entidadeAcessoAlterarEmail);
+        Task<bool> EnviarEmailAlteracaoEmailAsync(EntidadeAcessoAlterarEmail entidadeAlterarEmail, string urlBase);
+        Task<EntidadeAcessoResposta?> AlterarEmailAsync(string token);
     }
 }

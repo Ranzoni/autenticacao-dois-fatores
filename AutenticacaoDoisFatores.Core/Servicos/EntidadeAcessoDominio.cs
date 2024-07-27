@@ -1,5 +1,4 @@
 ﻿using AutenticacaoDoisFatores.Core.Entidades;
-using AutenticacaoDoisFatores.Core.Excecoes;
 using AutenticacaoDoisFatores.Core.Repositorios;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 
@@ -11,15 +10,9 @@ namespace AutenticacaoDoisFatores.Core.Servicos
 
         public async Task<EntidadeAcesso> CadastrarAsync(EntidadeAcesso entidadeAcesso)
         {
-            var chave = entidadeAcesso.Chave;
-
-            var chaveCriptografada = entidadeAcesso.Chave;
-            entidadeAcesso.AlterarChave(chaveCriptografada);
-
             await _repositorio.CadastrarAsync(entidadeAcesso);
             await _repositorio.SalvarAlteracoesAsync();
 
-            entidadeAcesso.AlterarChave(chave);
             return entidadeAcesso;
         }
 
@@ -30,6 +23,11 @@ namespace AutenticacaoDoisFatores.Core.Servicos
             return existe;
         }
 
+        public async Task<EntidadeAcesso?> BuscarAsync(int id)
+        {
+            return await _repositorio.BuscarAsync(id);
+        }
+
         public async Task<EntidadeAcesso?> BuscarComEmailAsync(string email)
         {
             var entidadeAcesso = await _repositorio.BuscarPorEmailAsync(email);
@@ -37,63 +35,8 @@ namespace AutenticacaoDoisFatores.Core.Servicos
             return entidadeAcesso;
         }
 
-        public async Task<EntidadeAcesso?> AtivarEntidadeAcessoAsync(string email, bool ativar)
+        public async Task<EntidadeAcesso?> AlterarAsync(EntidadeAcesso entidadeAcesso)
         {
-            var entidadeAcesso = await _repositorio.BuscarPorEmailAsync(email);
-            if (entidadeAcesso is null)
-                return null;
-
-            entidadeAcesso.Ativar(ativar);
-
-            _repositorio.Alterar(entidadeAcesso);
-            await _repositorio.SalvarAlteracoesAsync();
-
-            return entidadeAcesso;
-        }
-
-        public async Task<string?> GerarNovaChaveAsync(string email)
-        {
-            var entidadeAcesso = await _repositorio.BuscarPorEmailAsync(email);
-            if (entidadeAcesso is null)
-                return null;
-
-            var novaChave = entidadeAcesso.GerarChave();
-
-            var chaveCriptograda = Criptografia.Criptografar(novaChave);
-            entidadeAcesso.AlterarChave(chaveCriptograda);
-
-            _repositorio.Alterar(entidadeAcesso);
-            await _repositorio.SalvarAlteracoesAsync();
-
-            return novaChave;
-        }
-
-        public async Task<EntidadeAcesso?> AlterarNomeAsync(string email, string nome)
-        {
-            var entidadeAcesso = await _repositorio.BuscarPorEmailAsync(email);
-            if (entidadeAcesso is null)
-                return null;
-
-            entidadeAcesso.AlterarNome(nome);
-
-            _repositorio.Alterar(entidadeAcesso);
-            await _repositorio.SalvarAlteracoesAsync();
-
-            return entidadeAcesso;
-        }
-
-        public async Task<EntidadeAcesso?> AlterarEmailAsync(string emailAtual, string chave, string emailNovo)
-        {
-            var entidadeAcesso = await _repositorio.BuscarPorEmailAsync(emailAtual);
-            if (entidadeAcesso is null)
-                return null;
-
-            var chavesSaoIguais = Criptografia.SaoIguais(chave, entidadeAcesso.Chave);
-            if (!chavesSaoIguais)
-                return null;
-
-            entidadeAcesso.AlterarEmail(emailNovo);
-
             _repositorio.Alterar(entidadeAcesso);
             await _repositorio.SalvarAlteracoesAsync();
 

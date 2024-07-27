@@ -12,6 +12,11 @@ namespace AutenticacaoDoisFatores.Infra.Repositorios
             _contexto.EntidadesAcesso.Update(entidadeAcesso);
         }
 
+        public async Task<EntidadeAcesso?> BuscarAsync(int id)
+        {
+            return await _contexto.EntidadesAcesso.FirstOrDefaultAsync(e => e.Id.Equals(id));
+        }
+
         public async Task<EntidadeAcesso?> BuscarPorEmailAsync(string email)
         {
             return await _contexto.EntidadesAcesso

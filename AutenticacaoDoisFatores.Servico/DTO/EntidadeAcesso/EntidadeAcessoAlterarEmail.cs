@@ -1,8 +1,9 @@
 ﻿namespace AutenticacaoDoisFatores.Servico.DTO.EntidadeAcesso
 {
-    public class EntidadeAcessoAlterarEmail(string email, string chave)
+    public class EntidadeAcessoAlterarEmail(string emailAtual, string emailNovo, string chave)
     {
-        public string Email { get; private set; } = email;
+        public string EmailAtual { get; private set; } = emailAtual;
+        public string EmailNovo { get; private set; } = emailNovo;
         public string Chave { get; private set; } = chave;
     }
 }
