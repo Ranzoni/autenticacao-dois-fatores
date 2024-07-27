@@ -1,6 +1,6 @@
 ﻿using AutenticacaoDoisFatores.Servico.DTO.EntidadeAcesso;
 
-namespace AutenticacaoDoisFatores.Servico.Interfaces
+namespace AutenticacaoDoisFatores.Servico.Servicos.Interfaces
 {
     public interface IEntidadeAcessoServico
     {

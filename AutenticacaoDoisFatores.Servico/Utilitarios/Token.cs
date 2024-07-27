@@ -5,7 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace AutenticacaoDoisFatores.Servico
+namespace AutenticacaoDoisFatores.Servico.Utilitarios
 {
     internal static class Token
     {
@@ -63,15 +63,15 @@ namespace AutenticacaoDoisFatores.Servico
             return tokenString;
         }
 
-        internal static string GerarTokenReenvioChave(string email)
+        internal static string GerarTokenReenvioChave(int id)
         {
-            var claim = new Claim(ClaimTypes.Email, email);
+            var claim = new Claim(ClaimTypes.Hash, id.ToString());
             var token = GerarToken(EMAIL_REENVIO_CHAVE, claim);
 
             return token;
         }
 
-        internal static string GerarTokenEnvioChave(string email)
+        internal static string GerarTokenEnvioChaveAcesso(string email)
         {
             var claim = new Claim(ClaimTypes.Email, email);
             var token = GerarToken(EMAIL_ENVIO_CHAVE, claim);
@@ -101,18 +101,19 @@ namespace AutenticacaoDoisFatores.Servico
             return principal;
         }
 
-        internal static string? RetornarEmailReenvioChave(string token)
+        internal static int? RetornarIdReenvioChave(string token)
         {
             var principal = ValidarToken(token);
             var subjectClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
             if (subjectClaim?.Value != EMAIL_REENVIO_CHAVE)
                 return null;
 
-            var emailClaim = principal.FindFirst(ClaimTypes.Email);
-            return emailClaim?.Value;
+            var idClaim = principal.FindFirst(ClaimTypes.Hash);
+            int? id = idClaim is not null ? int.Parse(idClaim.Value) : null;
+            return id;
         }
 
-        internal static string? RetornarEmailEnvioConfirmacaoCadastro(string token)
+        internal static string? RetornarEmailConfirmacaoCadastroEntidadeAcesso(string token)
         {
             var principal = ValidarToken(token);
             var subjectClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
@@ -123,32 +124,32 @@ namespace AutenticacaoDoisFatores.Servico
             return emailClaim?.Value;
         }
 
-        internal static string GerarTokenAlterarNomeEntidadeAcesso(string email, string nome)
+        internal static string GerarTokenAlterarNomeEntidadeAcesso(int id, string nome)
         {
             var claims = new List<Claim>()
             {
-                new(ClaimTypes.Email, email),
+                new(ClaimTypes.Hash, id.ToString()),
                 new(ClaimTypes.Name, nome)
             };
             var token = GerarToken(EMAIL_ALTERACAO_NOME_ENTIDADE_ACESSO, claims);
 
             return token;
         }
-        
-        internal static (string? email, string? nome) RetornarEmailNomeAlteracaoEntidadeAcesso(string token)
+
+        internal static (int? id, string? nome) RetornarNomeAlteracaoEntidadeAcesso(string token)
         {
             var principal = ValidarToken(token);
             var subjectClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
             if (subjectClaim?.Value != EMAIL_ALTERACAO_NOME_ENTIDADE_ACESSO)
                 return (null, null);
 
-            var emailClaim = principal.FindFirst(ClaimTypes.Email);
-            var email = emailClaim?.Value;
+            var idClaim = principal.FindFirst(ClaimTypes.Email);
+            int? id = idClaim is not null ? int.Parse(idClaim.Value) : null;
 
             var nomeClaim = principal.FindFirst(ClaimTypes.Name);
             var nome = nomeClaim?.Value;
 
-            return (email, nome);
+            return (id, nome);
         }
 
         internal static string GerarTokenAlterarEmailEntidadeAcesso(int id, string email)

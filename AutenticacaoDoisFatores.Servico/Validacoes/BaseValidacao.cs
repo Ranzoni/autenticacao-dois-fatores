@@ -1,9 +1,9 @@
-﻿using AutenticacaoDoisFatores.Servico.Interfaces;
+﻿using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
 
 namespace AutenticacaoDoisFatores.Servico.Validacoes
 {
-    public abstract class BaseValidacao(INotificador notificador)
+    public abstract class BaseValidacao(INotificadorServico notificador)
     {
-        protected readonly INotificador _notificador = notificador;
+        protected readonly INotificadorServico _notificador = notificador;
     }
 }

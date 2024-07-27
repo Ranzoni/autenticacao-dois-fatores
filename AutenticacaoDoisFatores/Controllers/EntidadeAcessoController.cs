@@ -1,5 +1,5 @@
 using AutenticacaoDoisFatores.Servico.DTO.EntidadeAcesso;
-using AutenticacaoDoisFatores.Servico.Interfaces;
+using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -7,7 +7,7 @@ namespace AutenticacaoDoisFatores.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class EntidadeAcessoController(IEntidadeAcessoServico servico, INotificador notificador, IConfiguration config) : BaseController(notificador)
+    public class EntidadeAcessoController(IEntidadeAcessoServico servico, INotificadorServico notificador, IConfiguration config) : BaseController(notificador)
     {
         private readonly IEntidadeAcessoServico _servico = servico;
         private readonly IConfiguration _config = config;

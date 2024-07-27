@@ -3,11 +3,11 @@ using AutenticacaoDoisFatores.Core.Enum;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Core.Validadores;
 using AutenticacaoDoisFatores.Servico.DTO.EntidadeAcesso;
-using AutenticacaoDoisFatores.Servico.Interfaces;
+using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
 
 namespace AutenticacaoDoisFatores.Servico.Validacoes
 {
-    public class EntidadeAcessoServicoValidacao(INotificador notificador, IEntidadeAcessoDominio dominio) : BaseValidacao(notificador)
+    public class EntidadeAcessoServicoValidacao(INotificadorServico notificador, IEntidadeAcessoDominio dominio) : BaseValidacao(notificador)
     {
         private readonly IEntidadeAcessoDominio _dominio = dominio;
 
@@ -31,6 +31,7 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
                 _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailJaCadastrado);
                 return false;
             }
+
             return true;
         }
 
@@ -39,6 +40,28 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
             if (entidadeAcesso.Ativo)
             {
                 _notificador.AddMensagem(NotificacoesEntidadeAcesso.JaAtiva);
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool AlteracaoNomeEhValida(EntidadeAcessoAlterarNome entidadeAlterar)
+        {
+            if (EntidadeAcessoValidador.NomeEhValido(entidadeAlterar.Nome))
+            {
+                _notificador.AddMensagem(NotificacoesEntidadeAcesso.NomeInvalido);
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool AlteracaoEmailEhValida(EntidadeAcessoAlterarEmail entidadeAlterarEmail)
+        {
+            if (EntidadeAcessoValidador.EmailEhValido(entidadeAlterarEmail.EmailNovo))
+            {
+                _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido);
                 return false;
             }
 

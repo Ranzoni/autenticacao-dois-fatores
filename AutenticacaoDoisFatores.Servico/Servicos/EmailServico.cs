@@ -1,13 +1,19 @@
 ﻿using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Servico.Excecoes;
+using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
 using System.Net;
 using System.Net.Mail;
 
-namespace AutenticacaoDoisFatores.Servico
+namespace AutenticacaoDoisFatores.Servico.Servicos
 {
-    internal static class EmailServico
+    public class EmailServico : IEmailServico
     {
-        private static void Enviar(string para, string titulo, string conteudo)
+        private readonly string _host;
+        private readonly string _porta;
+        private readonly string _emailRemetente;
+        private readonly string _senha;
+
+        public EmailServico()
         {
             var host = Environment.GetEnvironmentVariable("EMAIL_HOST") ?? "";
             if (host.IsNullOrEmptyOrWhiteSpaces())
@@ -25,21 +31,29 @@ namespace AutenticacaoDoisFatores.Servico
             if (senha.IsNullOrEmptyOrWhiteSpaces())
                 EmailServicoException.SenhaEmailNaoEncontrada();
 
-            var email = new MailMessage(de, para, titulo, conteudo)
+            _host = host;
+            _porta = porta;
+            _emailRemetente = de;
+            _senha = senha;
+        }
+
+        private void Enviar(string para, string titulo, string conteudo)
+        {
+            var email = new MailMessage(_emailRemetente, para, titulo, conteudo)
             {
                 IsBodyHtml = true
             };
 
-            var smtpMail = new SmtpClient(host, int.Parse(porta))
+            var smtpMail = new SmtpClient(_host, int.Parse(_porta))
             {
                 EnableSsl = true,
-                Credentials = new NetworkCredential(de, senha)
+                Credentials = new NetworkCredential(_emailRemetente, _senha)
             };
 
             smtpMail.Send(email);
         }
 
-        internal static void EnviarSucessoCadastroDeAcesso(string para, string chave, string linkConfirmacao)
+        public void EnviarSucessoCadastroDeAcesso(string para, string chave, string linkConfirmacao)
         {
             var titulo = "Cadastro de acesso realizado";
             var mensagem = $@"<p>O cadastro de acesso foi realizado com sucesso.</p>
@@ -50,7 +64,7 @@ namespace AutenticacaoDoisFatores.Servico
             Enviar(para, titulo, conteudo);
         }
 
-        internal static void EnviarConfirmacaoAlteracaoChaveAcesso(string para, string linkConfirmacao)
+        public void EnviarConfirmacaoAlteracaoChaveAcesso(string para, string linkConfirmacao)
         {
             var titulo = "Confirmar nova chave de acesso";
             var conteudo = HtmlMensagem($"<p>Para confirmar a geração da nova chave de acesso clique no seguinte link: <a href='{linkConfirmacao}'>Clique aqui!</a></p>");
@@ -58,7 +72,7 @@ namespace AutenticacaoDoisFatores.Servico
             Enviar(para, titulo, conteudo);
         }
 
-        internal static void ReenviarChaveDeAcesso(string para, string chave)
+        public void ReenviarChaveDeAcesso(string para, string chave)
         {
             var titulo = "Reenvio de chave de acesso";
             var conteudo = HtmlMensagem($"<p>Utilize a seguinte chave para realizar as requisições: <b>{chave}</b></p>");
@@ -66,7 +80,7 @@ namespace AutenticacaoDoisFatores.Servico
             Enviar(para, titulo, conteudo);
         }
 
-        internal static void EnviarConfirmacaoAlteracaoEntidadeAcesso(string para, string linkConfirmacao)
+        public void EnviarConfirmacaoAlteracaoEntidadeAcesso(string para, string linkConfirmacao)
         {
             var titulo = "Confirmar alteração nos dados de acesso";
             var conteudo = HtmlMensagem($"<p>Para confirmar a geração da nova chave de acesso clique no seguinte link: <a href='{linkConfirmacao}'>Clique aqui!</a></p>");

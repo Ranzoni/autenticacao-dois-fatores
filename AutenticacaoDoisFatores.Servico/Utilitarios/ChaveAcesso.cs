@@ -1,4 +1,4 @@
-﻿namespace AutenticacaoDoisFatores.Servico
+﻿namespace AutenticacaoDoisFatores.Servico.Utilitarios
 {
     internal static class ChaveAcesso
     {

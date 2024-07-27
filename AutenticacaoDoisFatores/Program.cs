@@ -5,9 +5,9 @@ using AutenticacaoDoisFatores.Core.Validadores;
 using AutenticacaoDoisFatores.Infra;
 using AutenticacaoDoisFatores.Infra.Contexto;
 using AutenticacaoDoisFatores.Infra.Repositorios;
-using AutenticacaoDoisFatores.Servico;
-using AutenticacaoDoisFatores.Servico.Interfaces;
 using AutenticacaoDoisFatores.Servico.Mapeadores;
+using AutenticacaoDoisFatores.Servico.Servicos;
+using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Servico.Validacoes;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -45,7 +45,7 @@ var config = new MapperConfiguration(cfg =>
 var mapeamentos = config.CreateMapper();
 builder.Services.AddSingleton(mapeamentos);
 
-builder.Services.AddScoped<INotificador, Notificador>();
+builder.Services.AddScoped<INotificadorServico, NotificadorServico>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

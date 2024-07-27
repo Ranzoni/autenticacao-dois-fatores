@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace AutenticacaoDoisFatores.Core.Servicos
+namespace AutenticacaoDoisFatores.Servico.Utilitarios
 {
     public static class Criptografia
     {

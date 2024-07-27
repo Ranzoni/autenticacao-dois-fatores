@@ -1,12 +1,12 @@
-﻿using AutenticacaoDoisFatores.Servico.Interfaces;
+﻿using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
 namespace AutenticacaoDoisFatores.Controllers
 {
-    public abstract class BaseController(INotificador notificador) : ControllerBase
+    public abstract class BaseController(INotificadorServico notificador) : ControllerBase
     {
-        private readonly INotificador _notificador = notificador;
+        private readonly INotificadorServico _notificador = notificador;
 
         public ActionResult<T?> CriadoComSucesso<T>(T? retorno)
         {

@@ -1,6 +1,6 @@
-﻿namespace AutenticacaoDoisFatores.Servico.Interfaces
+﻿namespace AutenticacaoDoisFatores.Servico.Servicos.Interfaces
 {
-    public interface INotificador
+    public interface INotificadorServico
     {
         void AddMensagem<T>(T mensagem) where T : struct, IConvertible;
         bool ExisteMensagem();

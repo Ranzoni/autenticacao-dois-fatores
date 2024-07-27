@@ -1,9 +1,9 @@
 ﻿using AutenticacaoDoisFatores.Core.Extensoes;
-using AutenticacaoDoisFatores.Servico.Interfaces;
+using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
 
-namespace AutenticacaoDoisFatores.Servico
+namespace AutenticacaoDoisFatores.Servico.Servicos
 {
-    public class Notificador : INotificador
+    public class NotificadorServico : INotificadorServico
     {
         private readonly List<string> _mensagens = [];
 

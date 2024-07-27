@@ -1,19 +1,15 @@
 ﻿using AutenticacaoDoisFatores.Core.Entidades;
-using AutenticacaoDoisFatores.Core.Servicos;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Servico.DTO.EntidadeAcesso;
-using AutenticacaoDoisFatores.Servico.Interfaces;
+using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
+using AutenticacaoDoisFatores.Servico.Utilitarios;
 using AutenticacaoDoisFatores.Servico.Validacoes;
 using AutoMapper;
 
-namespace AutenticacaoDoisFatores.Servico
+namespace AutenticacaoDoisFatores.Servico.Servicos
 {
-    public class EntidadeAcessoServico(IEntidadeAcessoDominio dominio, IMapper mapeador, EntidadeAcessoServicoValidacao validador) : IEntidadeAcessoServico
+    public class EntidadeAcessoServico(IEntidadeAcessoDominio _dominio, IMapper _mapeador, IEmailServico _email, EntidadeAcessoServicoValidacao _validador) : IEntidadeAcessoServico
     {
-        protected readonly IEntidadeAcessoDominio _dominio = dominio;
-        private readonly IMapper _mapeador = mapeador;
-        private readonly EntidadeAcessoServicoValidacao _validador = validador;
-
         public async Task<EntidadeAcessoResposta?> CadastrarAsync(EntidadeAcessoCadastrar entidadeCadastrar, string urlBase)
         {
             if (!await _validador.CadastroEhValidoAsync(entidadeCadastrar))
@@ -25,10 +21,10 @@ namespace AutenticacaoDoisFatores.Servico
             var entidade = new EntidadeAcesso(entidadeCadastrar.Nome, chaveCriptografada, entidadeCadastrar.Email);
             var entidadeCadastrada = await _dominio.CadastrarAsync(entidade);
 
-            var token = Token.GerarTokenEnvioChave(entidade.Email);
+            var token = Token.GerarTokenEnvioChaveAcesso(entidade.Email);
             var urlConfirmacaoCadastro = $"{urlBase}{token}";
 
-            EmailServico.EnviarSucessoCadastroDeAcesso(entidade.Email, chave, urlConfirmacaoCadastro);
+            _email.EnviarSucessoCadastroDeAcesso(entidade.Email, chave, urlConfirmacaoCadastro);
 
             var entidadeResposta = _mapeador.Map<EntidadeAcessoResposta>(entidadeCadastrada);
 
@@ -37,7 +33,7 @@ namespace AutenticacaoDoisFatores.Servico
 
         public async Task<EntidadeAcessoResposta?> AtivarCadastroAsync(string token)
         {
-            var email = Token.RetornarEmailEnvioConfirmacaoCadastro(token) ?? "";
+            var email = Token.RetornarEmailConfirmacaoCadastroEntidadeAcesso(token) ?? "";
 
             var entidadeParaAlterar = await _dominio.BuscarComEmailAsync(email);
             if (entidadeParaAlterar is null)
@@ -56,23 +52,23 @@ namespace AutenticacaoDoisFatores.Servico
 
         public async Task<bool> ReenviarChaveAcessoAsync(ReenviarChaveAcesso reenviarChave, string urlBase)
         {
-            var existeEntidade = await _dominio.ExisteEntidadeComEmailAsync(reenviarChave.Email);
-            if (!existeEntidade)
+            var entidade = await _dominio.BuscarComEmailAsync(reenviarChave.Email);
+            if (entidade is null)
                 return false;
 
-            var token = Token.GerarTokenReenvioChave(reenviarChave.Email);
+            var token = Token.GerarTokenReenvioChave(entidade.Id);
             var urlConfirmacaoGeracaoNovaChave = $"{urlBase}{token}";
 
-            EmailServico.EnviarConfirmacaoAlteracaoChaveAcesso(reenviarChave.Email, urlConfirmacaoGeracaoNovaChave);
+            _email.EnviarConfirmacaoAlteracaoChaveAcesso(reenviarChave.Email, urlConfirmacaoGeracaoNovaChave);
 
             return true;
         }
 
         public async Task<bool> AlterarChaveAcessoAsync(string token)
         {
-            var email = Token.RetornarEmailReenvioChave(token) ?? "";
+            var id = Token.RetornarIdReenvioChave(token) ?? 0;
 
-            var entidadeParaAlterar = await _dominio.BuscarComEmailAsync(email);
+            var entidadeParaAlterar = await _dominio.BuscarAsync(id);
             if (entidadeParaAlterar is null)
                 return false;
 
@@ -81,32 +77,35 @@ namespace AutenticacaoDoisFatores.Servico
             entidadeParaAlterar.AlterarChave(chaveCriptografada);
             await _dominio.AlterarAsync(entidadeParaAlterar);
 
-            EmailServico.ReenviarChaveDeAcesso(email, chave);
+            _email.ReenviarChaveDeAcesso(entidadeParaAlterar.Email, chave);
 
             return true;
         }
 
         public async Task<bool> EnviarEmailAlteracaoNomeAsync(EntidadeAcessoAlterarNome entidadeAlterar, string urlBase)
         {
-            var existeEntidade = await _dominio.ExisteEntidadeComEmailAsync(entidadeAlterar.Email);
-            if (!existeEntidade)
+            var entidade = await _dominio.BuscarComEmailAsync(entidadeAlterar.Email);
+            if (entidade is null)
                 return false;
 
-            var token = Token.GerarTokenAlterarNomeEntidadeAcesso(entidadeAlterar.Email, entidadeAlterar.Nome);
+            if (_validador.AlteracaoNomeEhValida(entidadeAlterar))
+                return false;
+
+            var token = Token.GerarTokenAlterarNomeEntidadeAcesso(entidade.Id, entidadeAlterar.Nome);
             var linkConfirmacao = $"{urlBase}{token}";
 
-            EmailServico.EnviarConfirmacaoAlteracaoEntidadeAcesso(entidadeAlterar.Email, linkConfirmacao);
+            _email.EnviarConfirmacaoAlteracaoEntidadeAcesso(entidade.Email, linkConfirmacao);
 
             return true;
         }
 
         public async Task<EntidadeAcessoResposta?> AlterarNomeAsync(string token)
         {
-            var dadosToken = Token.RetornarEmailNomeAlteracaoEntidadeAcesso(token);
-            var email = dadosToken.email ?? "";
+            var dadosToken = Token.RetornarNomeAlteracaoEntidadeAcesso(token);
+            var id = dadosToken.id ?? 0;
             var novoNome = dadosToken.nome ?? "";
 
-            var entidadeParaAlterar = await _dominio.BuscarComEmailAsync(email);
+            var entidadeParaAlterar = await _dominio.BuscarAsync(id);
             if (entidadeParaAlterar is null)
                 return null;
 
@@ -124,6 +123,9 @@ namespace AutenticacaoDoisFatores.Servico
             if (entidade is null)
                 return false;
 
+            if (_validador.AlteracaoEmailEhValida(entidadeAlterarEmail))
+                return false;
+
             var chaveRecebida = entidadeAlterarEmail.Chave;
             if (!Criptografia.SaoIguais(chaveRecebida, entidade.Chave))
                 return false;
@@ -131,7 +133,7 @@ namespace AutenticacaoDoisFatores.Servico
             var token = Token.GerarTokenAlterarEmailEntidadeAcesso(entidade.Id, entidadeAlterarEmail.EmailNovo);
             var linkConfirmacao = $"{urlBase}{token}";
 
-            EmailServico.EnviarConfirmacaoAlteracaoEntidadeAcesso(entidadeAlterarEmail.EmailNovo, linkConfirmacao);
+            _email.EnviarConfirmacaoAlteracaoEntidadeAcesso(entidadeAlterarEmail.EmailNovo, linkConfirmacao);
 
             return true;
         }
