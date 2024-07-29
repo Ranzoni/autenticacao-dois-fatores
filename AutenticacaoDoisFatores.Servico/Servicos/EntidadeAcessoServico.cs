@@ -88,7 +88,7 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             if (entidade is null)
                 return false;
 
-            if (_validador.AlteracaoNomeEhValida(entidadeAlterar))
+            if (!_validador.AlteracaoNomeEhValida(entidadeAlterar))
                 return false;
 
             var token = Token.GerarTokenAlterarNomeEntidadeAcesso(entidade.Id, entidadeAlterar.Nome);
@@ -123,7 +123,7 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             if (entidade is null)
                 return false;
 
-            if (_validador.AlteracaoEmailEhValida(entidadeAlterarEmail))
+            if (!_validador.AlteracaoEmailEhValida(entidadeAlterarEmail))
                 return false;
 
             var chaveRecebida = entidadeAlterarEmail.Chave;

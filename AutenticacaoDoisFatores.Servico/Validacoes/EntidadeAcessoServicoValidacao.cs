@@ -48,7 +48,7 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
 
         public bool AlteracaoNomeEhValida(EntidadeAcessoAlterarNome entidadeAlterar)
         {
-            if (EntidadeAcessoValidador.NomeEhValido(entidadeAlterar.Nome))
+            if (!EntidadeAcessoValidador.NomeEhValido(entidadeAlterar.Nome))
             {
                 _notificador.AddMensagem(NotificacoesEntidadeAcesso.NomeInvalido);
                 return false;
@@ -59,7 +59,7 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
 
         public bool AlteracaoEmailEhValida(EntidadeAcessoAlterarEmail entidadeAlterarEmail)
         {
-            if (EntidadeAcessoValidador.EmailEhValido(entidadeAlterarEmail.EmailNovo))
+            if (!EntidadeAcessoValidador.EmailEhValido(entidadeAlterarEmail.EmailNovo))
             {
                 _notificador.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido);
                 return false;
