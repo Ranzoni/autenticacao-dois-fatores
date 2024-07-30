@@ -40,5 +40,13 @@ namespace AutenticacaoDoisFatores.Core.Servicos
 
             return entidadeAcesso;
         }
+
+        public async Task<bool> ExcluirAsync(int id)
+        {
+            var excluida = await _repositorio.ExcluirAsync(id);
+            await _repositorio.SalvarAlteracoesAsync();
+
+            return excluida;
+        }
     }
 }

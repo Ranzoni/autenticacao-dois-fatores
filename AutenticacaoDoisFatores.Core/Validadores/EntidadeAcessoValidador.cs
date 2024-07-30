@@ -1,9 +1,10 @@
 ﻿using AutenticacaoDoisFatores.Core.Excecoes;
 using AutenticacaoDoisFatores.Core.Extensoes;
+using System.Text.RegularExpressions;
 
 namespace AutenticacaoDoisFatores.Core.Validadores
 {
-    public static class EntidadeAcessoValidador
+    public static partial class EntidadeAcessoValidador
     {
         internal static void ValidarNovaEntidade(string nome, string chave, string email)
         {
@@ -39,7 +40,12 @@ namespace AutenticacaoDoisFatores.Core.Validadores
 
         public static bool EmailEhValido(string email)
         {
-            return !email.IsNullOrEmptyOrWhiteSpaces() && email.Length >= 5 && email.Length <= 80;
+            var regex = EmailRegex();
+
+            return !email.IsNullOrEmptyOrWhiteSpaces() && email.Length >= 5 && email.Length <= 80 && regex.IsMatch(email);
         }
+
+        [GeneratedRegex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
+        private static partial Regex EmailRegex();
     }
 }

@@ -9,5 +9,6 @@ namespace AutenticacaoDoisFatores.Core.Repositorios
         Task<EntidadeAcesso?> BuscarAsync(int id);
         Task<EntidadeAcesso?> BuscarPorEmailAsync(string email);
         void Alterar(EntidadeAcesso entidadeAcesso);
+        Task<bool> ExcluirAsync(int id);
     }
 }

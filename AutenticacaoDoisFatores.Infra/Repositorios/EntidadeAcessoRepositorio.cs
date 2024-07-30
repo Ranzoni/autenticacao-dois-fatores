@@ -29,6 +29,17 @@ namespace AutenticacaoDoisFatores.Infra.Repositorios
             await _contexto.AddAsync(entidadeAcesso);
         }
 
+        public async Task<bool> ExcluirAsync(int id)
+        {
+            var entidade = await BuscarAsync(id);
+            if (entidade is null)
+                return false;
+
+            _contexto.EntidadesAcesso.Remove(entidade);
+
+            return true;
+        }
+
         public async Task<bool> ExisteEntidadeComEmailAsync(string email)
         {
             var existe = await _contexto.EntidadesAcesso

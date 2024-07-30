@@ -173,5 +173,22 @@ namespace AutenticacaoDoisFatores.Controllers
                 return MensagemHtml("Falha", "Falha ao completar a solicitação", "Por favor, entre em contato com o responsável pelo sistema");
             }
         }
+
+        [HttpDelete("Excluir")]
+        public async Task<ActionResult> ExcluirAsync(EntidadeAcessoExcluir entidadeAcessoExcluir)
+        {
+            try
+            {
+                var excluida = await _servico.ExcluirAsync(entidadeAcessoExcluir);
+                if (!excluida)
+                    return NotFound("A chave não foi encontrada");
+
+                return Sucesso("Chave excluída com sucesso");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

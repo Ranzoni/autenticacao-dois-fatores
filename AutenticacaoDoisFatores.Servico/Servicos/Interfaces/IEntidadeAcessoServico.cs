@@ -12,5 +12,6 @@ namespace AutenticacaoDoisFatores.Servico.Servicos.Interfaces
         Task<EntidadeAcessoResposta?> AlterarNomeAsync(string token);
         Task<bool> EnviarEmailAlteracaoEmailAsync(EntidadeAcessoAlterarEmail entidadeAlterarEmail, string urlBase);
         Task<EntidadeAcessoResposta?> AlterarEmailAsync(string token);
+        Task<bool> ExcluirAsync(EntidadeAcessoExcluir entidadeAcessoExcluir);
     }
 }

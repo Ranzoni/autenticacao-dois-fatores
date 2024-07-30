@@ -155,5 +155,20 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
             return entidadeResposta;
         }
+
+        public async Task<bool> ExcluirAsync(EntidadeAcessoExcluir entidadeAcessoExcluir)
+        {
+            var entidadeAcesso = await _dominio.BuscarComEmailAsync(entidadeAcessoExcluir.Email);
+            if (entidadeAcesso is null)
+                return false;
+
+            var senhasSaoIguais = Criptografia.SaoIguais(entidadeAcessoExcluir.Chave, entidadeAcesso.Chave);
+            if (!senhasSaoIguais)
+                return false;
+
+            var excluida = await _dominio.ExcluirAsync(entidadeAcesso.Id);
+
+            return excluida;
+        }
     }
 }

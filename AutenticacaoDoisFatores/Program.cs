@@ -1,7 +1,6 @@
 using AutenticacaoDoisFatores.Core.Repositorios;
 using AutenticacaoDoisFatores.Core.Servicos;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
-using AutenticacaoDoisFatores.Core.Validadores;
 using AutenticacaoDoisFatores.Infra;
 using AutenticacaoDoisFatores.Infra.Contexto;
 using AutenticacaoDoisFatores.Infra.Repositorios;
@@ -34,6 +33,8 @@ builder.Services.AddDbContext<AutenticacaoDoisFatoresContexto>(opt =>
 builder.Services.AddTransient<IEntidadeAcessoRepositorio, EntidadeAcessoRepositorio>();
 
 builder.Services.AddTransient<IEntidadeAcessoDominio, EntidadeAcessoDominio>();
+
+builder.Services.AddTransient<IEmailServico, EmailServico>();
 
 builder.Services.AddTransient<IEntidadeAcessoServico, EntidadeAcessoServico>();
 builder.Services.AddTransient<EntidadeAcessoServicoValidacao>();

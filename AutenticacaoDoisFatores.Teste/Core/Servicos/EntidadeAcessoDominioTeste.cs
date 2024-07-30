@@ -126,5 +126,33 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
             _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.Alterar(entidadeParaAlterar), Times.Once);
             _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.SalvarAlteracoesAsync(), Times.Once);
         }
+
+        [Fact]
+        internal async Task DeveExcluirEntidade()
+        {
+            var id = _faker.Random.Int(1);
+            var dominio = _mock.CreateInstance<EntidadeAcessoDominio>();
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Setup(r => r.ExcluirAsync(id)).ReturnsAsync(true);
+
+            var excluida = await dominio.ExcluirAsync(id);
+
+            Assert.True(excluida);
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.ExcluirAsync(id), Times.Once);
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.SalvarAlteracoesAsync(), Times.Once);
+        }
+
+        [Fact]
+        internal async Task DeveRetornarFalsoQuandoNaoExcluirEntidade()
+        {
+            var id = _faker.Random.Int(1);
+            var dominio = _mock.CreateInstance<EntidadeAcessoDominio>();
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Setup(r => r.ExcluirAsync(id)).ReturnsAsync(false);
+
+            var excluida = await dominio.ExcluirAsync(id);
+
+            Assert.False(excluida);
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.ExcluirAsync(id), Times.Once);
+            _mock.GetMock<IEntidadeAcessoRepositorio>().Verify(r => r.SalvarAlteracoesAsync(), Times.Once);
+        }
     }
 }

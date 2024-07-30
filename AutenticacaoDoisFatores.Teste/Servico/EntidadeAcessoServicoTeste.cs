@@ -468,5 +468,63 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             Assert.Null(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.AlterarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
         }
+
+        [Fact]
+        internal async Task DeveExcluir()
+        {
+            var servico = _mock.CreateInstance<EntidadeAcessoServico>();
+            var id = _faker.Random.Int(1);
+            var nome = _faker.Company.CompanyName();
+            var chave = _faker.Random.AlphaNumeric(16);
+            var chaveCriptografada = Criptografia.Criptografar(chave);
+            var email = _faker.Person.Email;
+            var dataCadastro = _faker.Date.Past();
+            var entidadeCadastrada = new EntidadeAcesso(id, nome, chaveCriptografada, email, dataCadastro, null, true);
+            _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComEmailAsync(email)).ReturnsAsync(entidadeCadastrada);
+            _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.ExcluirAsync(id)).ReturnsAsync(true);
+            var entidadeAcessoExcluir = new EntidadeAcessoExcluir(email, chave);
+
+            var retorno = await servico.ExcluirAsync(entidadeAcessoExcluir);
+
+            Assert.True(retorno);
+            _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.ExcluirAsync(id), Times.Once);
+        }
+
+        [Fact]
+        internal async Task NaoDeveExcluirQuandoEntidadeNaoExiste()
+        {
+            var id = _faker.Random.Int(1);
+            var email = _faker.Person.Email;
+            var chave = _faker.Random.AlphaNumeric(16);
+            var servico = _mock.CreateInstance<EntidadeAcessoServico>();
+            var entidadeAcessoExcluir = new EntidadeAcessoExcluir(email, chave);
+
+            var retorno = await servico.ExcluirAsync(entidadeAcessoExcluir);
+
+            Assert.False(retorno);
+            _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.ExcluirAsync(It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        internal async Task NaoDeveExcluirQuandoChaveNaoValida()
+        {
+            var servico = _mock.CreateInstance<EntidadeAcessoServico>();
+            var id = _faker.Random.Int(1);
+            var nome = _faker.Company.CompanyName();
+            var chave = _faker.Random.AlphaNumeric(16);
+            var chaveCriptografada = Criptografia.Criptografar(chave);
+            var email = _faker.Person.Email;
+            var dataCadastro = _faker.Date.Past();
+            var entidadeCadastrada = new EntidadeAcesso(id, nome, chaveCriptografada, email, dataCadastro, null, true);
+            _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComEmailAsync(email)).ReturnsAsync(entidadeCadastrada);
+            _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.ExcluirAsync(id)).ReturnsAsync(true);
+            chave += "diferente";
+            var entidadeAcessoExcluir = new EntidadeAcessoExcluir(email, chave);
+
+            var retorno = await servico.ExcluirAsync(entidadeAcessoExcluir);
+
+            Assert.False(retorno);
+            _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.ExcluirAsync(It.IsAny<int>()), Times.Never);
+        }
     }
 }
