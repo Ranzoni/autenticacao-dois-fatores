@@ -308,7 +308,6 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var novoNome = _faker.Company.CompanyName();
             var token = Token.GerarTokenAlterarNomeEntidadeAcesso(id, novoNome);
             var email = _faker.Person.Email;
-            var entidadeAlterarNome = new EntidadeAcessoAlterarNome(email, novoNome);
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
             var nomeAtual = _faker.Company.CompanyName();
             var chave = _faker.Random.AlphaNumeric(16);
@@ -333,8 +332,6 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var id = _faker.Random.Int(1);
             var novoNome = _faker.Company.CompanyName();
             var token = Token.GerarTokenAlterarNomeEntidadeAcesso(id, novoNome);
-            var email = _faker.Person.Email;
-            var entidadeAlterarNome = new EntidadeAcessoAlterarNome(email, novoNome);
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
 
             var retorno = await servico.AlterarNomeAsync(token);
@@ -431,6 +428,45 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.False(retorno);
             _mock.GetMock<IEmailServico>().Verify(e => e.EnviarConfirmacaoAlteracaoEntidadeAcesso(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        internal async Task DeveAlterarEmail()
+        {
+            var id = _faker.Random.Int(1);
+            var novoEmail = $"novo_{_faker.Person.Email}";
+            var token = Token.GerarTokenAlterarEmailEntidadeAcesso(id, novoEmail);
+            var servico = _mock.CreateInstance<EntidadeAcessoServico>();
+            var nome = _faker.Company.CompanyName();
+            var chave = _faker.Random.AlphaNumeric(16);
+            var emailAtual = _faker.Person.Email;
+            var dataCadastro = _faker.Date.Past();
+            var entidadeCadastrada = new EntidadeAcesso(id, nome, chave, emailAtual, dataCadastro, null, true);
+            _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarAsync(id)).ReturnsAsync(entidadeCadastrada);
+            _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.AlterarAsync(entidadeCadastrada)).ReturnsAsync(entidadeCadastrada);
+            var entidadeResposta = new EntidadeAcessoResposta(id, nome, novoEmail);
+            _mock.GetMock<IMapper>().Setup(m => m.Map<EntidadeAcessoResposta?>(entidadeCadastrada)).Returns(entidadeResposta);
+
+            var retorno = await servico.AlterarEmailAsync(token);
+
+            Assert.NotNull(retorno);
+            Assert.Equal(entidadeResposta, retorno);
+            Assert.Equal(novoEmail, entidadeCadastrada.Email);
+            _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.AlterarAsync(entidadeCadastrada), Times.Once);
+        }
+
+        [Fact]
+        internal async Task NaoDeveAlterarEmailQuandoEntidadeNaoExiste()
+        {
+            var id = _faker.Random.Int(1);
+            var novoEmail = $"novo_{_faker.Person.Email}";
+            var token = Token.GerarTokenAlterarEmailEntidadeAcesso(id, novoEmail);
+            var servico = _mock.CreateInstance<EntidadeAcessoServico>();
+
+            var retorno = await servico.AlterarEmailAsync(token);
+
+            Assert.Null(retorno);
+            _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.AlterarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
         }
     }
 }
