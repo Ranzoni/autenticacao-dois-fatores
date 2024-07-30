@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34714.143
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutenticacaoDoisFatores", "AutenticacaoDoisFatores\AutenticacaoDoisFatores.csproj", "{3F077BC7-54B4-4A64-AC36-09EEA11F3113}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutenticacaoDoisFatores", "AutenticacaoDoisFatores\AutenticacaoDoisFatores.csproj", "{3F077BC7-54B4-4A64-AC36-09EEA11F3113}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutenticacaoDoisFatores.Core", "AutenticacaoDoisFatores.Core\AutenticacaoDoisFatores.Core.csproj", "{ADEF775D-A335-431E-8DC4-22D443950F0E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutenticacaoDoisFatores.Core", "AutenticacaoDoisFatores.Core\AutenticacaoDoisFatores.Core.csproj", "{ADEF775D-A335-431E-8DC4-22D443950F0E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutenticacaoDoisFatores.Infra", "AutenticacaoDoisFatores.Infra\AutenticacaoDoisFatores.Infra.csproj", "{D3877E3A-AD42-4FEB-BE7C-82BCD2A2D2C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutenticacaoDoisFatores.Infra", "AutenticacaoDoisFatores.Infra\AutenticacaoDoisFatores.Infra.csproj", "{D3877E3A-AD42-4FEB-BE7C-82BCD2A2D2C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutenticacaoDoisFatores.Servico", "AutenticacaoDoisFatores.Servico\AutenticacaoDoisFatores.Servico.csproj", "{C6E71873-52D9-467F-A458-D58438C3C5CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutenticacaoDoisFatores.Servico", "AutenticacaoDoisFatores.Servico\AutenticacaoDoisFatores.Servico.csproj", "{C6E71873-52D9-467F-A458-D58438C3C5CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutenticacaoDoisFatores.Teste", "AutenticacaoDoisFatores.Teste\AutenticacaoDoisFatores.Teste.csproj", "{EA53D9C4-CF8D-4C8F-AF09-1DFFCD8DE712}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{C6E71873-52D9-467F-A458-D58438C3C5CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6E71873-52D9-467F-A458-D58438C3C5CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6E71873-52D9-467F-A458-D58438C3C5CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA53D9C4-CF8D-4C8F-AF09-1DFFCD8DE712}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA53D9C4-CF8D-4C8F-AF09-1DFFCD8DE712}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA53D9C4-CF8D-4C8F-AF09-1DFFCD8DE712}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA53D9C4-CF8D-4C8F-AF09-1DFFCD8DE712}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

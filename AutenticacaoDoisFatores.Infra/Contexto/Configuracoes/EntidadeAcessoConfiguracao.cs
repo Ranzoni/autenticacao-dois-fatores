@@ -12,7 +12,22 @@ namespace AutenticacaoDoisFatores.Infra.Contexto.Configuracoes
                 .HasKey(p => p.Id);
 
             builder
-                .HasIndex(p => p.Chave);
+                .Property(p => p.Nome)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            builder
+                .Property(p => p.Chave)
+                .IsRequired();
+
+            builder
+                .Property(p => p.Email)
+                .IsRequired()
+                .HasMaxLength(80);
+
+            builder
+                .HasIndex(p => p.Email)
+                .IsUnique();
         }
     }
 }

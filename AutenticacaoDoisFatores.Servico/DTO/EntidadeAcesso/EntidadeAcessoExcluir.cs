@@ -1,8 +1,8 @@
 ﻿namespace AutenticacaoDoisFatores.Servico.DTO.EntidadeAcesso
 {
-    public class EntidadeAcessoCadastrar(string nome, string email)
+    public class EntidadeAcessoExcluir(string email, string chave)
     {
-        public string Nome { get; private set; } = nome;
         public string Email { get; private set; } = email;
+        public string Chave { get; private set; } = chave;
     }
 }

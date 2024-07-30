@@ -8,7 +8,7 @@ namespace AutenticacaoDoisFatores.Servico.Mapeadores
     {
         public EntidadeAcessoMapeamento()
         {
-            CreateMap<EntidadeAcesso, EntidadeAcessoCadastrada>();
+            CreateMap<EntidadeAcesso, EntidadeAcessoResposta>();
         }
     }
 }
