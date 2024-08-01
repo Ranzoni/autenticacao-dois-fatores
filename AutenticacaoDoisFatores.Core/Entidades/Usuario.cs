@@ -1,4 +1,5 @@
 ﻿using AutenticacaoDoisFatores.Core.Entidades.Base;
+using AutenticacaoDoisFatores.Core.Validadores;
 
 namespace AutenticacaoDoisFatores.Core.Entidades
 {
@@ -14,6 +15,8 @@ namespace AutenticacaoDoisFatores.Core.Entidades
 
         public Usuario(string nome, string email, string senha, EntidadeAcesso entidadeAcesso)
         {
+            UsuarioValidador.ValidarNovoUsuario(nome, email, senha, entidadeAcesso);
+
             Nome = nome;
             Email = email;
             Senha = senha;
@@ -23,6 +26,8 @@ namespace AutenticacaoDoisFatores.Core.Entidades
 
         public Usuario(int id, string nome, string email, string senha, DateTime dataCadastro, DateTime? dataAlteracao, DateTime? dataUltimoAcesso)
         {
+            UsuarioValidador.ValidarUsuarioCompleto(id, nome, email, senha);
+
             Id = id;
             Nome = nome;
             Email = email;
