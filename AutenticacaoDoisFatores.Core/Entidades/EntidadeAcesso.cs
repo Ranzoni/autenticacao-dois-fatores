@@ -1,4 +1,5 @@
-﻿using AutenticacaoDoisFatores.Core.Excecoes;
+﻿using AutenticacaoDoisFatores.Core.Entidades.Base;
+using AutenticacaoDoisFatores.Core.Excecoes;
 using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Core.Validadores;
 

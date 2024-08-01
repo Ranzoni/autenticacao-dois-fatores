@@ -1,4 +1,4 @@
-﻿namespace AutenticacaoDoisFatores.Core.Entidades
+﻿namespace AutenticacaoDoisFatores.Core.Entidades.Base
 {
     public abstract class EntidadeBase
     {
