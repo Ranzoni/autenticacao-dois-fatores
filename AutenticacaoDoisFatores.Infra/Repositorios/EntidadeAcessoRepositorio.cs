@@ -1,6 +1,7 @@
 ﻿using AutenticacaoDoisFatores.Core.Entidades;
 using AutenticacaoDoisFatores.Core.Repositorios;
 using AutenticacaoDoisFatores.Infra.Contexto;
+using AutenticacaoDoisFatores.Infra.Repositorios.Base;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutenticacaoDoisFatores.Infra.Repositorios

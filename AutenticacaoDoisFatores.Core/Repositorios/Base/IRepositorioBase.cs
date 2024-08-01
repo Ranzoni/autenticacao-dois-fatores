@@ -1,4 +1,4 @@
-﻿namespace AutenticacaoDoisFatores.Core.Repositorios
+﻿namespace AutenticacaoDoisFatores.Core.Repositorios.Base
 {
     public interface IRepositorioBase
     {

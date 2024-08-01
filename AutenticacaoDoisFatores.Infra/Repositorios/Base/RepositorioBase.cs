@@ -1,7 +1,7 @@
-﻿using AutenticacaoDoisFatores.Core.Repositorios;
+﻿using AutenticacaoDoisFatores.Core.Repositorios.Base;
 using AutenticacaoDoisFatores.Infra.Contexto;
 
-namespace AutenticacaoDoisFatores.Infra.Repositorios
+namespace AutenticacaoDoisFatores.Infra.Repositorios.Base
 {
     public abstract class RepositorioBase(AutenticacaoDoisFatoresContexto contexto) : IRepositorioBase
     {
