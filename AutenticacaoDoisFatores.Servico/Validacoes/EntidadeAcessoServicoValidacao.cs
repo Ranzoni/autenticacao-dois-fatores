@@ -7,10 +7,8 @@ using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
 
 namespace AutenticacaoDoisFatores.Servico.Validacoes
 {
-    public class EntidadeAcessoServicoValidacao(INotificadorServico notificador, IEntidadeAcessoDominio dominio) : BaseValidacao(notificador)
+    public class EntidadeAcessoServicoValidacao(INotificadorServico _notificador, IEntidadeAcessoDominio _dominio)
     {
-        private readonly IEntidadeAcessoDominio _dominio = dominio;
-
         public async Task<bool> CadastroEhValidoAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
         {
             if (!EntidadeAcessoValidador.NomeEhValido(entidadeAcessoCadastrar.Nome))

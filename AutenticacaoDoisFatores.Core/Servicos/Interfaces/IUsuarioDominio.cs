@@ -5,5 +5,6 @@ namespace AutenticacaoDoisFatores.Core.Servicos.Interfaces
     public interface IUsuarioDominio
     {
         Task CadastrarAsync(Usuario usuario);
+        Task<bool> ExisteUsuarioComEmailAsync(string email);
     }
 }

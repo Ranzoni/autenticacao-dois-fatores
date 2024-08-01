@@ -1,0 +1,9 @@
+﻿using AutenticacaoDoisFatores.Servico.DTO.Usuario;
+
+namespace AutenticacaoDoisFatores.Servico.Servicos.Interfaces
+{
+    public interface IUsuarioServico
+    {
+        Task<UsuarioResposta?> CadastrarAsync(UsuarioCadastrar usuarioCadastrar);
+    }
+}

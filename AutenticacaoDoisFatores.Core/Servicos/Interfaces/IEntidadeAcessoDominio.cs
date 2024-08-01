@@ -10,5 +10,6 @@ namespace AutenticacaoDoisFatores.Core.Servicos.Interfaces
         Task<EntidadeAcesso?> BuscarComEmailAsync(string email);
         Task<EntidadeAcesso?> AlterarAsync(EntidadeAcesso entidadeAcesso);
         Task<bool> ExcluirAsync(int id);
+        Task<EntidadeAcesso?> BuscarComChaveAsync(string chave);
     }
 }
