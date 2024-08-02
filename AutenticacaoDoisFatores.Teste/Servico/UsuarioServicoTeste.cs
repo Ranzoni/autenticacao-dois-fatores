@@ -1,10 +1,9 @@
 ﻿using AutenticacaoDoisFatores.Core.Entidades;
+using AutenticacaoDoisFatores.Core.Enum;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Servico.DTO.Usuario;
-using AutenticacaoDoisFatores.Servico.Mapeadores;
 using AutenticacaoDoisFatores.Servico.Servicos;
 using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
-using AutenticacaoDoisFatores.Servico.Utilitarios;
 using AutenticacaoDoisFatores.Teste.Construtores;
 using AutoMapper;
 using Bogus;
@@ -44,6 +43,78 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             Assert.Equal(usuarioResposta, retorno);
             _mocker.GetMock<IUsuarioDominio>().Verify(d => d.CadastrarAsync(It.IsAny<Usuario>()), Times.Once);
             _mocker.GetMock<IEmailServico>().Verify(s => s.EnviarEmailConfirmacaoCadastro(email, It.IsAny<string>()), Times.Once);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("    ")]
+        [InlineData("a")]
+        [InlineData("ab")]
+        [InlineData("123456789012345678901234567890123456789012345678901")]
+        internal async Task NaoDeveCadastrarComNomeInvalido(string nomeInvalido)
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var entidadeAcesso = EntidadeAcessoConstrutor.CriarEntidadeAcesso();
+            var email = _faker.Person.Email;
+            var senha = _faker.Random.AlphaNumeric(10);
+            var usuarioCadastrar = new UsuarioCadastrar(nomeInvalido, email, senha, entidadeAcesso.Chave);
+            _mocker.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComChaveAsync(It.IsAny<string>())).ReturnsAsync(entidadeAcesso);
+            var urlBase = _faker.Internet.Url();
+
+            var retorno = await servico.CadastrarAsync(usuarioCadastrar, urlBase);
+
+            Assert.Null(retorno);
+            _mocker.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesUsuario.NomeInvalido), Times.Once);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.CadastrarAsync(It.IsAny<Usuario>()), Times.Never);
+            _mocker.GetMock<IEmailServico>().Verify(s => s.EnviarEmailConfirmacaoCadastro(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("    ")]
+        [InlineData("a")]
+        [InlineData("ab")]
+        [InlineData("a@.c")]
+        [InlineData("a@12345678901234567890123456789012345678901234567890123456789012345678901234567.c")]
+        internal async Task NaoDeveCadastrarComEmailInvalido(string emailInvalido)
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var entidadeAcesso = EntidadeAcessoConstrutor.CriarEntidadeAcesso();
+            var nome = _faker.Person.FullName;
+            var senha = _faker.Random.AlphaNumeric(10);
+            var usuarioCadastrar = new UsuarioCadastrar(nome, emailInvalido, senha, entidadeAcesso.Chave);
+            _mocker.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComChaveAsync(It.IsAny<string>())).ReturnsAsync(entidadeAcesso);
+            var urlBase = _faker.Internet.Url();
+
+            var retorno = await servico.CadastrarAsync(usuarioCadastrar, urlBase);
+
+            Assert.Null(retorno);
+            _mocker.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesUsuario.EmailInvalido), Times.Once);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.CadastrarAsync(It.IsAny<Usuario>()), Times.Never);
+            _mocker.GetMock<IEmailServico>().Verify(s => s.EnviarEmailConfirmacaoCadastro(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        internal async Task NaoDeveCadastrarQuandoEmailJaEstaCadastrado()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var entidadeAcesso = EntidadeAcessoConstrutor.CriarEntidadeAcesso();
+            var nome = _faker.Person.FullName;
+            var email = _faker.Person.Email;
+            var senha = _faker.Random.AlphaNumeric(10);
+            var usuarioCadastrar = new UsuarioCadastrar(nome, email, senha, entidadeAcesso.Chave);
+            _mocker.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComChaveAsync(It.IsAny<string>())).ReturnsAsync(entidadeAcesso);
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.ExisteUsuarioComEmailAsync(email)).ReturnsAsync(true);
+            var urlBase = _faker.Internet.Url();
+
+            var retorno = await servico.CadastrarAsync(usuarioCadastrar, urlBase);
+
+            Assert.Null(retorno);
+            _mocker.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesUsuario.EmailJaCadastrado), Times.Once);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.CadastrarAsync(It.IsAny<Usuario>()), Times.Never);
+            _mocker.GetMock<IEmailServico>().Verify(s => s.EnviarEmailConfirmacaoCadastro(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
     }
 }
