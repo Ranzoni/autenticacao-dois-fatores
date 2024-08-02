@@ -24,6 +24,7 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             Assert.Equal(nome, usuario.Nome);
             Assert.Equal(email, usuario.Email);
             Assert.Equal(senha, usuario.Senha);
+            Assert.False(usuario.Ativo);
             Assert.Equal(entidadeAcesso, usuario.EntidadeAcesso);
         }
 
@@ -101,8 +102,9 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var dataCadastro = _faker.Date.Past();
             var dataAlteracao = _faker.Date.Past();
             var dataUltimoAcesso = _faker.Date.Past();
+            var ativo = _faker.Random.Bool();
 
-            var usuario = new Usuario(id, nome, email, senha, dataCadastro, dataAlteracao, dataUltimoAcesso);
+            var usuario = new Usuario(id, nome, email, senha, dataCadastro, dataAlteracao, dataUltimoAcesso, ativo);
 
             Assert.Equal(id, usuario.Id);
             Assert.Equal(nome, usuario.Nome);
@@ -111,6 +113,7 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             Assert.Equal(dataCadastro, usuario.DataCadastro);
             Assert.Equal(dataAlteracao, usuario.DataAlteracao);
             Assert.Equal(dataUltimoAcesso, usuario.DataUltimoAcesso);
+            Assert.Equal(ativo, usuario.Ativo);
         }
 
         [Theory]
@@ -123,7 +126,7 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var senha = _faker.Random.AlphaNumeric(10);
             var dataCadastro = _faker.Date.Past();
 
-            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(idInvalido, nome, email, senha, dataCadastro, null, null));
+            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(idInvalido, nome, email, senha, dataCadastro, null, null, false));
 
             Assert.Equal(NotificacoesUsuario.IdInvalido.Descricao(), excecao.Message);
         }
@@ -142,7 +145,7 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var senha = _faker.Random.AlphaNumeric(10);
             var dataCadastro = _faker.Date.Past();
 
-            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(id, nomeInvalido, email, senha, dataCadastro, null, null));
+            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(id, nomeInvalido, email, senha, dataCadastro, null, null, false));
 
             Assert.Equal(NotificacoesUsuario.NomeInvalido.Descricao(), excecao.Message);
         }
@@ -162,7 +165,7 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var senha = _faker.Random.AlphaNumeric(10);
             var dataCadastro = _faker.Date.Past();
 
-            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(id, nome, emailInvalido, senha, dataCadastro, null, null));
+            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(id, nome, emailInvalido, senha, dataCadastro, null, null, false));
 
             Assert.Equal(NotificacoesUsuario.EmailInvalido.Descricao(), excecao.Message);
         }
@@ -178,7 +181,7 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var email = _faker.Person.Email;
             var dataCadastro = _faker.Date.Past();
 
-            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(id, nome, email, senhaInvalida, dataCadastro, null, null));
+            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(id, nome, email, senhaInvalida, dataCadastro, null, null, false));
 
             Assert.Equal(NotificacoesUsuario.SenhaInvalida.Descricao(), excecao.Message);
         }

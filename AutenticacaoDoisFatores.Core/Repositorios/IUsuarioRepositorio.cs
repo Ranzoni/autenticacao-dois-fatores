@@ -6,5 +6,6 @@ namespace AutenticacaoDoisFatores.Core.Repositorios
     public interface IUsuarioRepositorio : IRepositorioBase
     {
         Task CadastrarAsync(Usuario usuario);
+        Task<bool> ExisteUsuarioComEmailAsync(string email);
     }
 }

@@ -11,6 +11,7 @@ namespace AutenticacaoDoisFatores.Core.Entidades
         public DateTime DataCadastro { get; private set; }
         public DateTime? DataAlteracao { get; private set; }
         public DateTime? DataUltimoAcesso { get; private set; }
+        public bool Ativo { get; private set; }
         public EntidadeAcesso? EntidadeAcesso { get; private set; }
 
         public Usuario(string nome, string email, string senha, EntidadeAcesso entidadeAcesso)
@@ -21,10 +22,11 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             Email = email;
             Senha = senha;
             DataCadastro = DateTime.UtcNow;
+            Ativo = false;
             EntidadeAcesso = entidadeAcesso;
         }
 
-        public Usuario(int id, string nome, string email, string senha, DateTime dataCadastro, DateTime? dataAlteracao, DateTime? dataUltimoAcesso)
+        public Usuario(int id, string nome, string email, string senha, DateTime dataCadastro, DateTime? dataAlteracao, DateTime? dataUltimoAcesso, bool ativo)
         {
             UsuarioValidador.ValidarUsuarioCompleto(id, nome, email, senha);
 
@@ -35,6 +37,7 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             DataCadastro = dataCadastro;
             DataAlteracao = dataAlteracao;
             DataUltimoAcesso = dataUltimoAcesso;
+            Ativo = ativo;
         }
     }
 }

@@ -6,5 +6,6 @@
         void EnviarConfirmacaoAlteracaoChaveAcesso(string para, string linkConfirmacao);
         void ReenviarChaveDeAcesso(string para, string chave);
         void EnviarConfirmacaoAlteracaoEntidadeAcesso(string para, string linkConfirmacao);
+        void EnviarEmailConfirmacaoCadastro(string para, string linkConfirmacao);
     }
 }

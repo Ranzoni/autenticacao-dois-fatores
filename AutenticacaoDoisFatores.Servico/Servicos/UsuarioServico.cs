@@ -8,21 +8,26 @@ using AutoMapper;
 
 namespace AutenticacaoDoisFatores.Servico.Servicos
 {
-    public class UsuarioServico(IUsuarioDominio _dominio, IEntidadeAcessoDominio _dominioAcesso, IMapper _mapeador, UsuarioServicoValidacao _validacao) : IUsuarioServico
+    public class UsuarioServico(IUsuarioDominio _dominio, IEntidadeAcessoDominio _dominioAcesso, IMapper _mapeador, UsuarioServicoValidacao _validacao, IEmailServico _email) : IUsuarioServico
     {
-        public async Task<UsuarioResposta?> CadastrarAsync(UsuarioCadastrar usuarioCadastrar)
+        public async Task<UsuarioResposta?> CadastrarAsync(UsuarioCadastrar usuarioCadastrar, string urlBase)
         {
-            var entidadeAcesso = await _dominioAcesso.BuscarComChaveAsync(usuarioCadastrar.Chave);
+            var chaveCriptografada = Criptografia.Criptografar(usuarioCadastrar.Chave);
+            var entidadeAcesso = await _dominioAcesso.BuscarComChaveAsync(chaveCriptografada);
             if (entidadeAcesso is null)
                 return null;
 
-            if (await _validacao.CadastroEhValidoAsync(usuarioCadastrar))
+            if (!await _validacao.CadastroEhValidoAsync(usuarioCadastrar))
                 return null;
 
             var senhaCriptografada = Criptografia.Criptografar(usuarioCadastrar.Senha);
             var novoUsuario = new Usuario(usuarioCadastrar.Nome, usuarioCadastrar.Email, senhaCriptografada, entidadeAcesso);
 
             await _dominio.CadastrarAsync(novoUsuario);
+
+            var token = Token.GerarTokenConfirmacaoCadastro(novoUsuario.Id);
+            var linkConfirmacao = $"{urlBase}{token}";
+            _email.EnviarEmailConfirmacaoCadastro(novoUsuario.Email, linkConfirmacao);
 
             var usuarioResposta = _mapeador.Map<UsuarioResposta>(novoUsuario);
 

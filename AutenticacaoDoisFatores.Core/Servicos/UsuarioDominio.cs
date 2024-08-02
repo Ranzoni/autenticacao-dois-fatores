@@ -11,5 +11,10 @@ namespace AutenticacaoDoisFatores.Core.Servicos
             await _repositorio.CadastrarAsync(usuario);
             await _repositorio.SalvarAlteracoesAsync();
         }
+
+        public async Task<bool> ExisteUsuarioComEmailAsync(string email)
+        {
+            return await _repositorio.ExisteUsuarioComEmailAsync(email);
+        }
     }
 }

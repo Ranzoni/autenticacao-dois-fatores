@@ -48,5 +48,10 @@ namespace AutenticacaoDoisFatores.Core.Servicos
 
             return excluida;
         }
+
+        public async Task<EntidadeAcesso?> BuscarComChaveAsync(string chave)
+        {
+            return await _repositorio.BuscarPorChaveAsync(chave);
+        }
     }
 }

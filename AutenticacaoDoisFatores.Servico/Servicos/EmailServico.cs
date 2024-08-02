@@ -110,5 +110,13 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
             return conteudo;
         }
+
+        public void EnviarEmailConfirmacaoCadastro(string para, string linkConfirmacao)
+        {
+            var titulo = "Confirmação de Cadastro";
+            var conteudo = HtmlMensagem($"<p>Para confirmar o cadastro do seu usuário clique no seguinte link: <a href='{linkConfirmacao}'>Clique aqui!</a></p>");
+
+            Enviar(para, titulo, conteudo);
+        }
     }
 }

@@ -13,6 +13,7 @@ namespace AutenticacaoDoisFatores.Servico.Utilitarios
         private const string EMAIL_REENVIO_CHAVE = "REENVIO_EMAIL_CHAVE";
         private const string EMAIL_ALTERACAO_NOME_ENTIDADE_ACESSO = "EMAIL_ALTERACAO_NOME_ENTIDADE_ACESSO";
         private const string EMAIL_ALTERACAO_EMAIL_ENTIDADE_ACESSO = "EMAIL_ALTERACAO_EMAIL_ENTIDADE_ACESSO";
+        private const string EMAIL_CONFIRMACAO_CADASTRO_USUARIO = "EMAIL_CONFIRMACAO_CADASTRO_USUARIO";
 
         private static string GerarToken(string sub, Claim claim)
         {
@@ -179,6 +180,14 @@ namespace AutenticacaoDoisFatores.Servico.Utilitarios
             var email = emailClaim?.Value;
 
             return (id, email);
+        }
+        
+        public static string GerarTokenConfirmacaoCadastro(int id)
+        {
+            var claim = new Claim(ClaimTypes.Hash, id.ToString());
+            var token = GerarToken(EMAIL_CONFIRMACAO_CADASTRO_USUARIO, claim);
+
+            return token;
         }
     }
 }
