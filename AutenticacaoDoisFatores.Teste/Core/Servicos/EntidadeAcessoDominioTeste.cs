@@ -1,6 +1,6 @@
-﻿using AutenticacaoDoisFatores.Core.Entidades;
-using AutenticacaoDoisFatores.Core.Repositorios;
+﻿using AutenticacaoDoisFatores.Core.Repositorios;
 using AutenticacaoDoisFatores.Core.Servicos;
+using AutenticacaoDoisFatores.Teste.Construtores;
 using Bogus;
 using Moq;
 using Moq.AutoMock;
@@ -15,10 +15,9 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
         [Fact]
         internal async Task DeveCriarEntidadeAcesso()
         {
-            var nome = _faker.Company.CompanyName();
-            var chave = _faker.Random.AlphaNumeric(32);
-            var email = _faker.Person.Email;
-            var entidadeAcesso = new EntidadeAcesso(nome, chave, email);
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeAcesso = construtor
+                .CriarEntidadeAcesso();
             var dominio = _mock.CreateInstance<EntidadeAcessoDominio>();
 
             var retorno = await dominio.CadastrarAsync(entidadeAcesso);
@@ -48,13 +47,10 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
         internal async Task DeveRetornarEntidadePorId()
         {
             var id = _faker.Random.Int(1);
-            var nome = _faker.Company.CompanyName();
-            var chave = _faker.Random.AlphaNumeric(32);
-            var email = _faker.Person.Email;
-            var dataCadastro = _faker.Date.Past();
-            var dataUltimoAcesso = _faker.Date.Recent();
-            var ativo = _faker.Random.Bool();
-            var entidadeAcessoCadastrada = new EntidadeAcesso(id, nome, chave, email, dataCadastro, dataUltimoAcesso, ativo);
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeAcessoCadastrada = construtor
+                .ComId(id)
+                .CriarEntidadeAcesso();
             var dominio = _mock.CreateInstance<EntidadeAcessoDominio>();
             _mock.GetMock<IEntidadeAcessoRepositorio>().Setup(r => r.BuscarAsync(id)).ReturnsAsync(entidadeAcessoCadastrada);
 
@@ -86,7 +82,10 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
             var dataCadastro = _faker.Date.Past();
             var dataUltimoAcesso = _faker.Date.Recent();
             var ativo = _faker.Random.Bool();
-            var entidadeAcessoCadastrada = new EntidadeAcesso(id, nome, chave, email, dataCadastro, dataUltimoAcesso, ativo);
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeAcessoCadastrada = construtor
+                .ComEmail(email)
+                .CriarEntidadeAcesso();
             var dominio = _mock.CreateInstance<EntidadeAcessoDominio>();
             _mock.GetMock<IEntidadeAcessoRepositorio>().Setup(r => r.BuscarPorEmailAsync(email)).ReturnsAsync(entidadeAcessoCadastrada);
             
@@ -111,14 +110,9 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
         [Fact]
         internal async Task DeveAlterarEntidade()
         {
-            var id = _faker.Random.Int(1);
-            var nome = _faker.Company.CompanyName();
-            var chave = _faker.Random.AlphaNumeric(32);
-            var email = _faker.Person.Email;
-            var dataCadastro = _faker.Date.Past();
-            var dataUltimoAcesso = _faker.Date.Recent();
-            var ativo = _faker.Random.Bool();
-            var entidadeParaAlterar = new EntidadeAcesso(id, nome, chave, email, dataCadastro, dataUltimoAcesso, ativo);
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeParaAlterar = construtor
+                .CriarEntidadeAcesso();
             var dominio = _mock.CreateInstance<EntidadeAcessoDominio>();
 
             var entidadeAlterada = await dominio.AlterarAsync(entidadeParaAlterar);

@@ -5,28 +5,22 @@ namespace AutenticacaoDoisFatores.Core.Validadores
 {
     public class EntidadeAcessoValidador
     {
-        internal static void ValidarNovaEntidade(string nome, string chave, string email)
+        internal static void ValidarNovaEntidade(string nome, Guid chave, string email)
         {
             if (!NomeEhValido(nome))
                 EntidadeAcessoException.NomeInvalido();
-
-            if (chave.IsNullOrEmptyOrWhiteSpaces())
-                EntidadeAcessoException.ChaveInvalida();
 
             if (!EmailEhValido(email))
                 EntidadeAcessoException.EmailInvalido();
         }
 
-        internal static void ValidarEntidadeCompleta(int id, string nome, string chave, string email)
+        internal static void ValidarEntidadeCompleta(int id, string nome, Guid chave, string email)
         {
             if (id == 0)
                 EntidadeAcessoException.IdInvalido();
 
             if (!NomeEhValido(nome))
                 EntidadeAcessoException.NomeInvalido();
-
-            if (chave.IsNullOrEmptyOrWhiteSpaces())
-                EntidadeAcessoException.ChaveInvalida();
 
             if (!EmailEhValido(email))
                 EntidadeAcessoException.EmailInvalido();

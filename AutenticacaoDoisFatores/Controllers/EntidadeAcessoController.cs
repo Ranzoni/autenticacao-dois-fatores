@@ -1,3 +1,4 @@
+using AutenticacaoDoisFatores.Controllers.Base;
 using AutenticacaoDoisFatores.Servico.DTO.EntidadeAcesso;
 using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -7,18 +8,14 @@ namespace AutenticacaoDoisFatores.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class EntidadeAcessoController(IEntidadeAcessoServico servico, INotificadorServico notificador, IConfiguration config) : BaseController(notificador)
+    public class EntidadeAcessoController(IEntidadeAcessoServico _servico, INotificadorServico notificador, IConfiguration config) : BaseController(notificador, config)
     {
-        private readonly IEntidadeAcessoServico _servico = servico;
-        private readonly IConfiguration _config = config;
-
         [HttpPost("Cadastrar")]
         public async Task<ActionResult<EntidadeAcessoResposta?>> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
         {
             try
             {
-                var urlAplicacao = _config.GetValue<string>("AutenticacaoDoisFatores:UrlBase");
-                var urlBase = $"{urlAplicacao}EntidadeAcesso/ConfirmarCadastro/";
+                var urlBase = RetornarUrlFormatada("EntidadeAcesso/ConfirmarCadastro/");
 
                 var retorno = await _servico.CadastrarAsync(entidadeAcessoCadastrar, urlBase);
 
@@ -56,8 +53,7 @@ namespace AutenticacaoDoisFatores.Controllers
         {
             try
             {
-                var urlAplicacao = _config.GetValue<string>("AutenticacaoDoisFatores:UrlBase");
-                var urlBase = $"{urlAplicacao}EntidadeAcesso/GerarNovaChaveAcesso/";
+                var urlBase = RetornarUrlFormatada("EntidadeAcesso/GerarNovaChaveAcesso/");
 
                 var retorno = await _servico.ReenviarChaveAcessoAsync(reenviarChaveAcesso, urlBase);
                 if (!retorno)
@@ -97,8 +93,7 @@ namespace AutenticacaoDoisFatores.Controllers
         {
             try
             {
-                var urlAplicacao = _config.GetValue<string>("AutenticacaoDoisFatores:UrlBase");
-                var urlBase = $"{urlAplicacao}EntidadeAcesso/ConfirmarAlteracaoNome/";
+                var urlBase = RetornarUrlFormatada("EntidadeAcesso/ConfirmarAlteracaoNome/");
 
                 var retorno = await _servico.EnviarEmailAlteracaoNomeAsync(entidadeAcessoAlterar, urlBase);
                 if (!retorno)
@@ -138,8 +133,7 @@ namespace AutenticacaoDoisFatores.Controllers
         {
             try
             {
-                var urlAplicacao = _config.GetValue<string>("AutenticacaoDoisFatores:UrlBase");
-                var urlBase = $"{urlAplicacao}EntidadeAcesso/ConfirmarAlteracaoEmail/";
+                var urlBase = RetornarUrlFormatada("EntidadeAcesso/ConfirmarAlteracaoEmail/");
 
                 var retorno = await _servico.EnviarEmailAlteracaoEmailAsync(entidadeAcessoAlterarEmail, urlBase);
                 if (!retorno)

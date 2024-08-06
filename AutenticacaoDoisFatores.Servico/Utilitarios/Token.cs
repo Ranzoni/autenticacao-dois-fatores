@@ -87,7 +87,7 @@ namespace AutenticacaoDoisFatores.Servico.Utilitarios
                 TokenException.ChaveNaoEncontrada();
 
             var segurancaToken = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(chaveToken);
+            var key = Encoding.UTF8.GetBytes(chaveToken);
 
             var parametrosValidacao = new TokenValidationParameters
             {

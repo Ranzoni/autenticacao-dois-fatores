@@ -18,6 +18,11 @@ namespace AutenticacaoDoisFatores.Infra.Repositorios
             return await _contexto.EntidadesAcesso.FirstOrDefaultAsync(e => e.Id.Equals(id));
         }
 
+        public async Task<EntidadeAcesso?> BuscarPorChaveAsync(Guid chave)
+        {
+            return await _contexto.EntidadesAcesso.FirstOrDefaultAsync(e => e.Chave.Equals(chave));
+        }
+
         public async Task<EntidadeAcesso?> BuscarPorEmailAsync(string email)
         {
             return await _contexto.EntidadesAcesso
@@ -39,6 +44,11 @@ namespace AutenticacaoDoisFatores.Infra.Repositorios
             _contexto.EntidadesAcesso.Remove(entidade);
 
             return true;
+        }
+
+        public async Task<bool> ExisteEntidadeComChaveAsync(Guid chave)
+        {
+            return await _contexto.EntidadesAcesso.AnyAsync(e => e.Chave.Equals(chave));
         }
 
         public async Task<bool> ExisteEntidadeComEmailAsync(string email)

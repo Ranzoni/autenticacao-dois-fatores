@@ -2,11 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace AutenticacaoDoisFatores.Controllers
+namespace AutenticacaoDoisFatores.Controllers.Base
 {
-    public abstract class BaseController(INotificadorServico notificador) : ControllerBase
+    public abstract class BaseController(INotificadorServico notificador, IConfiguration config) : ControllerBase
     {
         private readonly INotificadorServico _notificador = notificador;
+        private readonly IConfiguration _config = config;
 
         public ActionResult<T?> CriadoComSucesso<T>(T? retorno)
         {
@@ -106,6 +107,14 @@ namespace AutenticacaoDoisFatores.Controllers
                 StatusCode = (int)httpStatusCode,
                 Content = html
             };
+        }
+
+        protected string RetornarUrlFormatada(string acao)
+        {
+            var urlAplicacao = _config.GetValue<string>("AutenticacaoDoisFatores:UrlBase");
+            var urlFormatada = $"{urlAplicacao}{acao}";
+
+            return urlFormatada;
         }
     }
 }

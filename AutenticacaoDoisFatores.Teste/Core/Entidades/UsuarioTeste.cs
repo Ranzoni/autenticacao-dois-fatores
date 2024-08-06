@@ -4,6 +4,7 @@ using AutenticacaoDoisFatores.Core.Excecoes;
 using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Teste.Construtores;
 using Bogus;
+using Newtonsoft.Json.Linq;
 
 namespace AutenticacaoDoisFatores.Teste.Core.Entidades
 {
@@ -17,7 +18,9 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var nome = _faker.Person.FullName;
             var email = _faker.Person.Email;
             var senha = _faker.Random.AlphaNumeric(10);
-            var entidadeAcesso = EntidadeAcessoConstrutor.CriarEntidadeAcesso();
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeAcesso = construtor
+                .CriarEntidadeAcesso();
 
             var usuario = new Usuario(nome, email, senha, entidadeAcesso);
 
@@ -39,7 +42,9 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         {
             var email = _faker.Person.Email;
             var senha = _faker.Random.AlphaNumeric(10);
-            var entidadeAcesso = EntidadeAcessoConstrutor.CriarEntidadeAcesso();
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeAcesso = construtor
+                .CriarEntidadeAcesso();
 
             var excecao = Assert.Throws<UsuarioException>(() => new Usuario(nomeInvalido, email, senha, entidadeAcesso));
 
@@ -58,7 +63,9 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         {
             var nome = _faker.Person.FullName;
             var senha = _faker.Random.AlphaNumeric(10);
-            var entidadeAcesso = EntidadeAcessoConstrutor.CriarEntidadeAcesso();
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeAcesso = construtor
+                .CriarEntidadeAcesso();
 
             var excecao = Assert.Throws<UsuarioException>(() => new Usuario(nome, emailInvalido, senha, entidadeAcesso));
 
@@ -73,7 +80,9 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         {
             var nome = _faker.Person.FullName;
             var email = _faker.Person.Email;
-            var entidadeAcesso = EntidadeAcessoConstrutor.CriarEntidadeAcesso();
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeAcesso = construtor
+                .CriarEntidadeAcesso();
 
             var excecao = Assert.Throws<UsuarioException>(() => new Usuario(nome, email, senhaInvalida, entidadeAcesso));
 

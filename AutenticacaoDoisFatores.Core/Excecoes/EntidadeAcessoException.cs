@@ -15,11 +15,6 @@ namespace AutenticacaoDoisFatores.Core.Excecoes
             throw new EntidadeAcessoException(NotificacoesEntidadeAcesso.NomeInvalido);
         }
 
-        internal static void ChaveInvalida()
-        {
-            throw new EntidadeAcessoException(NotificacoesEntidadeAcesso.ChaveInvalida);
-        }
-
         internal static void EmailInvalido()
         {
             throw new EntidadeAcessoException(NotificacoesEntidadeAcesso.EmailInvalido);

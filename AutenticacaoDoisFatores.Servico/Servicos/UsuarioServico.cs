@@ -12,8 +12,7 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
     {
         public async Task<UsuarioResposta?> CadastrarAsync(UsuarioCadastrar usuarioCadastrar, string urlBase)
         {
-            var chaveCriptografada = Criptografia.Criptografar(usuarioCadastrar.Chave);
-            var entidadeAcesso = await _dominioAcesso.BuscarComChaveAsync(chaveCriptografada);
+            var entidadeAcesso = await _dominioAcesso.BuscarComChaveAsync(usuarioCadastrar.Chave);
             if (entidadeAcesso is null)
                 return null;
 

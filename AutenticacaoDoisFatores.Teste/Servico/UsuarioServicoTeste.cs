@@ -12,27 +12,26 @@ using Moq.AutoMock;
 
 namespace AutenticacaoDoisFatores.Teste.Servico
 {
+    [Collection("Test collection")]
     public class UsuarioServicoTeste
     {
         private readonly AutoMocker _mocker = new();
         private readonly Faker _faker = new();
 
-        public UsuarioServicoTeste()
-        {
-            var tokenKey = _faker.System.ApplePushToken();
-            Environment.SetEnvironmentVariable("TOKEN_KEY", tokenKey);
-        }
-
         [Fact]
         internal async Task DeveCadastrar()
         {
             var servico = _mocker.CreateInstance<UsuarioServico>();
-            var entidadeAcesso = EntidadeAcessoConstrutor.CriarEntidadeAcesso();
+            var construtor = new EntidadeAcessoConstrutor();
+            var chave = Guid.NewGuid();
+            var entidadeAcesso = construtor
+                .ComChave(chave)
+                .CriarEntidadeAcesso();
             var nome = _faker.Person.FullName;
             var email = _faker.Person.Email;
             var senha = _faker.Random.AlphaNumeric(10);
             var usuarioCadastrar = new UsuarioCadastrar(nome, email, senha, entidadeAcesso.Chave);
-            _mocker.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComChaveAsync(It.IsAny<string>())).ReturnsAsync(entidadeAcesso);
+            _mocker.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComChaveAsync(chave)).ReturnsAsync(entidadeAcesso);
             var usuarioResposta = new UsuarioResposta(nome, email, DateTime.Now);
             _mocker.GetMock<IMapper>().Setup(m => m.Map<UsuarioResposta>(It.IsAny<Usuario>())).Returns(usuarioResposta);
             var urlBase = _faker.Internet.Url();
@@ -55,11 +54,12 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         internal async Task NaoDeveCadastrarComNomeInvalido(string nomeInvalido)
         {
             var servico = _mocker.CreateInstance<UsuarioServico>();
-            var entidadeAcesso = EntidadeAcessoConstrutor.CriarEntidadeAcesso();
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeAcesso = construtor.CriarEntidadeAcesso();
             var email = _faker.Person.Email;
             var senha = _faker.Random.AlphaNumeric(10);
             var usuarioCadastrar = new UsuarioCadastrar(nomeInvalido, email, senha, entidadeAcesso.Chave);
-            _mocker.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComChaveAsync(It.IsAny<string>())).ReturnsAsync(entidadeAcesso);
+            _mocker.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComChaveAsync(entidadeAcesso.Chave)).ReturnsAsync(entidadeAcesso);
             var urlBase = _faker.Internet.Url();
 
             var retorno = await servico.CadastrarAsync(usuarioCadastrar, urlBase);
@@ -81,11 +81,12 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         internal async Task NaoDeveCadastrarComEmailInvalido(string emailInvalido)
         {
             var servico = _mocker.CreateInstance<UsuarioServico>();
-            var entidadeAcesso = EntidadeAcessoConstrutor.CriarEntidadeAcesso();
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeAcesso = construtor.CriarEntidadeAcesso();
             var nome = _faker.Person.FullName;
             var senha = _faker.Random.AlphaNumeric(10);
             var usuarioCadastrar = new UsuarioCadastrar(nome, emailInvalido, senha, entidadeAcesso.Chave);
-            _mocker.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComChaveAsync(It.IsAny<string>())).ReturnsAsync(entidadeAcesso);
+            _mocker.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComChaveAsync(entidadeAcesso.Chave)).ReturnsAsync(entidadeAcesso);
             var urlBase = _faker.Internet.Url();
 
             var retorno = await servico.CadastrarAsync(usuarioCadastrar, urlBase);
@@ -100,12 +101,13 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         internal async Task NaoDeveCadastrarQuandoEmailJaEstaCadastrado()
         {
             var servico = _mocker.CreateInstance<UsuarioServico>();
-            var entidadeAcesso = EntidadeAcessoConstrutor.CriarEntidadeAcesso();
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeAcesso = construtor.CriarEntidadeAcesso();
             var nome = _faker.Person.FullName;
             var email = _faker.Person.Email;
             var senha = _faker.Random.AlphaNumeric(10);
             var usuarioCadastrar = new UsuarioCadastrar(nome, email, senha, entidadeAcesso.Chave);
-            _mocker.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComChaveAsync(It.IsAny<string>())).ReturnsAsync(entidadeAcesso);
+            _mocker.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComChaveAsync(entidadeAcesso.Chave)).ReturnsAsync(entidadeAcesso);
             _mocker.GetMock<IUsuarioDominio>().Setup(d => d.ExisteUsuarioComEmailAsync(email)).ReturnsAsync(true);
             var urlBase = _faker.Internet.Url();
 

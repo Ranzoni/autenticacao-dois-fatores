@@ -31,17 +31,22 @@ builder.Services.AddDbContext<AutenticacaoDoisFatoresContexto>(opt =>
 );
 
 builder.Services.AddTransient<IEntidadeAcessoRepositorio, EntidadeAcessoRepositorio>();
+builder.Services.AddTransient<IUsuarioRepositorio, UsuarioRepositorio>();
 
 builder.Services.AddTransient<IEntidadeAcessoDominio, EntidadeAcessoDominio>();
+builder.Services.AddTransient<IUsuarioDominio, UsuarioDominio>();
 
 builder.Services.AddTransient<IEmailServico, EmailServico>();
 
 builder.Services.AddTransient<IEntidadeAcessoServico, EntidadeAcessoServico>();
 builder.Services.AddTransient<EntidadeAcessoServicoValidacao>();
+builder.Services.AddTransient<IUsuarioServico, UsuarioServico>();
+builder.Services.AddTransient<UsuarioServicoValidacao>();
 
 var config = new MapperConfiguration(cfg =>
 {
     cfg.AddProfile<EntidadeAcessoMapeamento>();
+    cfg.AddProfile<UsuarioMapeamento>();
 });
 var mapeamentos = config.CreateMapper();
 builder.Services.AddSingleton(mapeamentos);
