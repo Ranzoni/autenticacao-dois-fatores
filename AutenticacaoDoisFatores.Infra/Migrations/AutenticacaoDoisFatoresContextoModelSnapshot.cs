@@ -33,9 +33,8 @@ namespace AutenticacaoDoisFatores.Infra.Migrations
                     b.Property<bool>("Ativo")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Chave")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("Chave")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("DataCadastro")
                         .HasColumnType("timestamp with time zone");
@@ -54,6 +53,9 @@ namespace AutenticacaoDoisFatores.Infra.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Chave")
+                        .IsUnique();
 
                     b.HasIndex("Email")
                         .IsUnique();

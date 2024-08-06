@@ -1,4 +1,5 @@
 ﻿using AutenticacaoDoisFatores.Core.Enum;
+using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Core.Validadores;
 using AutenticacaoDoisFatores.Servico.DTO.Usuario;
@@ -19,6 +20,12 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
             if (!UsuarioValidador.EmailEhValido(usuarioCadastrar.Email))
             {
                 _notificador.AddMensagem(NotificacoesUsuario.EmailInvalido);
+                return false;
+            }
+
+            if (!UsuarioValidador.SenhaEhValida(usuarioCadastrar.Senha))
+            {
+                _notificador.AddMensagem(NotificacoesUsuario.SenhaInvalida);
                 return false;
             }
 

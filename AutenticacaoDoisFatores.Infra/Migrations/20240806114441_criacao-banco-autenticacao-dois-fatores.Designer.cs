@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AutenticacaoDoisFatores.Infra.Migrations
 {
     [DbContext(typeof(AutenticacaoDoisFatoresContexto))]
-    [Migration("20240801114722_usuario")]
-    partial class usuario
+    [Migration("20240806114441_criacao-banco-autenticacao-dois-fatores")]
+    partial class criacaobancoautenticacaodoisfatores
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,9 +36,8 @@ namespace AutenticacaoDoisFatores.Infra.Migrations
                     b.Property<bool>("Ativo")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Chave")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("Chave")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("DataCadastro")
                         .HasColumnType("timestamp with time zone");
@@ -58,6 +57,9 @@ namespace AutenticacaoDoisFatores.Infra.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Chave")
+                        .IsUnique();
+
                     b.HasIndex("Email")
                         .IsUnique();
 
@@ -68,6 +70,9 @@ namespace AutenticacaoDoisFatores.Infra.Migrations
                 {
                     b.Property<int>("Id")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("DataAlteracao")
                         .HasColumnType("timestamp with time zone");

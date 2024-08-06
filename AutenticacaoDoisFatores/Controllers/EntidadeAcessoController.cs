@@ -42,9 +42,9 @@ namespace AutenticacaoDoisFatores.Controllers
             {
                 return MensagemHtml("Falha", "Link expirado", "Será necessário solicitar um novo link");
             }
-            catch
+            catch (Exception e)
             {
-                return MensagemHtml("Falha", "Falha ao completar a solicitação", "Por favor, entre em contato com o responsável pelo sistema");
+                return MensagemHtml("Falha", "Falha ao completar a solicitação", $"Por favor, entre em contato com o responsável pelo sistema. Erro: {e.Message}");
             }
         }
 
@@ -82,9 +82,9 @@ namespace AutenticacaoDoisFatores.Controllers
             {
                 return MensagemHtml("Falha", "Link expirado", "Será necessário solicitar um novo link");
             }
-            catch
+            catch (Exception e)
             {
-                return MensagemHtml("Falha", "Falha ao completar a solicitação", "Por favor, entre em contato com o responsável pelo sistema");
+                return MensagemHtml("Falha", "Falha ao completar a solicitação", $"Por favor, entre em contato com o responsável pelo sistema. Erro: {e.Message}");
             }
         }
 
@@ -122,9 +122,9 @@ namespace AutenticacaoDoisFatores.Controllers
             {
                 return MensagemHtml("Falha", "Link expirado", "Será necessário solicitar um novo link");
             }
-            catch
+            catch (Exception e)
             {
-                return MensagemHtml("Falha", "Falha ao completar a solicitação", "Por favor, entre em contato com o responsável pelo sistema");
+                return MensagemHtml("Falha", "Falha ao completar a solicitação", $"Por favor, entre em contato com o responsável pelo sistema. Erro: {e.Message}");
             }
         }
 
@@ -162,9 +162,9 @@ namespace AutenticacaoDoisFatores.Controllers
             {
                 return MensagemHtml("Falha", "Link expirado", "Será necessário solicitar um novo link");
             }
-            catch
+            catch (Exception e)
             {
-                return MensagemHtml("Falha", "Falha ao completar a solicitação", "Por favor, entre em contato com o responsável pelo sistema");
+                return MensagemHtml("Falha", "Falha ao completar a solicitação", $"Por favor, entre em contato com o responsável pelo sistema. Erro: {e.Message}");
             }
         }
 

@@ -14,7 +14,7 @@ namespace AutenticacaoDoisFatores.Core.Validadores
             if (!EmailEhValido(email))
                 UsuarioException.EmailInvalido();
 
-            if (senha.IsNullOrEmptyOrWhiteSpaces())
+            if (!SenhaEhValida(senha))
                 UsuarioException.SenhaInvalida();
 
             if (entidadeAcesso is null)
@@ -32,7 +32,7 @@ namespace AutenticacaoDoisFatores.Core.Validadores
             if (!EmailEhValido(email))
                 UsuarioException.EmailInvalido();
 
-            if (senha.IsNullOrEmptyOrWhiteSpaces())
+            if (!SenhaEhValida(senha))
                 UsuarioException.SenhaInvalida();
         }
 
@@ -46,6 +46,11 @@ namespace AutenticacaoDoisFatores.Core.Validadores
             var regex = Utilitarios.RetornarEmailRegex();
 
             return !email.IsNullOrEmptyOrWhiteSpaces() && email.Length >= 5 && email.Length <= 80 && regex.IsMatch(email);
+        }
+
+        public static bool SenhaEhValida(string senha)
+        {
+            return !senha.IsNullOrEmptyOrWhiteSpaces();
         }
     }
 }

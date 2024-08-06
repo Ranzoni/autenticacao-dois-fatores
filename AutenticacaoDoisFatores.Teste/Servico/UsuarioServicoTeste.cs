@@ -97,6 +97,29 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             _mocker.GetMock<IEmailServico>().Verify(s => s.EnviarEmailConfirmacaoCadastro(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("    ")]
+        internal async Task NaoDeveCadastrarComSenhaInvalida(string senhaInvalida)
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeAcesso = construtor.CriarEntidadeAcesso();
+            var nome = _faker.Person.FullName;
+            var email = _faker.Person.Email;
+            var usuarioCadastrar = new UsuarioCadastrar(nome, email, senhaInvalida, entidadeAcesso.Chave);
+            _mocker.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComChaveAsync(entidadeAcesso.Chave)).ReturnsAsync(entidadeAcesso);
+            var urlBase = _faker.Internet.Url();
+
+            var retorno = await servico.CadastrarAsync(usuarioCadastrar, urlBase);
+
+            Assert.Null(retorno);
+            _mocker.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesUsuario.SenhaInvalida), Times.Once);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.CadastrarAsync(It.IsAny<Usuario>()), Times.Never);
+            _mocker.GetMock<IEmailServico>().Verify(s => s.EnviarEmailConfirmacaoCadastro(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
         [Fact]
         internal async Task NaoDeveCadastrarQuandoEmailJaEstaCadastrado()
         {
