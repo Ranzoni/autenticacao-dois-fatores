@@ -6,6 +6,12 @@ namespace AutenticacaoDoisFatores.Core.Servicos
 {
     public class UsuarioDominio(IUsuarioRepositorio _repositorio) : IUsuarioDominio
     {
+        public async Task AlterarAsync(Usuario usuario)
+        {
+            _repositorio.Alterar(usuario);
+            await _repositorio.SalvarAlteracoesAsync();
+        }
+
         public async Task CadastrarAsync(Usuario usuario)
         {
             await _repositorio.CadastrarAsync(usuario);

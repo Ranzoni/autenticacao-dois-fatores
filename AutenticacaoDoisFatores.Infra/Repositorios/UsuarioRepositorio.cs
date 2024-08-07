@@ -7,6 +7,11 @@ namespace AutenticacaoDoisFatores.Infra.Repositorios
 {
     public class UsuarioRepositorio(AutenticacaoDoisFatoresContexto _contexto) : IUsuarioRepositorio
     {
+        public void Alterar(Usuario usuario)
+        {
+            _contexto.Usuarios.Update(usuario);
+        }
+
         public async Task CadastrarAsync(Usuario usuario)
         {
             await _contexto.Usuarios.AddAsync(usuario);
