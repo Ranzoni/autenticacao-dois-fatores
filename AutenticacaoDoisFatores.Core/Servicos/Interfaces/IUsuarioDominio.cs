@@ -7,5 +7,6 @@ namespace AutenticacaoDoisFatores.Core.Servicos.Interfaces
         Task CadastrarAsync(Usuario usuario);
         Task<bool> ExisteUsuarioComEmailAsync(string email);
         Task AlterarAsync(Usuario usuario);
+        Task<Usuario?> BuscarAsync(int id);
     }
 }

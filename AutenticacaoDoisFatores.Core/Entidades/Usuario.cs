@@ -39,5 +39,10 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             DataUltimoAcesso = dataUltimoAcesso;
             Ativo = ativo;
         }
+    
+        public void Ativar(bool ativar)
+        {
+            Ativo = ativar;
+        }
     }
 }

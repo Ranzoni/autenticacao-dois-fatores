@@ -52,5 +52,39 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
             _mock.GetMock<IUsuarioRepositorio>().Verify(r => r.Alterar(usuario), Times.Once);
             _mock.GetMock<IUsuarioRepositorio>().Verify(r => r.SalvarAlteracoesAsync(), Times.Once);
         }
+
+        [Fact]
+        internal async Task DeveRetornarUsuarioPorId()
+        {
+            var id = _faker.Random.Int(1);
+            var construtor = new UsuarioConstrutor();
+            var usuario = construtor
+                .ComId(id)
+                .CriarCompleto();
+            var dominio = _mock.CreateInstance<UsuarioDominio>();
+            _mock.GetMock<IUsuarioRepositorio>().Setup(r => r.BuscarAsync(id)).ReturnsAsync(usuario);
+
+            var retorno = await dominio.BuscarAsync(id);
+
+            Assert.NotNull(retorno);
+            Assert.Equal(usuario, retorno);
+            _mock.GetMock<IUsuarioRepositorio>().Verify(r => r.BuscarAsync(id), Times.Once);
+        }
+
+        [Fact]
+        internal async Task DeveRetornarNuloQuandoNaoExisteUsuarioComId()
+        {
+            var id = _faker.Random.Int(1);
+            var construtor = new UsuarioConstrutor();
+            var usuario = construtor
+                .ComId(id)
+                .CriarCompleto();
+            var dominio = _mock.CreateInstance<UsuarioDominio>();
+
+            var retorno = await dominio.BuscarAsync(id);
+
+            Assert.Null(retorno);
+            _mock.GetMock<IUsuarioRepositorio>().Verify(r => r.BuscarAsync(id), Times.Once);
+        }
     }
 }

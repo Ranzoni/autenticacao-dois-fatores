@@ -189,5 +189,19 @@ namespace AutenticacaoDoisFatores.Servico.Utilitarios
 
             return token;
         }
+
+        public static int? RetornarIdConfirmacaoCadastro(string token)
+        {
+            var principal = ValidarToken(token);
+            var subjectClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
+            if (subjectClaim?.Value != EMAIL_CONFIRMACAO_CADASTRO_USUARIO)
+                return null;
+
+            var nomeClaim = principal.FindFirst(ClaimTypes.Hash);
+            var idString = nomeClaim?.Value;
+            int? id = idString is not null ? int.Parse(idString) : null;
+
+            return id;
+        }
     }
 }

@@ -10,6 +10,23 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 {
     public class UsuarioServico(IUsuarioDominio _dominio, IEntidadeAcessoDominio _dominioAcesso, IMapper _mapeador, UsuarioServicoValidacao _validacao, IEmailServico _email) : IUsuarioServico
     {
+        public async Task<bool> AtivarAsync(string token)
+        {
+            var id = Token.RetornarIdConfirmacaoCadastro(token) ?? 0;
+
+            var usuario = await _dominio.BuscarAsync(id);
+            if (usuario is null)
+                return false;
+
+            if (!_validacao.AtivacaoEhValida(usuario))
+                return false;
+
+            usuario.Ativar(true);
+            await _dominio.AlterarAsync(usuario);
+
+            return true;
+        }
+
         public async Task<UsuarioResposta?> CadastrarAsync(UsuarioCadastrar usuarioCadastrar, string urlBase)
         {
             var entidadeAcesso = await _dominioAcesso.BuscarComChaveAsync(usuarioCadastrar.Chave);

@@ -8,5 +8,6 @@ namespace AutenticacaoDoisFatores.Core.Repositorios
         Task CadastrarAsync(Usuario usuario);
         Task<bool> ExisteUsuarioComEmailAsync(string email);
         void Alterar(Usuario usuario);
+        Task<Usuario?> BuscarAsync(int id);
     }
 }

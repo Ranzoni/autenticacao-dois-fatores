@@ -4,6 +4,7 @@ using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Servico.DTO.Usuario;
 using AutenticacaoDoisFatores.Servico.Servicos;
 using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
+using AutenticacaoDoisFatores.Servico.Utilitarios;
 using AutenticacaoDoisFatores.Teste.Construtores;
 using AutoMapper;
 using Bogus;
@@ -140,6 +141,41 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             _mocker.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesUsuario.EmailJaCadastrado), Times.Once);
             _mocker.GetMock<IUsuarioDominio>().Verify(d => d.CadastrarAsync(It.IsAny<Usuario>()), Times.Never);
             _mocker.GetMock<IEmailServico>().Verify(s => s.EnviarEmailConfirmacaoCadastro(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        internal async Task DeveAtivar()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var usuario = new UsuarioConstrutor()
+                .ComAtivo(false)
+                .CriarCompleto();
+            var token = Token.GerarTokenConfirmacaoCadastro(usuario.Id);
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(usuario.Id)).ReturnsAsync(usuario);
+
+            var retorno = await servico.AtivarAsync(token);
+
+            Assert.True(retorno);
+            Assert.True(usuario.Ativo);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(usuario), Times.Once);
+        }
+
+        [Fact]
+        internal async Task NaoDeveAtivarQuandoJaAtivo()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var usuario = new UsuarioConstrutor()
+                .ComAtivo(true)
+                .CriarCompleto();
+            var token = Token.GerarTokenConfirmacaoCadastro(usuario.Id);
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(usuario.Id)).ReturnsAsync(usuario);
+
+            var retorno = await servico.AtivarAsync(token);
+
+            Assert.False(retorno);
+            Assert.True(usuario.Ativo);
+            _mocker.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesUsuario.EmailJaCadastrado), Times.Once);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Never);
         }
     }
 }

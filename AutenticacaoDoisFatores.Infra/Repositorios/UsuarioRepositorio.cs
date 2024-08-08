@@ -12,6 +12,11 @@ namespace AutenticacaoDoisFatores.Infra.Repositorios
             _contexto.Usuarios.Update(usuario);
         }
 
+        public async Task<Usuario?> BuscarAsync(int id)
+        {
+            return await _contexto.Usuarios.FirstOrDefaultAsync(u => u.Id.Equals(id));
+        }
+
         public async Task CadastrarAsync(Usuario usuario)
         {
             await _contexto.Usuarios.AddAsync(usuario);

@@ -1,10 +1,8 @@
-﻿using AutenticacaoDoisFatores.Core.Entidades;
-using AutenticacaoDoisFatores.Core.Enum;
+﻿using AutenticacaoDoisFatores.Core.Enum;
 using AutenticacaoDoisFatores.Core.Excecoes;
 using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Teste.Construtores;
 using Bogus;
-using Newtonsoft.Json.Linq;
 
 namespace AutenticacaoDoisFatores.Teste.Core.Entidades
 {
@@ -18,11 +16,15 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var nome = _faker.Person.FullName;
             var email = _faker.Person.Email;
             var senha = _faker.Random.AlphaNumeric(10);
-            var construtor = new EntidadeAcessoConstrutor();
-            var entidadeAcesso = construtor
+            var entidadeAcesso = new EntidadeAcessoConstrutor()
                 .CriarEntidadeAcesso();
 
-            var usuario = new Usuario(nome, email, senha, entidadeAcesso);
+            var usuario = new UsuarioConstrutor()
+                .ComNome(nome)
+                .ComEmail(email)
+                .ComSenha(senha)
+                .ComEntidadeAcesso(entidadeAcesso)
+                .Criar();
 
             Assert.Equal(nome, usuario.Nome);
             Assert.Equal(email, usuario.Email);
@@ -40,13 +42,10 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         [InlineData("123456789012345678901234567890123456789012345678901")]
         internal void NaoDeveCriarUsuarioComNomeInvalido(string nomeInvalido)
         {
-            var email = _faker.Person.Email;
-            var senha = _faker.Random.AlphaNumeric(10);
-            var construtor = new EntidadeAcessoConstrutor();
-            var entidadeAcesso = construtor
-                .CriarEntidadeAcesso();
-
-            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(nomeInvalido, email, senha, entidadeAcesso));
+            var excecao = Assert.Throws<UsuarioException>(() =>
+                new UsuarioConstrutor()
+                .ComNome(nomeInvalido)
+                .Criar());
 
             Assert.Equal(NotificacoesUsuario.NomeInvalido.Descricao(), excecao.Message);
         }
@@ -61,13 +60,10 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         [InlineData("a@12345678901234567890123456789012345678901234567890123456789012345678901234567.c")]
         internal void NaoDeveCriarUsuarioComEmailInvalido(string emailInvalido)
         {
-            var nome = _faker.Person.FullName;
-            var senha = _faker.Random.AlphaNumeric(10);
-            var construtor = new EntidadeAcessoConstrutor();
-            var entidadeAcesso = construtor
-                .CriarEntidadeAcesso();
-
-            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(nome, emailInvalido, senha, entidadeAcesso));
+            var excecao = Assert.Throws<UsuarioException>(() =>
+                new UsuarioConstrutor()
+                .ComEmail(emailInvalido)
+                .Criar());
 
             Assert.Equal(NotificacoesUsuario.EmailInvalido.Descricao(), excecao.Message);
         }
@@ -78,13 +74,10 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         [InlineData("    ")]
         internal void NaoDeveCriarUsuarioComSenhaInvalida(string senhaInvalida)
         {
-            var nome = _faker.Person.FullName;
-            var email = _faker.Person.Email;
-            var construtor = new EntidadeAcessoConstrutor();
-            var entidadeAcesso = construtor
-                .CriarEntidadeAcesso();
-
-            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(nome, email, senhaInvalida, entidadeAcesso));
+            var excecao = Assert.Throws<UsuarioException>(() =>
+                new UsuarioConstrutor()
+                .ComSenha(senhaInvalida)
+                .Criar());
 
             Assert.Equal(NotificacoesUsuario.SenhaInvalida.Descricao(), excecao.Message);
         }
@@ -92,11 +85,10 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         [Fact]
         internal void NaoDeveCriarUsuarioQuandoEntidadeAcessoEhNula()
         {
-            var nome = _faker.Person.FullName;
-            var email = _faker.Person.Email;
-            var senha = _faker.Random.AlphaNumeric(10);
-
-            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(nome, email, senha, null));
+            var excecao = Assert.Throws<UsuarioException>(() =>
+                new UsuarioConstrutor()
+                .ComEntidadeAcesso(null)
+                .Criar());
 
             Assert.Equal(NotificacoesUsuario.ChaveAcessoNaoInformada.Descricao(), excecao.Message);
         }
@@ -113,7 +105,16 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var dataUltimoAcesso = _faker.Date.Past();
             var ativo = _faker.Random.Bool();
 
-            var usuario = new Usuario(id, nome, email, senha, dataCadastro, dataAlteracao, dataUltimoAcesso, ativo);
+            var usuario = new UsuarioConstrutor()
+                .ComId(id)
+                .ComNome(nome)
+                .ComEmail(email)
+                .ComSenha(senha)
+                .ComDataCadastro(dataCadastro)
+                .ComDataAlteracao(dataAlteracao)
+                .ComDataUltimoAcesso(dataUltimoAcesso)
+                .ComAtivo(ativo)
+                .CriarCompleto();
 
             Assert.Equal(id, usuario.Id);
             Assert.Equal(nome, usuario.Nome);
@@ -130,12 +131,10 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         [InlineData(-1)]
         internal void NaoDeveCriarUsuarioCompletoComIdInvalido(int idInvalido)
         {
-            var nome = _faker.Person.FullName;
-            var email = _faker.Person.Email;
-            var senha = _faker.Random.AlphaNumeric(10);
-            var dataCadastro = _faker.Date.Past();
-
-            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(idInvalido, nome, email, senha, dataCadastro, null, null, false));
+            var excecao = Assert.Throws<UsuarioException>(() =>
+                new UsuarioConstrutor()
+                .ComId(idInvalido)
+                .CriarCompleto());
 
             Assert.Equal(NotificacoesUsuario.IdInvalido.Descricao(), excecao.Message);
         }
@@ -149,12 +148,10 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         [InlineData("123456789012345678901234567890123456789012345678901")]
         internal void NaoDeveCriarUsuarioCompletoComNomeInvalido(string nomeInvalido)
         {
-            var id = _faker.Random.Int(1);
-            var email = _faker.Person.Email;
-            var senha = _faker.Random.AlphaNumeric(10);
-            var dataCadastro = _faker.Date.Past();
-
-            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(id, nomeInvalido, email, senha, dataCadastro, null, null, false));
+            var excecao = Assert.Throws<UsuarioException>(() =>
+                new UsuarioConstrutor()
+                .ComNome(nomeInvalido)
+                .CriarCompleto());
 
             Assert.Equal(NotificacoesUsuario.NomeInvalido.Descricao(), excecao.Message);
         }
@@ -169,12 +166,10 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         [InlineData("a@12345678901234567890123456789012345678901234567890123456789012345678901234567.c")]
         internal void NaoDeveCriarUsuarioCompletoComEmailInvalido(string emailInvalido)
         {
-            var id = _faker.Random.Int(1);
-            var nome = _faker.Person.FullName;
-            var senha = _faker.Random.AlphaNumeric(10);
-            var dataCadastro = _faker.Date.Past();
-
-            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(id, nome, emailInvalido, senha, dataCadastro, null, null, false));
+            var excecao = Assert.Throws<UsuarioException>(() =>
+                new UsuarioConstrutor()
+                .ComEmail(emailInvalido)
+                .CriarCompleto());
 
             Assert.Equal(NotificacoesUsuario.EmailInvalido.Descricao(), excecao.Message);
         }
@@ -185,14 +180,26 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
         [InlineData("    ")]
         internal void NaoDeveCriarUsuarioCompletoComSenhaInvalida(string senhaInvalida)
         {
-            var id = _faker.Random.Int(1);
-            var nome = _faker.Person.FullName;
-            var email = _faker.Person.Email;
-            var dataCadastro = _faker.Date.Past();
-
-            var excecao = Assert.Throws<UsuarioException>(() => new Usuario(id, nome, email, senhaInvalida, dataCadastro, null, null, false));
+            var excecao = Assert.Throws<UsuarioException>(() =>
+                new UsuarioConstrutor()
+                .ComSenha(senhaInvalida)
+                .CriarCompleto());
 
             Assert.Equal(NotificacoesUsuario.SenhaInvalida.Descricao(), excecao.Message);
+        }
+
+        [Theory]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        internal void DeveAlterarAtivo(bool valorAtual, bool novoValor)
+        {
+            var usuario = new UsuarioConstrutor()
+                .ComAtivo(valorAtual)
+                .CriarCompleto();
+
+            usuario.Ativar(novoValor);
+
+            Assert.Equal(novoValor, usuario.Ativo);
         }
     }
 }

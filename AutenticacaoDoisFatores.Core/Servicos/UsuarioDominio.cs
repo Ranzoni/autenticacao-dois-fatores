@@ -12,6 +12,11 @@ namespace AutenticacaoDoisFatores.Core.Servicos
             await _repositorio.SalvarAlteracoesAsync();
         }
 
+        public async Task<Usuario?> BuscarAsync(int id)
+        {
+            return await _repositorio.BuscarAsync(id);
+        }
+
         public async Task CadastrarAsync(Usuario usuario)
         {
             await _repositorio.CadastrarAsync(usuario);

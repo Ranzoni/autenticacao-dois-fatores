@@ -1,4 +1,5 @@
-﻿using AutenticacaoDoisFatores.Core.Enum;
+﻿using AutenticacaoDoisFatores.Core.Entidades;
+using AutenticacaoDoisFatores.Core.Enum;
 using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Core.Validadores;
@@ -31,6 +32,17 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
 
             var emailJaCadastrado = await _dominio.ExisteUsuarioComEmailAsync(usuarioCadastrar.Email);
             if (emailJaCadastrado)
+            {
+                _notificador.AddMensagem(NotificacoesUsuario.EmailJaCadastrado);
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool AtivacaoEhValida(Usuario usuario)
+        {
+            if (usuario.Ativo)
             {
                 _notificador.AddMensagem(NotificacoesUsuario.EmailJaCadastrado);
                 return false;
