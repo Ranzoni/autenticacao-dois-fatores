@@ -1,6 +1,7 @@
 ﻿using AutenticacaoDoisFatores.Controllers.Base;
 using AutenticacaoDoisFatores.Servico.DTO.Usuario;
 using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
+using Mensageiro;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -8,7 +9,7 @@ namespace AutenticacaoDoisFatores.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UsuarioController(INotificadorServico notificador, IConfiguration configuration, IUsuarioServico _servico) : BaseController(notificador, configuration)
+    public class UsuarioController(INotificador notificador, IConfiguration configuration, IUsuarioServico _servico) : BaseController(notificador, configuration)
     {
         [HttpPost("Cadastrar")]
         public async Task<ActionResult<UsuarioResposta?>> CadastrarAsync(UsuarioCadastrar usuarioCadastrar)
@@ -18,8 +19,6 @@ namespace AutenticacaoDoisFatores.Controllers
                 var urlBase = RetornarUrlFormatada("Usuario/ConfirmarCadastro/");
 
                 var retorno = await _servico.CadastrarAsync(usuarioCadastrar, urlBase);
-                if (retorno is null)
-                    return NaoEncontrado("A chave de acesso não foi encontrada");
 
                 return CriadoComSucesso(retorno);
             }

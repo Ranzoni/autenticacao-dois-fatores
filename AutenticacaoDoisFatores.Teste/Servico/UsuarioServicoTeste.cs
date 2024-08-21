@@ -8,6 +8,7 @@ using AutenticacaoDoisFatores.Servico.Utilitarios;
 using AutenticacaoDoisFatores.Teste.Construtores;
 using AutoMapper;
 using Bogus;
+using Mensageiro;
 using Moq;
 using Moq.AutoMock;
 
@@ -66,7 +67,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var retorno = await servico.CadastrarAsync(usuarioCadastrar, urlBase);
 
             Assert.Null(retorno);
-            _mocker.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesUsuario.NomeInvalido), Times.Once);
+            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesUsuario.NomeInvalido), Times.Once);
             _mocker.GetMock<IUsuarioDominio>().Verify(d => d.CadastrarAsync(It.IsAny<Usuario>()), Times.Never);
             _mocker.GetMock<IEmailServico>().Verify(s => s.EnviarEmailConfirmacaoCadastro(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
@@ -93,7 +94,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var retorno = await servico.CadastrarAsync(usuarioCadastrar, urlBase);
 
             Assert.Null(retorno);
-            _mocker.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesUsuario.EmailInvalido), Times.Once);
+            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesUsuario.EmailInvalido), Times.Once);
             _mocker.GetMock<IUsuarioDominio>().Verify(d => d.CadastrarAsync(It.IsAny<Usuario>()), Times.Never);
             _mocker.GetMock<IEmailServico>().Verify(s => s.EnviarEmailConfirmacaoCadastro(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
@@ -116,7 +117,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var retorno = await servico.CadastrarAsync(usuarioCadastrar, urlBase);
 
             Assert.Null(retorno);
-            _mocker.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesUsuario.SenhaInvalida), Times.Once);
+            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesUsuario.SenhaInvalida), Times.Once);
             _mocker.GetMock<IUsuarioDominio>().Verify(d => d.CadastrarAsync(It.IsAny<Usuario>()), Times.Never);
             _mocker.GetMock<IEmailServico>().Verify(s => s.EnviarEmailConfirmacaoCadastro(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
@@ -138,7 +139,27 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var retorno = await servico.CadastrarAsync(usuarioCadastrar, urlBase);
 
             Assert.Null(retorno);
-            _mocker.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesUsuario.EmailJaCadastrado), Times.Once);
+            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesUsuario.EmailJaCadastrado), Times.Once);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.CadastrarAsync(It.IsAny<Usuario>()), Times.Never);
+            _mocker.GetMock<IEmailServico>().Verify(s => s.EnviarEmailConfirmacaoCadastro(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        internal async Task NaoDeveCadastrarComChaveInvalida()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var chave = Guid.NewGuid();
+            var nome = _faker.Person.FullName;
+            var email = _faker.Person.Email;
+            var senha = _faker.Random.AlphaNumeric(10);
+            var usuarioCadastrar = new UsuarioCadastrar(nome, email, senha, chave);
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.ExisteUsuarioComEmailAsync(email)).ReturnsAsync(true);
+            var urlBase = _faker.Internet.Url();
+
+            var retorno = await servico.CadastrarAsync(usuarioCadastrar, urlBase);
+
+            Assert.Null(retorno);
+            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagemNaoEncontrado(NotificacoesUsuario.ChaveAcessoNaoEncontrada), Times.Once);
             _mocker.GetMock<IUsuarioDominio>().Verify(d => d.CadastrarAsync(It.IsAny<Usuario>()), Times.Never);
             _mocker.GetMock<IEmailServico>().Verify(s => s.EnviarEmailConfirmacaoCadastro(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
@@ -174,7 +195,21 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.False(retorno);
             Assert.True(usuario.Ativo);
-            _mocker.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesUsuario.EmailJaCadastrado), Times.Once);
+            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesUsuario.EmailJaCadastrado), Times.Once);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Never);
+        }
+
+        [Fact]
+        internal async Task NaoDeveAtivarQuandoUsuarioNaoExiste()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var id = _faker.Random.Int(1);
+            var token = Token.GerarTokenConfirmacaoCadastro(id);
+
+            var retorno = await servico.AtivarAsync(token);
+
+            Assert.False(retorno);
+            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagemNaoEncontrado(NotificacoesUsuario.NaoEncontrado), Times.Once);
             _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Never);
         }
     }

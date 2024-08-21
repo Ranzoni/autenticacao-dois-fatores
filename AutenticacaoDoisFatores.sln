@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutenticacaoDoisFatores.Inf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutenticacaoDoisFatores.Servico", "AutenticacaoDoisFatores.Servico\AutenticacaoDoisFatores.Servico.csproj", "{C6E71873-52D9-467F-A458-D58438C3C5CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutenticacaoDoisFatores.Teste", "AutenticacaoDoisFatores.Teste\AutenticacaoDoisFatores.Teste.csproj", "{EA53D9C4-CF8D-4C8F-AF09-1DFFCD8DE712}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutenticacaoDoisFatores.Teste", "AutenticacaoDoisFatores.Teste\AutenticacaoDoisFatores.Teste.csproj", "{EA53D9C4-CF8D-4C8F-AF09-1DFFCD8DE712}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

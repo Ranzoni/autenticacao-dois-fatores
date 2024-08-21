@@ -3,11 +3,11 @@ using AutenticacaoDoisFatores.Core.Enum;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Core.Validadores;
 using AutenticacaoDoisFatores.Servico.DTO.EntidadeAcesso;
-using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
+using Mensageiro;
 
 namespace AutenticacaoDoisFatores.Servico.Validacoes
 {
-    public class EntidadeAcessoServicoValidacao(INotificadorServico _notificador, IEntidadeAcessoDominio _dominio)
+    public class EntidadeAcessoServicoValidacao(INotificador _notificador, IEntidadeAcessoDominio _dominio)
     {
         public async Task<bool> CadastroEhValidoAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
         {
@@ -33,8 +33,14 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
             return true;
         }
 
-        public bool AtivacaoEhValida(EntidadeAcesso entidadeAcesso)
+        public bool AtivacaoEhValida(EntidadeAcesso? entidadeAcesso)
         {
+            if (entidadeAcesso is null)
+            {
+                NaoEncontrada();
+                return false;
+            }
+
             if (entidadeAcesso.Ativo)
             {
                 _notificador.AddMensagem(NotificacoesEntidadeAcesso.JaAtiva);
@@ -64,6 +70,11 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
             }
 
             return true;
+        }
+
+        public void NaoEncontrada()
+        {
+            _notificador.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada);
         }
     }
 }

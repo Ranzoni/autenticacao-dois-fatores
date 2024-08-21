@@ -9,6 +9,7 @@ using AutenticacaoDoisFatores.Servico.Utilitarios;
 using AutenticacaoDoisFatores.Teste.Construtores;
 using AutoMapper;
 using Bogus;
+using Mensageiro;
 using Moq;
 using Moq.AutoMock;
 
@@ -68,7 +69,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             Assert.Null(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.CadastrarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
             _mock.GetMock<IEmailServico>().Verify(d => d.EnviarSucessoCadastroDeAcesso(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _mock.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.NomeInvalido), Times.Once);
+            _mock.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.NomeInvalido), Times.Once);
         }
 
         [Theory]
@@ -91,7 +92,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             Assert.Null(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.CadastrarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
             _mock.GetMock<IEmailServico>().Verify(d => d.EnviarSucessoCadastroDeAcesso(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _mock.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido), Times.Once);
+            _mock.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido), Times.Once);
         }
 
         [Fact]
@@ -109,7 +110,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             Assert.Null(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.CadastrarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
             _mock.GetMock<IEmailServico>().Verify(d => d.EnviarSucessoCadastroDeAcesso(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _mock.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.EmailJaCadastrado), Times.Once);
+            _mock.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.EmailJaCadastrado), Times.Once);
         }
 
         [Fact]
@@ -135,7 +136,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveAtivarCadastroQuandoNaoEncontrarEntidade()
+        internal async Task DeveRetornarMensagemQuandoTentarAtivarCadastroQueNaoEncontrarEntidade()
         {
             var email = _faker.Person.Email;
             var token = Token.GerarTokenEnvioChaveAcesso(email);
@@ -145,6 +146,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.Null(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.AlterarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Fact]
@@ -164,7 +166,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.Null(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.AlterarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
-            _mock.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.JaAtiva), Times.Once);
+            _mock.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.JaAtiva), Times.Once);
         }
 
         [Fact]
@@ -187,7 +189,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveReenviarChaveAcessoQuandoEntidadeNaoExiste()
+        internal async Task DeveRetornarMensagemAoTentarReenviarChaveAcessoQuandoEntidadeNaoExiste()
         {
             var email = _faker.Person.Email;
             var reenviarChaveAcesso = new ReenviarChaveAcesso(email);
@@ -198,6 +200,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.False(retorno);
             _mock.GetMock<IEmailServico>().Verify(e => e.EnviarConfirmacaoAlteracaoChaveAcesso(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Fact]
@@ -225,7 +228,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveAlterarChaveAcessoQuandoEntidadeNaoExiste()
+        internal async Task DeveRetornarMensagemAoAlterarChaveAcessoQuandoEntidadeNaoExiste()
         {
             var id = _faker.Random.Int(1);
             var token = Token.GerarTokenReenvioChave(id);
@@ -236,6 +239,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             Assert.False(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.AlterarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
             _mock.GetMock<IEmailServico>().Verify(e => e.ReenviarChaveDeAcesso(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Fact]
@@ -261,7 +265,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveEnviarEmailAlteracaoNomeQuandoEntidadeNaoExiste()
+        internal async Task DeveRetornarMensagemAoEnviarEmailAlteracaoNomeQuandoEntidadeNaoExiste()
         {
             var email = _faker.Person.Email;
             var nome = _faker.Company.CompanyName();
@@ -273,6 +277,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.False(retorno);
             _mock.GetMock<IEmailServico>().Verify(e => e.EnviarConfirmacaoAlteracaoEntidadeAcesso(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Theory]
@@ -300,7 +305,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.False(retorno);
             _mock.GetMock<IEmailServico>().Verify(e => e.EnviarConfirmacaoAlteracaoEntidadeAcesso(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _mock.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.NomeInvalido), Times.Once);
+            _mock.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.NomeInvalido), Times.Once);
         }
 
         [Fact]
@@ -334,7 +339,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveAlterarNomeQuandoEntidadeNaoExiste()
+        internal async Task DeveRetornarMensagemAoAlterarNomeQuandoEntidadeNaoExiste()
         {
             var id = _faker.Random.Int(1);
             var novoNome = _faker.Company.CompanyName();
@@ -345,6 +350,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.Null(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.AlterarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Fact]
@@ -369,7 +375,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveEnviarEmailAlteracaoEmailQuandoEntidadeNaoExiste()
+        internal async Task DeveRetornarMensagemAoEnviarEmailAlteracaoEmailQuandoEntidadeNaoExiste()
         {
             var emailAtual = _faker.Person.Email;
             var emailNovo = $"novo_{_faker.Person.Email}";
@@ -382,6 +388,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.False(retorno);
             _mock.GetMock<IEmailServico>().Verify(e => e.EnviarConfirmacaoAlteracaoEntidadeAcesso(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Theory]
@@ -410,7 +417,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.False(retorno);
             _mock.GetMock<IEmailServico>().Verify(e => e.EnviarConfirmacaoAlteracaoEntidadeAcesso(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _mock.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido), Times.Once);
+            _mock.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido), Times.Once);
         }
 
         [Fact]
@@ -442,7 +449,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveAlterarEmailQuandoEntidadeNaoExiste()
+        internal async Task DeveRetornarMensagemAoAlterarEmailQuandoEntidadeNaoExiste()
         {
             var id = _faker.Random.Int(1);
             var novoEmail = $"novo_{_faker.Person.Email}";
@@ -453,6 +460,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.Null(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.AlterarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Fact]
@@ -480,7 +488,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveExcluirQuandoEntidadeNaoExiste()
+        internal async Task DeveRetornarMensagemAoExcluirQuandoEntidadeNaoExiste()
         {
             var id = _faker.Random.Int(1);
             var email = _faker.Person.Email;
@@ -492,6 +500,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.False(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.ExcluirAsync(It.IsAny<int>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Fact]

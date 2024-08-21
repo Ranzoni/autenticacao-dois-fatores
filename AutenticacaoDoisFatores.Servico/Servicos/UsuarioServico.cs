@@ -15,10 +15,10 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             var id = Token.RetornarIdConfirmacaoCadastro(token) ?? 0;
 
             var usuario = await _dominio.BuscarAsync(id);
-            if (usuario is null)
+            if (!_validacao.AtivacaoEhValida(usuario))
                 return false;
 
-            if (!_validacao.AtivacaoEhValida(usuario))
+            if (usuario is null)
                 return false;
 
             usuario.Ativar(true);
@@ -31,7 +31,10 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
         {
             var entidadeAcesso = await _dominioAcesso.BuscarComChaveAsync(usuarioCadastrar.Chave);
             if (entidadeAcesso is null)
+            {
+                _validacao.ChaveAcessoNaoEncontrado();
                 return null;
+            }
 
             if (!await _validacao.CadastroEhValidoAsync(usuarioCadastrar))
                 return null;

@@ -1,14 +1,13 @@
 ﻿using AutenticacaoDoisFatores.Core.Entidades;
 using AutenticacaoDoisFatores.Core.Enum;
-using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Core.Validadores;
 using AutenticacaoDoisFatores.Servico.DTO.Usuario;
-using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
+using Mensageiro;
 
 namespace AutenticacaoDoisFatores.Servico.Validacoes
 {
-    public class UsuarioServicoValidacao(INotificadorServico _notificador, IUsuarioDominio _dominio)
+    public class UsuarioServicoValidacao(INotificador _notificador, IUsuarioDominio _dominio)
     {
         public async Task<bool> CadastroEhValidoAsync(UsuarioCadastrar usuarioCadastrar)
         {
@@ -40,8 +39,14 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
             return true;
         }
 
-        public bool AtivacaoEhValida(Usuario usuario)
+        public bool AtivacaoEhValida(Usuario? usuario)
         {
+            if (usuario is null)
+            {
+                _notificador.AddMensagemNaoEncontrado(NotificacoesUsuario.NaoEncontrado);
+                return false;
+            }
+
             if (usuario.Ativo)
             {
                 _notificador.AddMensagem(NotificacoesUsuario.EmailJaCadastrado);
@@ -49,6 +54,11 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
             }
 
             return true;
+        }
+
+        public void ChaveAcessoNaoEncontrado()
+        {
+            _notificador.AddMensagemNaoEncontrado(NotificacoesUsuario.ChaveAcessoNaoEncontrada);
         }
     }
 }

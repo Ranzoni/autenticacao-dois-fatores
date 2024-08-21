@@ -9,6 +9,7 @@ using AutenticacaoDoisFatores.Servico.Servicos;
 using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Servico.Validacoes;
 using AutoMapper;
+using Mensageiro;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,7 +52,7 @@ var config = new MapperConfiguration(cfg =>
 var mapeamentos = config.CreateMapper();
 builder.Services.AddSingleton(mapeamentos);
 
-builder.Services.AddScoped<INotificadorServico, NotificadorServico>();
+builder.Services.AddScoped<INotificador, Notificador>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

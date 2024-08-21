@@ -13,6 +13,8 @@ namespace AutenticacaoDoisFatores.Core.Enum
         [Description("O e-mail informado já está cadastrado")]
         EmailJaCadastrado,
         [Description("A entidade de acesso já está ativa")]
-        JaAtiva
+        JaAtiva,
+        [Description("A entidade não foi encontrada")]
+        NaoEncontrada
     }
 }

@@ -34,10 +34,10 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             var email = Token.RetornarEmailConfirmacaoCadastroEntidadeAcesso(token) ?? "";
 
             var entidadeParaAlterar = await _dominio.BuscarComEmailAsync(email);
-            if (entidadeParaAlterar is null)
+            if (!_validador.AtivacaoEhValida(entidadeParaAlterar))
                 return null;
 
-            if (!_validador.AtivacaoEhValida(entidadeParaAlterar))
+            if (entidadeParaAlterar is null)
                 return null;
 
             entidadeParaAlterar.Ativar(true);
@@ -52,7 +52,10 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
         {
             var entidade = await _dominio.BuscarComEmailAsync(reenviarChave.Email);
             if (entidade is null)
+            {
+                _validador.NaoEncontrada();
                 return false;
+            }
 
             var token = Token.GerarTokenReenvioChave(entidade.Id);
             var urlConfirmacaoGeracaoNovaChave = $"{urlBase}{token}";
@@ -68,7 +71,10 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
             var entidadeParaAlterar = await _dominio.BuscarAsync(id);
             if (entidadeParaAlterar is null)
+            {
+                _validador.NaoEncontrada();
                 return false;
+            }
 
             var chave = ChaveAcesso.GerarChave();
             entidadeParaAlterar.AlterarChave(chave);
@@ -83,7 +89,10 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
         {
             var entidade = await _dominio.BuscarComEmailAsync(entidadeAlterar.Email);
             if (entidade is null)
+            {
+                _validador.NaoEncontrada();
                 return false;
+            }
 
             if (!_validador.AlteracaoNomeEhValida(entidadeAlterar))
                 return false;
@@ -104,7 +113,10 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
             var entidadeParaAlterar = await _dominio.BuscarAsync(id);
             if (entidadeParaAlterar is null)
+            {
+                _validador.NaoEncontrada();
                 return null;
+            }
 
             entidadeParaAlterar.AlterarNome(novoNome);
             var entidadeAlterada = await _dominio.AlterarAsync(entidadeParaAlterar);
@@ -118,7 +130,10 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
         {
             var entidade = await _dominio.BuscarComEmailAsync(entidadeAlterarEmail.EmailAtual);
             if (entidade is null || entidadeAlterarEmail.Chave != entidade.Chave)
+            {
+                _validador.NaoEncontrada();
                 return false;
+            }
 
             if (!_validador.AlteracaoEmailEhValida(entidadeAlterarEmail))
                 return false;
@@ -139,7 +154,10 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
             var entidadeParaAlterar = await _dominio.BuscarAsync(id);
             if (entidadeParaAlterar is null)
+            {
+                _validador.NaoEncontrada();
                 return null;
+            }
 
             entidadeParaAlterar.AlterarEmail(novoEmail);
             var entidadeAlterada = await _dominio.AlterarAsync(entidadeParaAlterar);
@@ -153,7 +171,10 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
         {
             var entidadeAcesso = await _dominio.BuscarComEmailAsync(entidadeAcessoExcluir.Email);
             if (entidadeAcesso is null || entidadeAcessoExcluir.Chave != entidadeAcesso.Chave)
+            {
+                _validador.NaoEncontrada();
                 return false;
+            }
 
             var excluida = await _dominio.ExcluirAsync(entidadeAcesso.Id);
 

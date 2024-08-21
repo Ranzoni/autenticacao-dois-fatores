@@ -1,6 +1,7 @@
 using AutenticacaoDoisFatores.Controllers.Base;
 using AutenticacaoDoisFatores.Servico.DTO.EntidadeAcesso;
 using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
+using Mensageiro;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -8,7 +9,7 @@ namespace AutenticacaoDoisFatores.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class EntidadeAcessoController(IEntidadeAcessoServico _servico, INotificadorServico notificador, IConfiguration config) : BaseController(notificador, config)
+    public class EntidadeAcessoController(IEntidadeAcessoServico _servico, INotificador notificador, IConfiguration config) : BaseController(notificador, config)
     {
         [HttpPost("Cadastrar")]
         public async Task<ActionResult<EntidadeAcessoResposta?>> CadastrarAsync(EntidadeAcessoCadastrar entidadeAcessoCadastrar)
@@ -56,8 +57,6 @@ namespace AutenticacaoDoisFatores.Controllers
                 var urlBase = RetornarUrlFormatada("EntidadeAcesso/GerarNovaChaveAcesso/");
 
                 var retorno = await _servico.ReenviarChaveAcessoAsync(reenviarChaveAcesso, urlBase);
-                if (!retorno)
-                    return NaoEncontrado("Não foi encontrada uma entidade com este endereço de e-mail");
 
                 return Sucesso("Um e-mail de recuperação foi enviado");
             }
@@ -96,8 +95,6 @@ namespace AutenticacaoDoisFatores.Controllers
                 var urlBase = RetornarUrlFormatada("EntidadeAcesso/ConfirmarAlteracaoNome/");
 
                 var retorno = await _servico.EnviarEmailAlteracaoNomeAsync(entidadeAcessoAlterar, urlBase);
-                if (!retorno)
-                    return NaoEncontrado("Não foi encontrada uma entidade com este endereço de e-mail");
 
                 return Sucesso("Um e-mail de confirmação foi enviado");
             }
@@ -136,8 +133,6 @@ namespace AutenticacaoDoisFatores.Controllers
                 var urlBase = RetornarUrlFormatada("EntidadeAcesso/ConfirmarAlteracaoEmail/");
 
                 var retorno = await _servico.EnviarEmailAlteracaoEmailAsync(entidadeAcessoAlterarEmail, urlBase);
-                if (!retorno)
-                    return NaoEncontrado("A entidade de acesso não foi encontrada");
 
                 return Sucesso(retorno);
             }

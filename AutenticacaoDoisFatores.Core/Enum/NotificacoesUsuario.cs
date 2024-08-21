@@ -15,6 +15,10 @@ namespace AutenticacaoDoisFatores.Core.Enum
         [Description("A senha do usuário é inválida")]
         SenhaInvalida,
         [Description("Não foi informada uma chave de acesso relacionada ao usuário")]
-        ChaveAcessoNaoInformada
+        ChaveAcessoNaoInformada,
+        [Description("A chave de acesso informada não foi encontrada")]
+        ChaveAcessoNaoEncontrada,
+        [Description("O usuário não foi encontrado")]
+        NaoEncontrado
     }
 }
