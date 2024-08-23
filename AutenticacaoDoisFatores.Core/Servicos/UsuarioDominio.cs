@@ -12,9 +12,9 @@ namespace AutenticacaoDoisFatores.Core.Servicos
             await _repositorio.SalvarAlteracoesAsync();
         }
 
-        public async Task<Usuario?> BuscarAsync(int id)
+        public async Task<Usuario?> BuscarAsync(int id, Guid chave)
         {
-            return await _repositorio.BuscarAsync(id);
+            return await _repositorio.BuscarAsync(id, chave);
         }
 
         public async Task CadastrarAsync(Usuario usuario)
@@ -23,9 +23,9 @@ namespace AutenticacaoDoisFatores.Core.Servicos
             await _repositorio.SalvarAlteracoesAsync();
         }
 
-        public async Task<bool> ExisteUsuarioComEmailAsync(string email)
+        public async Task<bool> ExisteUsuarioComEmailAsync(string email, Guid chave)
         {
-            return await _repositorio.ExisteUsuarioComEmailAsync(email);
+            return await _repositorio.ExisteUsuarioComEmailAsync(email, chave);
         }
     }
 }

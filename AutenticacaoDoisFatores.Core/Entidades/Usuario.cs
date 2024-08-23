@@ -1,4 +1,5 @@
 ﻿using AutenticacaoDoisFatores.Core.Entidades.Base;
+using AutenticacaoDoisFatores.Core.Excecoes;
 using AutenticacaoDoisFatores.Core.Validadores;
 
 namespace AutenticacaoDoisFatores.Core.Entidades
@@ -43,6 +44,14 @@ namespace AutenticacaoDoisFatores.Core.Entidades
         public void Ativar(bool ativar)
         {
             Ativo = ativar;
+        }
+
+        public void AlterarNome(string nome)
+        {
+            if (!UsuarioValidador.NomeEhValido(nome))
+                UsuarioException.NomeInvalido();
+
+            Nome = nome;
         }
     }
 }

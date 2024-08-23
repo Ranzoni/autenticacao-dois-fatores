@@ -201,5 +201,38 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
 
             Assert.Equal(novoValor, usuario.Ativo);
         }
+
+        [Fact]
+        internal void DeveAlterarNome()
+        {
+            var nomeAtual = _faker.Person.FullName;
+            var usuario = new UsuarioConstrutor()
+                .ComNome(nomeAtual)
+                .Criar();
+            var novoNome = $"{_faker.Person.FullName} Silva";
+
+            usuario.AlterarNome(novoNome);
+
+            Assert.Equal(novoNome, usuario.Nome);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("    ")]
+        [InlineData("a")]
+        [InlineData("ab")]
+        [InlineData("123456789012345678901234567890123456789012345678901")]
+        internal void NaoDeveAlterarNomeInvalido(string nomeInvalido)
+        {
+            var nomeAtual = _faker.Person.FullName;
+            var usuario = new UsuarioConstrutor()
+                .ComNome(nomeAtual)
+                .Criar();
+
+            var excecao = Assert.Throws<UsuarioException>(() => usuario.AlterarNome(nomeInvalido));
+
+            Assert.Equal(NotificacoesUsuario.NomeInvalido.Descricao(), excecao.Message);
+        }
     }
 }

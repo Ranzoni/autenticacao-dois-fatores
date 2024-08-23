@@ -133,7 +133,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var senha = _faker.Random.AlphaNumeric(10);
             var usuarioCadastrar = new UsuarioCadastrar(nome, email, senha, entidadeAcesso.Chave);
             _mocker.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComChaveAsync(entidadeAcesso.Chave)).ReturnsAsync(entidadeAcesso);
-            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.ExisteUsuarioComEmailAsync(email)).ReturnsAsync(true);
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.ExisteUsuarioComEmailAsync(email, entidadeAcesso.Chave)).ReturnsAsync(true);
             var urlBase = _faker.Internet.Url();
 
             var retorno = await servico.CadastrarAsync(usuarioCadastrar, urlBase);
@@ -153,7 +153,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var email = _faker.Person.Email;
             var senha = _faker.Random.AlphaNumeric(10);
             var usuarioCadastrar = new UsuarioCadastrar(nome, email, senha, chave);
-            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.ExisteUsuarioComEmailAsync(email)).ReturnsAsync(true);
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.ExisteUsuarioComEmailAsync(email, chave)).ReturnsAsync(true);
             var urlBase = _faker.Internet.Url();
 
             var retorno = await servico.CadastrarAsync(usuarioCadastrar, urlBase);
@@ -167,12 +167,13 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         [Fact]
         internal async Task DeveAtivar()
         {
+            var chave = Guid.NewGuid();
             var servico = _mocker.CreateInstance<UsuarioServico>();
             var usuario = new UsuarioConstrutor()
                 .ComAtivo(false)
                 .CriarCompleto();
-            var token = Token.GerarTokenConfirmacaoCadastro(usuario.Id);
-            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(usuario.Id)).ReturnsAsync(usuario);
+            var token = Token.GerarTokenConfirmacaoCadastro(usuario.Id, chave);
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(usuario.Id, chave)).ReturnsAsync(usuario);
 
             var retorno = await servico.AtivarAsync(token);
 
@@ -184,12 +185,13 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         [Fact]
         internal async Task NaoDeveAtivarQuandoJaAtivo()
         {
+            var chave = Guid.NewGuid();
             var servico = _mocker.CreateInstance<UsuarioServico>();
             var usuario = new UsuarioConstrutor()
                 .ComAtivo(true)
                 .CriarCompleto();
-            var token = Token.GerarTokenConfirmacaoCadastro(usuario.Id);
-            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(usuario.Id)).ReturnsAsync(usuario);
+            var token = Token.GerarTokenConfirmacaoCadastro(usuario.Id, chave);
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(usuario.Id, chave)).ReturnsAsync(usuario);
 
             var retorno = await servico.AtivarAsync(token);
 
@@ -202,15 +204,46 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         [Fact]
         internal async Task NaoDeveAtivarQuandoUsuarioNaoExiste()
         {
+            var chave = Guid.NewGuid();
             var servico = _mocker.CreateInstance<UsuarioServico>();
             var id = _faker.Random.Int(1);
-            var token = Token.GerarTokenConfirmacaoCadastro(id);
+            var token = Token.GerarTokenConfirmacaoCadastro(id, chave);
 
             var retorno = await servico.AtivarAsync(token);
 
             Assert.False(retorno);
             _mocker.GetMock<INotificador>().Verify(n => n.AddMensagemNaoEncontrado(NotificacoesUsuario.NaoEncontrado), Times.Once);
             _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Never);
+        }
+
+        [Fact]
+        internal async Task DeveAlterar()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var id = _faker.Random.Int(1);
+            var chave = Guid.NewGuid();
+            var nome = _faker.Person.FullName;
+            var email = _faker.Person.Email;
+            var senha = _faker.Random.AlphaNumeric(10);
+            var usuarioCadastrado = new UsuarioConstrutor()
+                .ComId(id)
+                .ComNome(nome)
+                .ComEmail(email)
+                .ComSenha(senha)
+                .CriarCompleto();
+            var novoNome = $"{_faker.Person.FullName} Silva";
+            var usuarioAlterar = new UsuarioAlterar(novoNome, chave);
+            var usuarioResposta = new UsuarioResposta(nome, email, DateTime.Now);
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(id, chave)).ReturnsAsync(usuarioCadastrado);
+            _mocker.GetMock<IMapper>().Setup(m => m.Map<UsuarioResposta>(It.IsAny<Usuario>())).Returns(usuarioResposta);
+            var urlBase = _faker.Internet.Url();
+
+            var retorno = await servico.AlterarAsync(id, usuarioAlterar);
+
+            Assert.NotNull(retorno);
+            Assert.Equal(usuarioResposta, retorno);
+            Assert.Equal(novoNome, usuarioCadastrado.Nome);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Once);
         }
     }
 }

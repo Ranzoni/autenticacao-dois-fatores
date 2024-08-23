@@ -6,5 +6,6 @@ namespace AutenticacaoDoisFatores.Servico.Servicos.Interfaces
     {
         Task<UsuarioResposta?> CadastrarAsync(UsuarioCadastrar usuarioCadastrar, string urlBase);
         Task<bool> AtivarAsync(string token);
+        Task<UsuarioResposta?> AlterarAsync(int id, UsuarioAlterar usuarioAlterar);
     }
 }

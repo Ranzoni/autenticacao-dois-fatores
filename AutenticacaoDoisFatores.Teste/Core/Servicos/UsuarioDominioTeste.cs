@@ -30,14 +30,15 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
         [InlineData(true)]
         internal async Task DeveBuscarSeExisteUsuarioComEmail(bool existe)
         {
+            var chave = Guid.NewGuid();
             var email = _faker.Person.Email;
             var dominio = _mock.CreateInstance<UsuarioDominio>();
-            _mock.GetMock<IUsuarioRepositorio>().Setup(r => r.ExisteUsuarioComEmailAsync(email)).ReturnsAsync(existe);
+            _mock.GetMock<IUsuarioRepositorio>().Setup(r => r.ExisteUsuarioComEmailAsync(email, chave)).ReturnsAsync(existe);
 
-            var retorno = await dominio.ExisteUsuarioComEmailAsync(email);
+            var retorno = await dominio.ExisteUsuarioComEmailAsync(email, chave);
 
             Assert.Equal(existe, retorno);
-            _mock.GetMock<IUsuarioRepositorio>().Verify(r => r.ExisteUsuarioComEmailAsync(email), Times.Once);
+            _mock.GetMock<IUsuarioRepositorio>().Verify(r => r.ExisteUsuarioComEmailAsync(email, chave), Times.Once);
         }
 
         [Fact]
@@ -56,24 +57,26 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
         [Fact]
         internal async Task DeveRetornarUsuarioPorId()
         {
+            var chave = Guid.NewGuid();
             var id = _faker.Random.Int(1);
             var construtor = new UsuarioConstrutor();
             var usuario = construtor
                 .ComId(id)
                 .CriarCompleto();
             var dominio = _mock.CreateInstance<UsuarioDominio>();
-            _mock.GetMock<IUsuarioRepositorio>().Setup(r => r.BuscarAsync(id)).ReturnsAsync(usuario);
+            _mock.GetMock<IUsuarioRepositorio>().Setup(r => r.BuscarAsync(id, chave)).ReturnsAsync(usuario);
 
-            var retorno = await dominio.BuscarAsync(id);
+            var retorno = await dominio.BuscarAsync(id, chave);
 
             Assert.NotNull(retorno);
             Assert.Equal(usuario, retorno);
-            _mock.GetMock<IUsuarioRepositorio>().Verify(r => r.BuscarAsync(id), Times.Once);
+            _mock.GetMock<IUsuarioRepositorio>().Verify(r => r.BuscarAsync(id, chave), Times.Once);
         }
 
         [Fact]
         internal async Task DeveRetornarNuloQuandoNaoExisteUsuarioComId()
         {
+            var chave = Guid.NewGuid();
             var id = _faker.Random.Int(1);
             var construtor = new UsuarioConstrutor();
             var usuario = construtor
@@ -81,10 +84,10 @@ namespace AutenticacaoDoisFatores.Teste.Core.Servicos
                 .CriarCompleto();
             var dominio = _mock.CreateInstance<UsuarioDominio>();
 
-            var retorno = await dominio.BuscarAsync(id);
+            var retorno = await dominio.BuscarAsync(id, chave);
 
             Assert.Null(retorno);
-            _mock.GetMock<IUsuarioRepositorio>().Verify(r => r.BuscarAsync(id), Times.Once);
+            _mock.GetMock<IUsuarioRepositorio>().Verify(r => r.BuscarAsync(id, chave), Times.Once);
         }
     }
 }

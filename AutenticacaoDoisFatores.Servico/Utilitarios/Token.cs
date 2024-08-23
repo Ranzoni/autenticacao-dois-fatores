@@ -172,8 +172,8 @@ namespace AutenticacaoDoisFatores.Servico.Utilitarios
             if (subjectClaim?.Value != EMAIL_ALTERACAO_EMAIL_ENTIDADE_ACESSO)
                 return (null, null);
 
-            var nomeClaim = principal.FindFirst(ClaimTypes.Hash);
-            var idString = nomeClaim?.Value;
+            var idClaim = principal.FindFirst(ClaimTypes.Hash);
+            var idString = idClaim?.Value;
             int? id = idString is not null ? int.Parse(idString) : null;
 
             var emailClaim = principal.FindFirst(ClaimTypes.Email);
@@ -182,26 +182,35 @@ namespace AutenticacaoDoisFatores.Servico.Utilitarios
             return (id, email);
         }
         
-        public static string GerarTokenConfirmacaoCadastro(int id)
+        public static string GerarTokenConfirmacaoCadastro(int id, Guid chave)
         {
-            var claim = new Claim(ClaimTypes.Hash, id.ToString());
-            var token = GerarToken(EMAIL_CONFIRMACAO_CADASTRO_USUARIO, claim);
+            var listaClaims = new List<Claim>();
+            var idClaim = new Claim(ClaimTypes.Hash, id.ToString());
+            listaClaims.Add(idClaim);
+            var chaveClaim = new Claim(ClaimTypes.Authentication, chave.ToString());
+            listaClaims.Add(chaveClaim);
+
+            var token = GerarToken(EMAIL_CONFIRMACAO_CADASTRO_USUARIO, listaClaims);
 
             return token;
         }
 
-        public static int? RetornarIdConfirmacaoCadastro(string token)
+        public static (int? id, Guid? chave) RetornarIdEChaveConfirmacaoCadastro(string token)
         {
             var principal = ValidarToken(token);
             var subjectClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
             if (subjectClaim?.Value != EMAIL_CONFIRMACAO_CADASTRO_USUARIO)
-                return null;
+                return (null, null);
 
-            var nomeClaim = principal.FindFirst(ClaimTypes.Hash);
-            var idString = nomeClaim?.Value;
+            var idClaim = principal.FindFirst(ClaimTypes.Hash);
+            var idString = idClaim?.Value;
             int? id = idString is not null ? int.Parse(idString) : null;
 
-            return id;
+            var chaveClaim = principal.FindFirst(ClaimTypes.Authentication);
+            var chaveString = chaveClaim?.Value;
+            Guid? chave = chaveString is not null ? Guid.Parse(chaveString) : null;
+
+            return (id, chave);
         }
     }
 }

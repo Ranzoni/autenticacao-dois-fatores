@@ -29,7 +29,7 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
                 return false;
             }
 
-            var emailJaCadastrado = await _dominio.ExisteUsuarioComEmailAsync(usuarioCadastrar.Email);
+            var emailJaCadastrado = await _dominio.ExisteUsuarioComEmailAsync(usuarioCadastrar.Email, usuarioCadastrar.Chave);
             if (emailJaCadastrado)
             {
                 _notificador.AddMensagem(NotificacoesUsuario.EmailJaCadastrado);
@@ -59,6 +59,22 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
         public void ChaveAcessoNaoEncontrado()
         {
             _notificador.AddMensagemNaoEncontrado(NotificacoesUsuario.ChaveAcessoNaoEncontrada);
+        }
+
+        public bool AlteracaoEhValida(UsuarioAlterar usuarioAlterar)
+        {
+            if (!UsuarioValidador.NomeEhValido(usuarioAlterar.Nome))
+            {
+                _notificador.AddMensagem(NotificacoesUsuario.NomeInvalido);
+                return false;
+            }
+
+            return true;
+        }
+
+        public void UsuarioNaoEncontrado()
+        {
+            _notificador.AddMensagemNaoEncontrado(NotificacoesUsuario.NaoEncontrado);
         }
     }
 }

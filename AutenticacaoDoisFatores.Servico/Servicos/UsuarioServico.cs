@@ -10,11 +10,34 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 {
     public class UsuarioServico(IUsuarioDominio _dominio, IEntidadeAcessoDominio _dominioAcesso, IMapper _mapeador, UsuarioServicoValidacao _validacao, IEmailServico _email) : IUsuarioServico
     {
+        public async Task<UsuarioResposta?> AlterarAsync(int id, UsuarioAlterar usuarioAlterar)
+        {
+            if (!_validacao.AlteracaoEhValida(usuarioAlterar))
+                return null;
+
+            var usuarioCadastrado = await _dominio.BuscarAsync(id, usuarioAlterar.Chave);
+            if (usuarioCadastrado is null)
+            {
+                _validacao.UsuarioNaoEncontrado();
+                return null;
+            }
+
+            usuarioCadastrado.AlterarNome(usuarioAlterar.Nome);
+
+            await _dominio.AlterarAsync(usuarioCadastrado);
+
+            var usuarioResposta = _mapeador.Map<UsuarioResposta>(usuarioCadastrado);
+
+            return usuarioResposta;
+        }
+
         public async Task<bool> AtivarAsync(string token)
         {
-            var id = Token.RetornarIdConfirmacaoCadastro(token) ?? 0;
+            var dadosToken = Token.RetornarIdEChaveConfirmacaoCadastro(token);
+            var id = dadosToken.id ?? 0;
+            var chave = dadosToken.chave ?? Guid.Empty;
 
-            var usuario = await _dominio.BuscarAsync(id);
+            var usuario = await _dominio.BuscarAsync(id, chave);
             if (!_validacao.AtivacaoEhValida(usuario))
                 return false;
 
@@ -44,7 +67,7 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
             await _dominio.CadastrarAsync(novoUsuario);
 
-            var token = Token.GerarTokenConfirmacaoCadastro(novoUsuario.Id);
+            var token = Token.GerarTokenConfirmacaoCadastro(novoUsuario.Id, entidadeAcesso.Chave);
             var linkConfirmacao = $"{urlBase}{token}";
             _email.EnviarEmailConfirmacaoCadastro(novoUsuario.Email, linkConfirmacao);
 
