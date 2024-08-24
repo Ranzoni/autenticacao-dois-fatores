@@ -214,6 +214,7 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             usuario.AlterarNome(novoNome);
 
             Assert.Equal(novoNome, usuario.Nome);
+            Assert.NotNull(usuario.DataAlteracao);
         }
 
         [Theory]
@@ -232,6 +233,7 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
 
             var excecao = Assert.Throws<UsuarioException>(() => usuario.AlterarNome(nomeInvalido));
 
+            Assert.Null(usuario.DataAlteracao);
             Assert.Equal(NotificacoesUsuario.NomeInvalido.Descricao(), excecao.Message);
         }
     }

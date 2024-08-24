@@ -48,5 +48,20 @@ namespace AutenticacaoDoisFatores.Controllers
                 return MensagemHtml("Falha", "Falha ao completar a solicitação", $"Por favor, entre em contato com o responsável pelo sistema. Erro: {e.Message}");
             }
         }
+
+        [HttpPut("Alterar/{id}")]
+        public async Task<ActionResult<UsuarioResposta?>> AlterarAsync(int id, UsuarioAlterar usuarioAlterar)
+        {
+            try
+            {
+                var retorno = await _servico.AlterarAsync(id, usuarioAlterar);
+
+                return Sucesso(retorno);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

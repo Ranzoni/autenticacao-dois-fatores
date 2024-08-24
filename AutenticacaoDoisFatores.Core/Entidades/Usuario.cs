@@ -52,6 +52,12 @@ namespace AutenticacaoDoisFatores.Core.Entidades
                 UsuarioException.NomeInvalido();
 
             Nome = nome;
+            AtualizarDataAlteracao();
+        }
+
+        private void AtualizarDataAlteracao()
+        {
+            DataAlteracao = DateTime.UtcNow;
         }
     }
 }
