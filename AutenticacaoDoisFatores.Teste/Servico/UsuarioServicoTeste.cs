@@ -236,7 +236,6 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var usuarioResposta = new UsuarioResposta(nome, email, DateTime.Now);
             _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(id, chave)).ReturnsAsync(usuarioCadastrado);
             _mocker.GetMock<IMapper>().Setup(m => m.Map<UsuarioResposta>(It.IsAny<Usuario>())).Returns(usuarioResposta);
-            var urlBase = _faker.Internet.Url();
 
             var retorno = await servico.AlterarAsync(id, usuarioAlterar);
 
@@ -244,6 +243,44 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             Assert.Equal(usuarioResposta, retorno);
             Assert.Equal(novoNome, usuarioCadastrado.Nome);
             _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Once);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("    ")]
+        [InlineData("a")]
+        [InlineData("ab")]
+        [InlineData("123456789012345678901234567890123456789012345678901")]
+        internal async Task NaoDeveAlterarComNomeInvalido(string nomeInvalido)
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var id = _faker.Random.Int(1);
+            var chave = Guid.NewGuid();
+            var usuarioAlterar = new UsuarioAlterar(nomeInvalido, chave);
+            var urlBase = _faker.Internet.Url();
+
+            var retorno = await servico.AlterarAsync(id, usuarioAlterar);
+
+            Assert.Null(retorno);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Never);
+            _mocker.GetMock<INotificador>().Verify(d => d.AddMensagem(NotificacoesUsuario.NomeInvalido), Times.Once);
+        }
+
+        [Fact]
+        internal async Task NaoDeveAlterarQuandoNaoExiste()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var id = _faker.Random.Int(1);
+            var chave = Guid.NewGuid();
+            var novoNome = _faker.Person.FullName;
+            var usuarioAlterar = new UsuarioAlterar(novoNome, chave);
+
+            var retorno = await servico.AlterarAsync(id, usuarioAlterar);
+
+            Assert.Null(retorno);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Never);
+            _mocker.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesUsuario.NaoEncontrado), Times.Once);
         }
     }
 }
