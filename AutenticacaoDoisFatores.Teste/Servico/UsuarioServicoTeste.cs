@@ -311,5 +311,64 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         //    Assert.Equal(novoNome, usuarioCadastrado.Nome);
         //    _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Once);
         //}
+
+        [Fact]
+        internal async Task DeveAutenticar()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var email = _faker.Person.Email;
+            var senha = _faker.Random.AlphaNumeric(6);
+            var chave = Guid.NewGuid();
+            var usuarioAutenticar = new UsuarioAutenticar(email, senha, chave);
+            var senhaCriptografada = Criptografia.Criptografar(senha);
+            var usuario = new UsuarioConstrutor()
+                .ComEmail(email)
+                .ComSenha(senhaCriptografada)
+                .CriarCompleto();
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarPorEmailAsync(email, chave)).ReturnsAsync(usuario);
+
+            var retorno = await servico.AutenticarAsync(usuarioAutenticar);
+
+            Assert.NotNull(retorno);
+            Assert.Equal(email, retorno.Email);
+            Assert.NotNull(retorno.Token);
+            Assert.NotEmpty(retorno.Token);
+        }
+
+        [Fact]
+        internal async Task NaoDeveAutenticarEmailInexistente()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var email = _faker.Person.Email;
+            var senha = _faker.Random.AlphaNumeric(6);
+            var chave = Guid.NewGuid();
+            var usuarioAutenticar = new UsuarioAutenticar(email, senha, chave);
+
+            var retorno = await servico.AutenticarAsync(usuarioAutenticar);
+
+            Assert.Null(retorno);
+            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagemNaoEncontrado(NotificacoesUsuario.NaoEncontrado), Times.Once);
+        }
+
+        [Fact]
+        internal async Task NaoDeveAutenticarSenhaIncorreta()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var email = _faker.Person.Email;
+            var senha = _faker.Random.AlphaNumeric(6);
+            var chave = Guid.NewGuid();
+            var usuarioAutenticar = new UsuarioAutenticar(email, senha, chave);
+            var senhaCriptografada = Criptografia.Criptografar(senha + "abcd");
+            var usuario = new UsuarioConstrutor()
+                .ComEmail(email)
+                .ComSenha(senhaCriptografada)
+                .CriarCompleto();
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarPorEmailAsync(email, chave)).ReturnsAsync(usuario);
+
+            var retorno = await servico.AutenticarAsync(usuarioAutenticar);
+
+            Assert.Null(retorno);
+            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesUsuario.SenhaIncorreta), Times.Once);
+        }
     }
 }

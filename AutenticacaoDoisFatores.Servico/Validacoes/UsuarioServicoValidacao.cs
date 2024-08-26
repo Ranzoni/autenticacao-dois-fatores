@@ -3,6 +3,7 @@ using AutenticacaoDoisFatores.Core.Enum;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Core.Validadores;
 using AutenticacaoDoisFatores.Servico.DTO.Usuario;
+using AutenticacaoDoisFatores.Servico.Utilitarios;
 using Mensageiro;
 
 namespace AutenticacaoDoisFatores.Servico.Validacoes
@@ -82,6 +83,18 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
             if (!UsuarioValidador.EmailEhValido(usuarioAlterarEmail.Email))
             {
                 _notificador.AddMensagem(NotificacoesUsuario.EmailInvalido);
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool AutenticacaoEhValida(UsuarioAutenticar usuarioAutenticar, Usuario usuario)
+        {
+            var senhasIguais = Criptografia.SaoIguais(usuarioAutenticar.Senha, usuario.Senha);
+            if (!senhasIguais)
+            {
+                _notificador.AddMensagem(NotificacoesUsuario.SenhaIncorreta);
                 return false;
             }
 

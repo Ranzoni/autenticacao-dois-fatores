@@ -9,5 +9,6 @@ namespace AutenticacaoDoisFatores.Servico.Servicos.Interfaces
         Task<UsuarioResposta?> AlterarNomeAsync(int id, UsuarioAlterarNome usuarioAlterarNome);
         Task<bool> EnviarEmailAlteracaoEmailAsync(int id, UsuarioAlterarEmail usuarioAlterarEmail, string urlBase);
         Task<UsuarioResposta?> AlterarEmailAsync(string token);
+        Task<UsuarioAutenticado?> AutenticarAsync(UsuarioAutenticar usuarioAutenticar);
     }
 }

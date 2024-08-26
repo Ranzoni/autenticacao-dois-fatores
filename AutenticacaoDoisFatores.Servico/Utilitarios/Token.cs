@@ -15,6 +15,7 @@ namespace AutenticacaoDoisFatores.Servico.Utilitarios
         private const string EMAIL_ALTERACAO_EMAIL_ENTIDADE_ACESSO = "EMAIL_ALTERACAO_EMAIL_ENTIDADE_ACESSO";
         private const string EMAIL_CONFIRMACAO_CADASTRO_USUARIO = "EMAIL_CONFIRMACAO_CADASTRO_USUARIO";
         private const string EMAIL_ALTERACAO_EMAIL_USUARIO = "EMAIL_ALTERACAO_EMAIL_USUARIO";
+        private const string AUTENTICAO_USUARIO = "AUTENTICAO_USUARIO";
 
         private static string GerarToken(string sub, Claim claim)
         {
@@ -246,6 +247,18 @@ namespace AutenticacaoDoisFatores.Servico.Utilitarios
             Guid? chave = chaveString is not null ? Guid.Parse(chaveString) : null;
 
             return (id, email, chave);
+        }
+
+        public static string GerarTokenAutenticacaoUsuario(int id, Guid chave)
+        {
+            var claims = new List<Claim>()
+            {
+                new(ClaimTypes.Hash, id.ToString()),
+                new(ClaimTypes.Authentication, chave.ToString())
+            };
+            var token = GerarToken(AUTENTICAO_USUARIO, claims);
+
+            return token;
         }
     }
 }

@@ -117,5 +117,24 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
             return usuarioResposta;
         }
+
+        public async Task<UsuarioAutenticado?> AutenticarAsync(UsuarioAutenticar usuarioAutenticar)
+        {
+            var usuario = await _dominio.BuscarPorEmailAsync(usuarioAutenticar.Email, usuarioAutenticar.Chave);
+            if (usuario is null)
+            {
+                _validacao.UsuarioNaoEncontrado();
+                return null;
+            }
+
+            if (!_validacao.AutenticacaoEhValida(usuarioAutenticar, usuario))
+                return null;
+
+            var token = Token.GerarTokenAutenticacaoUsuario(usuario.Id, usuarioAutenticar.Chave);
+
+            var usuarioAutenticado = new UsuarioAutenticado(usuario.Id, usuario.Email, token);
+
+            return usuarioAutenticado;
+        }
     }
 }
