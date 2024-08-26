@@ -61,9 +61,9 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
             _notificador.AddMensagemNaoEncontrado(NotificacoesUsuario.ChaveAcessoNaoEncontrada);
         }
 
-        public bool AlteracaoEhValida(UsuarioAlterar usuarioAlterar)
+        public bool AlteracaoNomeEhValida(UsuarioAlterarNome usuarioAlterarNome)
         {
-            if (!UsuarioValidador.NomeEhValido(usuarioAlterar.Nome))
+            if (!UsuarioValidador.NomeEhValido(usuarioAlterarNome.Nome))
             {
                 _notificador.AddMensagem(NotificacoesUsuario.NomeInvalido);
                 return false;
@@ -75,6 +75,17 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
         public void UsuarioNaoEncontrado()
         {
             _notificador.AddMensagemNaoEncontrado(NotificacoesUsuario.NaoEncontrado);
+        }
+
+        public bool AlteracaoEmailEhValida(UsuarioAlterarEmail usuarioAlterarEmail)
+        {
+            if (!UsuarioValidador.EmailEhValido(usuarioAlterarEmail.Email))
+            {
+                _notificador.AddMensagem(NotificacoesUsuario.EmailInvalido);
+                return false;
+            }
+
+            return true;
         }
     }
 }

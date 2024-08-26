@@ -236,5 +236,41 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             Assert.Null(usuario.DataAlteracao);
             Assert.Equal(NotificacoesUsuario.NomeInvalido.Descricao(), excecao.Message);
         }
+
+        [Fact]
+        internal void DeveAlterarEmail()
+        {
+            var emailAtual = _faker.Person.Email;
+            var usuario = new UsuarioConstrutor()
+                .ComEmail(emailAtual)
+                .Criar();
+            var novoEmail = $"novo_{_faker.Person.Email}";
+
+            usuario.AlterarEmail(novoEmail);
+
+            Assert.Equal(novoEmail, usuario.Email);
+            Assert.NotNull(usuario.DataAlteracao);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("    ")]
+        [InlineData("a")]
+        [InlineData("ab")]
+        [InlineData("a@.c")]
+        [InlineData("a@12345678901234567890123456789012345678901234567890123456789012345678901234567.c")]
+        internal void NaoDeveAlterarEmailInvalido(string emailInvalido)
+        {
+            var emailAtual = _faker.Person.Email;
+            var usuario = new UsuarioConstrutor()
+                .ComEmail(emailAtual)
+                .Criar();
+
+            var excecao = Assert.Throws<UsuarioException>(() => usuario.AlterarEmail(emailInvalido));
+
+            Assert.Null(usuario.DataAlteracao);
+            Assert.Equal(NotificacoesUsuario.EmailInvalido.Descricao(), excecao.Message);
+        }
     }
 }

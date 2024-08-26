@@ -50,11 +50,11 @@ namespace AutenticacaoDoisFatores.Controllers
         }
 
         [HttpPut("Alterar/{id}")]
-        public async Task<ActionResult<UsuarioResposta?>> AlterarAsync(int id, UsuarioAlterar usuarioAlterar)
+        public async Task<ActionResult<UsuarioResposta?>> AlterarAsync(int id, UsuarioAlterarNome usuarioAlterar)
         {
             try
             {
-                var retorno = await _servico.AlterarAsync(id, usuarioAlterar);
+                var retorno = await _servico.AlterarNomeAsync(id, usuarioAlterar);
 
                 return Sucesso(retorno);
             }

@@ -1,8 +1,8 @@
 ﻿namespace AutenticacaoDoisFatores.Servico.DTO.Usuario
 {
-    public class UsuarioAlterar(string nome, Guid chave)
+    public class UsuarioAlterarEmail(string email, Guid chave)
     {
-        public string Nome { get; private set; } = nome;
+        public string Email { get; private set; } = email;
         public Guid Chave { get; private set; } = chave;
     }
 }

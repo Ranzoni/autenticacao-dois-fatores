@@ -55,6 +55,15 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             AtualizarDataAlteracao();
         }
 
+        public void AlterarEmail(string email)
+        {
+            if (!UsuarioValidador.EmailEhValido(email))
+                UsuarioException.EmailInvalido();
+
+            Email = email;
+            AtualizarDataAlteracao();
+        }
+
         private void AtualizarDataAlteracao()
         {
             DataAlteracao = DateTime.UtcNow;

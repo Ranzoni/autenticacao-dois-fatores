@@ -14,6 +14,7 @@ namespace AutenticacaoDoisFatores.Servico.Utilitarios
         private const string EMAIL_ALTERACAO_NOME_ENTIDADE_ACESSO = "EMAIL_ALTERACAO_NOME_ENTIDADE_ACESSO";
         private const string EMAIL_ALTERACAO_EMAIL_ENTIDADE_ACESSO = "EMAIL_ALTERACAO_EMAIL_ENTIDADE_ACESSO";
         private const string EMAIL_CONFIRMACAO_CADASTRO_USUARIO = "EMAIL_CONFIRMACAO_CADASTRO_USUARIO";
+        private const string EMAIL_ALTERACAO_EMAIL_USUARIO = "EMAIL_ALTERACAO_EMAIL_USUARIO";
 
         private static string GerarToken(string sub, Claim claim)
         {
@@ -211,6 +212,40 @@ namespace AutenticacaoDoisFatores.Servico.Utilitarios
             Guid? chave = chaveString is not null ? Guid.Parse(chaveString) : null;
 
             return (id, chave);
+        }
+
+        public static string GerarTokenAlterarEmailUsuario(int id, string email, Guid chave)
+        {
+            var claims = new List<Claim>()
+            {
+                new(ClaimTypes.Hash, id.ToString()),
+                new(ClaimTypes.Email, email),
+                new(ClaimTypes.Authentication, chave.ToString())
+            };
+            var token = GerarToken(EMAIL_ALTERACAO_EMAIL_USUARIO, claims);
+
+            return token;
+        }
+
+        public static (int? id, string? email, Guid? chave) RetornarIdEmailAlteracaoEmailUsuario(string token)
+        {
+            var principal = ValidarToken(token);
+            var subjectClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
+            if (subjectClaim?.Value != EMAIL_ALTERACAO_EMAIL_USUARIO)
+                return (null, null, null);
+
+            var idClaim = principal.FindFirst(ClaimTypes.Hash);
+            var idString = idClaim?.Value;
+            int? id = idString is not null ? int.Parse(idString) : null;
+
+            var emailClaim = principal.FindFirst(ClaimTypes.Email);
+            var email = emailClaim?.Value;
+
+            var chaveClaim = principal.FindFirst(ClaimTypes.Authentication);
+            var chaveString = chaveClaim?.Value;
+            Guid? chave = chaveString is not null ? Guid.Parse(chaveString) : null;
+
+            return (id, email, chave);
         }
     }
 }
