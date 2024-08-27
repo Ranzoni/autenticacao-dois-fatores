@@ -17,6 +17,11 @@ namespace AutenticacaoDoisFatores.Core.Servicos
             return await _repositorio.BuscarAsync(id, chave);
         }
 
+        public async Task<Usuario?> BuscarNaoAtivoAsync(int id, Guid chave)
+        {
+            return await _repositorio.BuscarNaoAtivoAsync(id, chave);
+        }
+
         public async Task<Usuario?> BuscarPorEmailAsync(string email, Guid chave)
         {
             return await _repositorio.BuscarPorEmailAsync(email, chave);

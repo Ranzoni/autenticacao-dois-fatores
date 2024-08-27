@@ -16,6 +16,22 @@ namespace AutenticacaoDoisFatores.Infra.Repositorios
         {
             return await _contexto.Usuarios
                 .FirstOrDefaultAsync(u => u.Id.Equals(id)
+                    && u.Ativo
+                    && u.EntidadeAcesso.Chave.Equals(chave));
+        }
+
+        public async Task<Usuario?> BuscarNaoAtivoAsync(int id, Guid chave)
+        {
+            return await _contexto.Usuarios
+                .FirstOrDefaultAsync(u => u.Id.Equals(id)
+                    && u.EntidadeAcesso.Chave.Equals(chave));
+        }
+
+        public async Task<Usuario?> BuscarPorEmailAsync(string email, Guid chave)
+        {
+            return await _contexto.Usuarios
+                .FirstOrDefaultAsync(u => u.Email.Equals(email)
+                    && u.Ativo
                     && u.EntidadeAcesso.Chave.Equals(chave));
         }
 

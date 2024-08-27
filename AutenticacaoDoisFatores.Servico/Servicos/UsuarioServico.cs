@@ -56,7 +56,7 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             var id = dadosToken.id ?? 0;
             var chave = dadosToken.chave ?? Guid.Empty;
 
-            var usuario = await _dominio.BuscarAsync(id, chave);
+            var usuario = await _dominio.BuscarNaoAtivoAsync(id, chave);
             if (!_validacao.AtivacaoEhValida(usuario))
                 return false;
 

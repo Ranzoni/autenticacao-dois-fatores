@@ -63,5 +63,20 @@ namespace AutenticacaoDoisFatores.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpPost("Autenticar")]
+        public async Task<ActionResult<UsuarioAutenticado?>> AutenticarAsync(UsuarioAutenticar usuarioAutenticar)
+        {
+            try
+            {
+                var retorno = await _servico.AutenticarAsync(usuarioAutenticar);
+
+                return Sucesso(retorno);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }
