@@ -173,7 +173,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
                 .ComAtivo(false)
                 .CriarCompleto();
             var token = Token.GerarTokenConfirmacaoCadastro(usuario.Id, chave);
-            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(usuario.Id, chave)).ReturnsAsync(usuario);
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarNaoAtivoAsync(usuario.Id, chave)).ReturnsAsync(usuario);
 
             var retorno = await servico.AtivarAsync(token);
 
@@ -191,7 +191,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
                 .ComAtivo(true)
                 .CriarCompleto();
             var token = Token.GerarTokenConfirmacaoCadastro(usuario.Id, chave);
-            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(usuario.Id, chave)).ReturnsAsync(usuario);
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarNaoAtivoAsync(usuario.Id, chave)).ReturnsAsync(usuario);
 
             var retorno = await servico.AtivarAsync(token);
 
@@ -368,7 +368,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var retorno = await servico.AutenticarAsync(usuarioAutenticar);
 
             Assert.Null(retorno);
-            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesUsuario.SenhaIncorreta), Times.Once);
+            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagemNaoAutorizado(NotificacoesUsuario.SenhaIncorreta), Times.Once);
         }
     }
 }

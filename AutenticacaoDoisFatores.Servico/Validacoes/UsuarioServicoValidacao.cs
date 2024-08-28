@@ -94,7 +94,7 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
             var senhasIguais = Criptografia.SaoIguais(usuarioAutenticar.Senha, usuario.Senha);
             if (!senhasIguais)
             {
-                _notificador.AddMensagem(NotificacoesUsuario.SenhaIncorreta);
+                _notificador.AddMensagemNaoAutorizado(NotificacoesUsuario.SenhaIncorreta);
                 return false;
             }
 
