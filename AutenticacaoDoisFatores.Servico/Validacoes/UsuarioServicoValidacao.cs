@@ -110,16 +110,9 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
             return true;
         }
 
-        public bool AutenticacaoEhValida(UsuarioAutenticar usuarioAutenticar, Usuario usuario)
+        public void NaoAutorizado()
         {
-            var senhasIguais = Criptografia.SaoIguais(usuarioAutenticar.Senha, usuario.Senha);
-            if (!senhasIguais)
-            {
-                _notificador.AddMensagemNaoAutorizado(NotificacoesUsuario.SenhaIncorreta);
-                return false;
-            }
-
-            return true;
+            _notificador.AddMensagemNaoAutorizado(NotificacoesUsuario.SenhaIncorreta);
         }
     }
 }

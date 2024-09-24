@@ -1,4 +1,5 @@
 ﻿using AutenticacaoDoisFatores.Core.Entidades;
+using AutenticacaoDoisFatores.Core.Enum;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Servico.DTO.Usuario;
 using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
@@ -134,8 +135,12 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
                 return null;
             }
 
-            if (!_validacao.AutenticacaoEhValida(usuarioAutenticar, usuario))
+            var senhasIguais = Criptografia.SaoIguais(usuarioAutenticar.Senha, usuario.Senha);
+            if (!senhasIguais)
+            {
+                _validacao.NaoAutorizado();
                 return null;
+            }
 
             var token = Token.GerarTokenAutenticacaoUsuario(usuario.Id, usuarioAutenticar.Chave);
 

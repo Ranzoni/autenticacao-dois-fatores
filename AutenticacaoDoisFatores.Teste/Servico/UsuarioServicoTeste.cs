@@ -286,7 +286,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.NotNull(retorno);
             Assert.Equal(usuarioResposta, retorno);
-            Assert.Equal(novaSenha, usuarioCadastrado.Senha);
+            Assert.True(Criptografia.SaoIguais(novaSenha, usuarioCadastrado.Senha));
             Assert.Equal(nome, usuarioCadastrado.Nome);
             _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(usuarioCadastrado), Times.Once);
         }
