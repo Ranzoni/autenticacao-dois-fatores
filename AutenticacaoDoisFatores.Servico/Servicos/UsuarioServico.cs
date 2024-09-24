@@ -171,7 +171,8 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
                 return false;
             }
 
-            usuarioCadastrado.AlterarSenha(senha);
+            var senhaCriptografada = Criptografia.Criptografar(senha);
+            usuarioCadastrado.AlterarSenha(senhaCriptografada);
 
             await _dominio.AlterarAsync(usuarioCadastrado);
 
