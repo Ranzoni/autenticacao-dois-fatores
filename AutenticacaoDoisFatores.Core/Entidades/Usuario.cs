@@ -77,5 +77,10 @@ namespace AutenticacaoDoisFatores.Core.Entidades
         {
             DataAlteracao = DateTime.UtcNow;
         }
+
+        public void AtualizarDataUltimoAcesso()
+        {
+            DataUltimoAcesso = DateTime.UtcNow;
+        }
     }
 }

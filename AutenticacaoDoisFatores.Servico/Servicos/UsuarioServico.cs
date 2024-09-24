@@ -132,6 +132,9 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
             var token = Token.GerarTokenAutenticacaoUsuario(usuario.Id, usuarioAutenticar.Chave);
 
+            usuario.AtualizarDataUltimoAcesso();
+            await _dominio.AlterarAsync(usuario);
+
             var usuarioAutenticado = new UsuarioAutenticado(usuario.Id, usuario.Email, token);
 
             return usuarioAutenticado;

@@ -495,6 +495,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             Assert.Equal(email, retorno.Email);
             Assert.NotNull(retorno.Token);
             Assert.NotEmpty(retorno.Token);
+            Assert.NotNull(usuario.DataUltimoAcesso);
         }
 
         [Fact]
@@ -530,6 +531,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var retorno = await servico.AutenticarAsync(usuarioAutenticar);
 
             Assert.Null(retorno);
+            Assert.Null(usuario.DataUltimoAcesso);
             _mocker.GetMock<INotificador>().Verify(n => n.AddMensagemNaoAutorizado(NotificacoesUsuario.SenhaIncorreta), Times.Once);
         }
     }

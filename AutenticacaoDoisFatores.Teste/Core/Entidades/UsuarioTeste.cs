@@ -307,5 +307,15 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             Assert.Equal(usuario.Senha, senhaAtual);
             Assert.Equal(NotificacoesUsuario.SenhaInvalida.Descricao(), excecao.Message);
         }
+
+        [Fact]
+        internal void DeveAtualizarDataUltimoAcesso()
+        {
+            var usuario = new UsuarioConstrutor().Criar();
+
+            usuario.AtualizarDataUltimoAcesso();
+
+            Assert.NotNull(usuario.DataUltimoAcesso);
+        }
     }
 }
