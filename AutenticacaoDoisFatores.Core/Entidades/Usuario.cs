@@ -64,6 +64,15 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             AtualizarDataAlteracao();
         }
 
+        public void AlterarSenha(string senha)
+        {
+            if (!UsuarioValidador.SenhaEhValida(senha))
+                UsuarioException.SenhaInvalida();
+
+            Senha = senha;
+            AtualizarDataAlteracao();
+        }
+
         private void AtualizarDataAlteracao()
         {
             DataAlteracao = DateTime.UtcNow;

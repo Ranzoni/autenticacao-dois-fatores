@@ -234,6 +234,7 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var excecao = Assert.Throws<UsuarioException>(() => usuario.AlterarNome(nomeInvalido));
 
             Assert.Null(usuario.DataAlteracao);
+            Assert.Equal(usuario.Nome, nomeAtual);
             Assert.Equal(NotificacoesUsuario.NomeInvalido.Descricao(), excecao.Message);
         }
 
@@ -270,7 +271,41 @@ namespace AutenticacaoDoisFatores.Teste.Core.Entidades
             var excecao = Assert.Throws<UsuarioException>(() => usuario.AlterarEmail(emailInvalido));
 
             Assert.Null(usuario.DataAlteracao);
+            Assert.Equal(usuario.Email, emailAtual);
             Assert.Equal(NotificacoesUsuario.EmailInvalido.Descricao(), excecao.Message);
+        }
+
+        [Fact]
+        internal void DeveAlterarSenha()
+        {
+            var senhaAtual = _faker.Random.AlphaNumeric(8);
+            var usuario = new UsuarioConstrutor()
+                .ComSenha(senhaAtual)
+                .Criar();
+            var novaSenha = _faker.Random.AlphaNumeric(9);
+
+            usuario.AlterarSenha(novaSenha);
+
+            Assert.Equal(novaSenha, usuario.Senha);
+            Assert.NotNull(usuario.DataAlteracao);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("    ")]
+        internal void NaoDeveAlterarSenhaInvalida(string senhaInvalida)
+        {
+            var senhaAtual = _faker.Random.AlphaNumeric(8);
+            var usuario = new UsuarioConstrutor()
+                .ComSenha(senhaAtual)
+                .Criar();
+
+            var excecao = Assert.Throws<UsuarioException>(() => usuario.AlterarSenha(senhaInvalida));
+
+            Assert.Null(usuario.DataAlteracao);
+            Assert.Equal(usuario.Senha, senhaAtual);
+            Assert.Equal(NotificacoesUsuario.SenhaInvalida.Descricao(), excecao.Message);
         }
     }
 }
