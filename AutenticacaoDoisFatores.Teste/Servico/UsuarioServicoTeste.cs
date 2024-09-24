@@ -223,32 +223,28 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var id = _faker.Random.Int(1);
             var chave = Guid.NewGuid();
             var nome = _faker.Person.FullName;
-            var email = _faker.Person.Email;
             var senha = _faker.Random.AlphaNumeric(10);
             var usuarioCadastrado = new UsuarioConstrutor()
                 .ComId(id)
                 .ComNome(nome)
-                .ComEmail(email)
                 .ComSenha(senha)
                 .CriarCompleto();
             var novoNome = $"{_faker.Person.FullName} Silva";
-            var usuarioAlterar = new UsuarioAlterarNome(novoNome, chave);
-            var usuarioResposta = new UsuarioResposta(nome, email, DateTime.Now);
+            var usuarioAlterar = new UsuarioAlterar(novoNome);
+            var usuarioResposta = new UsuarioResposta(nome, usuarioCadastrado.Email, DateTime.Now);
             _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(id, chave)).ReturnsAsync(usuarioCadastrado);
             _mocker.GetMock<IMapper>().Setup(m => m.Map<UsuarioResposta>(It.IsAny<Usuario>())).Returns(usuarioResposta);
 
-            var retorno = await servico.AlterarNomeAsync(id, usuarioAlterar);
+            var retorno = await servico.AlterarAsync(id, chave, usuarioAlterar);
 
             Assert.NotNull(retorno);
             Assert.Equal(usuarioResposta, retorno);
             Assert.Equal(novoNome, usuarioCadastrado.Nome);
-            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Once);
+            Assert.Equal(senha, usuarioCadastrado.Senha);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(usuarioCadastrado), Times.Once);
         }
 
         [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("    ")]
         [InlineData("a")]
         [InlineData("ab")]
         [InlineData("123456789012345678901234567890123456789012345678901")]
@@ -257,10 +253,10 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var servico = _mocker.CreateInstance<UsuarioServico>();
             var id = _faker.Random.Int(1);
             var chave = Guid.NewGuid();
-            var usuarioAlterar = new UsuarioAlterarNome(nomeInvalido, chave);
+            var usuarioAlterar = new UsuarioAlterar(nomeInvalido);
             var urlBase = _faker.Internet.Url();
 
-            var retorno = await servico.AlterarNomeAsync(id, usuarioAlterar);
+            var retorno = await servico.AlterarAsync(id, chave, usuarioAlterar);
 
             Assert.Null(retorno);
             _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Never);
@@ -268,15 +264,44 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveAlterarNomeQuandoNaoExiste()
+        internal async Task DeveAlterarSenha()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var id = _faker.Random.Int(1);
+            var chave = Guid.NewGuid();
+            var nome = _faker.Person.FullName;
+            var senha = _faker.Random.AlphaNumeric(10);
+            var usuarioCadastrado = new UsuarioConstrutor()
+                .ComId(id)
+                .ComNome(nome)
+                .ComSenha(senha)
+                .CriarCompleto();
+            var novaSenha = _faker.Random.AlphaNumeric(12);
+            var usuarioAlterar = new UsuarioAlterar(null, novaSenha);
+            var usuarioResposta = new UsuarioResposta(nome, usuarioCadastrado.Email, DateTime.Now);
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(id, chave)).ReturnsAsync(usuarioCadastrado);
+            _mocker.GetMock<IMapper>().Setup(m => m.Map<UsuarioResposta>(It.IsAny<Usuario>())).Returns(usuarioResposta);
+
+            var retorno = await servico.AlterarAsync(id, chave, usuarioAlterar);
+
+            Assert.NotNull(retorno);
+            Assert.Equal(usuarioResposta, retorno);
+            Assert.Equal(novaSenha, usuarioCadastrado.Senha);
+            Assert.Equal(nome, usuarioCadastrado.Nome);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(usuarioCadastrado), Times.Once);
+        }
+
+        [Fact]
+        internal async Task NaoDeveAlterarQuandoNaoExiste()
         {
             var servico = _mocker.CreateInstance<UsuarioServico>();
             var id = _faker.Random.Int(1);
             var chave = Guid.NewGuid();
             var novoNome = _faker.Person.FullName;
-            var usuarioAlterar = new UsuarioAlterarNome(novoNome, chave);
+            var novaSenha = _faker.Random.AlphaNumeric(10);
+            var usuarioAlterar = new UsuarioAlterar(novoNome, novaSenha);
 
-            var retorno = await servico.AlterarNomeAsync(id, usuarioAlterar);
+            var retorno = await servico.AlterarAsync(id, chave, usuarioAlterar);
 
             Assert.Null(retorno);
             _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Never);
@@ -297,11 +322,11 @@ namespace AutenticacaoDoisFatores.Teste.Servico
                 .ComSenha(senha)
                 .CriarCompleto();
             var novoEmail = $"novo_{_faker.Person.Email}";
-            var usuarioAlterar = new UsuarioAlterarEmail(novoEmail, chave);
+            var usuarioAlterar = new UsuarioAlterarEmail(novoEmail);
             _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(id, chave)).ReturnsAsync(usuarioCadastrado);
             var urlBase = _faker.Internet.Url();
 
-            var retorno = await servico.EnviarEmailAlteracaoEmailAsync(id, usuarioAlterar, urlBase);
+            var retorno = await servico.EnviarEmailAlteracaoEmailAsync(id, chave, usuarioAlterar, urlBase);
 
             Assert.True(retorno);
             _mocker.GetMock<IEmailServico>().Verify(d => d.EnviarEmailConfirmacaoAlteracaoEmail(novoEmail, nome, It.IsAny<string>()), Times.Once);
@@ -320,10 +345,10 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var servico = _mocker.CreateInstance<UsuarioServico>();
             var id = _faker.Random.Int(1);
             var chave = Guid.NewGuid();
-            var usuarioAlterar = new UsuarioAlterarEmail(emailInvalido, chave);
+            var usuarioAlterar = new UsuarioAlterarEmail(emailInvalido);
             var urlBase = _faker.Internet.Url();
 
-            var retorno = await servico.EnviarEmailAlteracaoEmailAsync(id, usuarioAlterar, urlBase);
+            var retorno = await servico.EnviarEmailAlteracaoEmailAsync(id, chave, usuarioAlterar, urlBase);
 
             Assert.False(retorno);
             _mocker.GetMock<IUsuarioDominio>().Verify(d => d.BuscarAsync(It.IsAny<int>(), It.IsAny<Guid>()), Times.Never);
@@ -338,10 +363,10 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var id = _faker.Random.Int(1);
             var chave = Guid.NewGuid();
             var novoEmail = $"novo_{_faker.Person.Email}";
-            var usuarioAlterar = new UsuarioAlterarEmail(novoEmail, chave);
+            var usuarioAlterar = new UsuarioAlterarEmail(novoEmail);
             var urlBase = _faker.Internet.Url();
 
-            var retorno = await servico.EnviarEmailAlteracaoEmailAsync(id, usuarioAlterar, urlBase);
+            var retorno = await servico.EnviarEmailAlteracaoEmailAsync(id, chave, usuarioAlterar, urlBase);
 
             Assert.False(retorno);
             _mocker.GetMock<IEmailServico>().Verify(d => d.EnviarEmailConfirmacaoAlteracaoEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
@@ -440,7 +465,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task DeveAlterarSenha()
+        internal async Task DeveConfirmarAlteracaoSenha()
         {
             var servico = _mocker.CreateInstance<UsuarioServico>();
             var novaSenha = _faker.Random.AlphaNumeric(10);

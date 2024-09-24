@@ -1,10 +1,12 @@
 ﻿using AutenticacaoDoisFatores.Core.Entidades;
 using AutenticacaoDoisFatores.Core.Enum;
+using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Core.Validadores;
 using AutenticacaoDoisFatores.Servico.DTO.Usuario;
 using AutenticacaoDoisFatores.Servico.Utilitarios;
 using Mensageiro;
+using System.Security;
 
 namespace AutenticacaoDoisFatores.Servico.Validacoes
 {
@@ -62,11 +64,19 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
             _notificador.AddMensagemNaoEncontrado(NotificacoesUsuario.ChaveAcessoNaoEncontrada);
         }
 
-        public bool AlteracaoNomeEhValida(UsuarioAlterarNome usuarioAlterarNome)
+        public bool AlteracaoEhValida(UsuarioAlterar usuarioAlterar)
         {
-            if (!UsuarioValidador.NomeEhValido(usuarioAlterarNome.Nome))
+            var nome = usuarioAlterar.Nome ?? "";
+            if (!nome.IsNullOrEmptyOrWhiteSpaces() && !UsuarioValidador.NomeEhValido(nome))
             {
                 _notificador.AddMensagem(NotificacoesUsuario.NomeInvalido);
+                return false;
+            }
+
+            var senha = usuarioAlterar.Senha ?? "";
+            if (!senha.IsNullOrEmptyOrWhiteSpaces() && !UsuarioValidador.SenhaEhValida(senha))
+            {
+                _notificador.AddMensagem(NotificacoesUsuario.SenhaInvalida);
                 return false;
             }
 

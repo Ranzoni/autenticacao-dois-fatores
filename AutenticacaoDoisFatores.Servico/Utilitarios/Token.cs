@@ -295,5 +295,23 @@ namespace AutenticacaoDoisFatores.Servico.Utilitarios
 
             return token;
         }
+
+        public static (int? id, Guid? chave) RetornarIdChaveAutenticacaoUsuario(string token)
+        {
+            var principal = ValidarToken(token);
+            var subjectClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
+            if (subjectClaim?.Value != AUTENTICAO_USUARIO)
+                return (null, null);
+
+            var idClaim = principal.FindFirst(ClaimTypes.Hash);
+            var idString = idClaim?.Value;
+            int? id = idString is not null ? int.Parse(idString) : null;
+
+            var chaveClaim = principal.FindFirst(ClaimTypes.Authentication);
+            var chaveString = chaveClaim?.Value;
+            Guid? chave = chaveString is not null ? Guid.Parse(chaveString) : null;
+
+            return (id, chave);
+        }
     }
 }

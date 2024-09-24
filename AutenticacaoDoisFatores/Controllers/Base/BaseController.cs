@@ -1,4 +1,5 @@
-﻿using Mensageiro;
+﻿using AutenticacaoDoisFatores.Servico.Utilitarios;
+using Mensageiro;
 using Mensageiro.WebApi;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -84,6 +85,16 @@ namespace AutenticacaoDoisFatores.Controllers.Base
             var urlFormatada = $"{urlAplicacao}{acao}";
 
             return urlFormatada;
+        }
+
+        protected (int id, Guid chave) RetornarDadosTokenAutenticacao()
+        {
+            var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+            var dadosToken = Token.RetornarIdChaveAutenticacaoUsuario(token);
+            var id = dadosToken.id ?? 0;
+            var chave = dadosToken.chave ?? Guid.Empty;
+
+            return (id, chave);
         }
     }
 }

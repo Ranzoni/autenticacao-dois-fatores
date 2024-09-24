@@ -1,6 +1,7 @@
 ﻿using AutenticacaoDoisFatores.Controllers.Base;
 using AutenticacaoDoisFatores.Servico.DTO.Usuario;
 using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
+using AutenticacaoDoisFatores.Servico.Utilitarios;
 using Mensageiro;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -51,12 +52,14 @@ namespace AutenticacaoDoisFatores.Controllers
         }
 
         [Authorize]
-        [HttpPut("Alterar/{id}")]
-        public async Task<ActionResult<UsuarioResposta?>> AlterarAsync(int id, UsuarioAlterarNome usuarioAlterar)
+        [HttpPut("Alterar")]
+        public async Task<ActionResult<UsuarioResposta?>> AlterarAsync(UsuarioAlterar usuarioAlterar)
         {
             try
             {
-                var retorno = await _servico.AlterarNomeAsync(id, usuarioAlterar);
+                var (id, chave) = RetornarDadosTokenAutenticacao();
+
+                var retorno = await _servico.AlterarAsync(id, chave, usuarioAlterar);
 
                 return Sucesso(retorno);
             }
@@ -67,13 +70,15 @@ namespace AutenticacaoDoisFatores.Controllers
         }
 
         [Authorize]
-        [HttpPut("AlterarEmail/{id}")]
-        public async Task<ActionResult> AlterarEmailAsync(int id, UsuarioAlterarEmail usuarioAlterar)
+        [HttpPut("AlterarEmail")]
+        public async Task<ActionResult> AlterarEmailAsync(UsuarioAlterarEmail usuarioAlterar)
         {
             try
             {
+                var (id, chave) = RetornarDadosTokenAutenticacao();
+
                 var urlBase = RetornarUrlFormatada("Usuario/ConfirmarAlteracaoEmail/");
-                var retorno = await _servico.EnviarEmailAlteracaoEmailAsync(id, usuarioAlterar, urlBase);
+                var retorno = await _servico.EnviarEmailAlteracaoEmailAsync(id, chave, usuarioAlterar, urlBase);
 
                 return Sucesso("Um e-mail de confirmação foi enviado");
             }

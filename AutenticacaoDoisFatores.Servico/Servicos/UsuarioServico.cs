@@ -10,38 +10,45 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 {
     public class UsuarioServico(IUsuarioDominio _dominio, IEntidadeAcessoDominio _dominioAcesso, IMapper _mapeador, UsuarioServicoValidacao _validacao, IEmailServico _email) : IUsuarioServico
     {
-        public async Task<bool> EnviarEmailAlteracaoEmailAsync(int id, UsuarioAlterarEmail usuarioAlterarEmail, string urlBase)
+        public async Task<bool> EnviarEmailAlteracaoEmailAsync(int id, Guid chave, UsuarioAlterarEmail usuarioAlterarEmail, string urlBase)
         {
             if (!_validacao.AlteracaoEmailEhValida(usuarioAlterarEmail))
                 return false;
 
-            var usuarioCadastrado = await _dominio.BuscarAsync(id, usuarioAlterarEmail.Chave);
+            var usuarioCadastrado = await _dominio.BuscarAsync(id, chave);
             if (usuarioCadastrado is null)
             {
                 _validacao.UsuarioNaoEncontrado();
                 return false;
             }
 
-            var token = Token.GerarTokenAlterarEmailUsuario(id, usuarioAlterarEmail.Email, usuarioAlterarEmail.Chave);
+            var token = Token.GerarTokenAlterarEmailUsuario(id, usuarioAlterarEmail.Email, chave);
             var linkConfirmacao = $"{urlBase}{token}";
             _email.EnviarEmailConfirmacaoAlteracaoEmail(usuarioAlterarEmail.Email, usuarioCadastrado.Nome, linkConfirmacao);
 
             return true;
         }
 
-        public async Task<UsuarioResposta?> AlterarNomeAsync(int id, UsuarioAlterarNome usuarioAlterarNome)
+        public async Task<UsuarioResposta?> AlterarAsync(int id, Guid chave, UsuarioAlterar usuarioAlterar)
         {
-            if (!_validacao.AlteracaoNomeEhValida(usuarioAlterarNome))
+            if (!_validacao.AlteracaoEhValida(usuarioAlterar))
                 return null;
 
-            var usuarioCadastrado = await _dominio.BuscarAsync(id, usuarioAlterarNome.Chave);
+            var usuarioCadastrado = await _dominio.BuscarAsync(id, chave);
             if (usuarioCadastrado is null)
             {
                 _validacao.UsuarioNaoEncontrado();
                 return null;
             }
 
-            usuarioCadastrado.AlterarNome(usuarioAlterarNome.Nome);
+            if (usuarioAlterar.Nome is not null)
+                usuarioCadastrado.AlterarNome(usuarioAlterar.Nome);
+
+            if (usuarioAlterar.Senha is not null)
+            {
+                var senhaCriptografada = Criptografia.Criptografar(usuarioAlterar.Senha);
+                usuarioCadastrado.AlterarSenha(senhaCriptografada);
+            }
 
             await _dominio.AlterarAsync(usuarioCadastrado);
 
