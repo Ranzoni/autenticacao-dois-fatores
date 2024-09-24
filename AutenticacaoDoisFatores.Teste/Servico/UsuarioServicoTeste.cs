@@ -283,34 +283,70 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             _mocker.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesUsuario.NaoEncontrado), Times.Once);
         }
 
-        //[Fact]
-        //internal async Task DeveEnviarEmailAlteracaoEmail()
-        //{
-        //    var servico = _mocker.CreateInstance<UsuarioServico>();
-        //    var id = _faker.Random.Int(1);
-        //    var chave = Guid.NewGuid();
-        //    var nome = _faker.Person.FullName;
-        //    var email = _faker.Person.Email;
-        //    var senha = _faker.Random.AlphaNumeric(10);
-        //    var usuarioCadastrado = new UsuarioConstrutor()
-        //        .ComId(id)
-        //        .ComNome(nome)
-        //        .ComEmail(email)
-        //        .ComSenha(senha)
-        //        .CriarCompleto();
-        //    var novoNome = $"{_faker.Person.FullName} Silva";
-        //    var usuarioAlterar = new UsuarioAlterarNome(novoNome, chave);
-        //    var usuarioResposta = new UsuarioResposta(nome, email, DateTime.Now);
-        //    _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(id, chave)).ReturnsAsync(usuarioCadastrado);
-        //    _mocker.GetMock<IMapper>().Setup(m => m.Map<UsuarioResposta>(It.IsAny<Usuario>())).Returns(usuarioResposta);
+        [Fact]
+        internal async Task DeveEnviarEmailAlteracaoEmail()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var id = _faker.Random.Int(1);
+            var chave = Guid.NewGuid();
+            var nome = _faker.Person.FullName;
+            var senha = _faker.Random.AlphaNumeric(10);
+            var usuarioCadastrado = new UsuarioConstrutor()
+                .ComId(id)
+                .ComNome(nome)
+                .ComSenha(senha)
+                .CriarCompleto();
+            var novoEmail = $"novo_{_faker.Person.Email}";
+            var usuarioAlterar = new UsuarioAlterarEmail(novoEmail, chave);
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(id, chave)).ReturnsAsync(usuarioCadastrado);
+            var urlBase = _faker.Internet.Url();
 
-        //    var retorno = await servico.EnviarEmailAlteracaoEmailAsync(id, usuarioAlterar);
+            var retorno = await servico.EnviarEmailAlteracaoEmailAsync(id, usuarioAlterar, urlBase);
 
-        //    Assert.NotNull(retorno);
-        //    Assert.Equal(usuarioResposta, retorno);
-        //    Assert.Equal(novoNome, usuarioCadastrado.Nome);
-        //    _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Once);
-        //}
+            Assert.True(retorno);
+            _mocker.GetMock<IEmailServico>().Verify(d => d.EnviarEmailConfirmacaoAlteracaoEmail(novoEmail, nome, It.IsAny<string>()), Times.Once);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("    ")]
+        [InlineData("a")]
+        [InlineData("ab")]
+        [InlineData("a@.c")]
+        [InlineData("a@12345678901234567890123456789012345678901234567890123456789012345678901234567.c")]
+        internal async Task NaoDeveEnviarEmailAlteracaoEmailComEmailInvalido(string emailInvalido)
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var id = _faker.Random.Int(1);
+            var chave = Guid.NewGuid();
+            var usuarioAlterar = new UsuarioAlterarEmail(emailInvalido, chave);
+            var urlBase = _faker.Internet.Url();
+
+            var retorno = await servico.EnviarEmailAlteracaoEmailAsync(id, usuarioAlterar, urlBase);
+
+            Assert.False(retorno);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.BuscarAsync(It.IsAny<int>(), It.IsAny<Guid>()), Times.Never);
+            _mocker.GetMock<IEmailServico>().Verify(d => d.EnviarEmailConfirmacaoAlteracaoEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesUsuario.EmailInvalido), Times.Once);
+        }
+
+        [Fact]
+        internal async Task NaoDeveEnviarEmailAlteracaoEmailComEmailUsuarioInexistente()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var id = _faker.Random.Int(1);
+            var chave = Guid.NewGuid();
+            var novoEmail = $"novo_{_faker.Person.Email}";
+            var usuarioAlterar = new UsuarioAlterarEmail(novoEmail, chave);
+            var urlBase = _faker.Internet.Url();
+
+            var retorno = await servico.EnviarEmailAlteracaoEmailAsync(id, usuarioAlterar, urlBase);
+
+            Assert.False(retorno);
+            _mocker.GetMock<IEmailServico>().Verify(d => d.EnviarEmailConfirmacaoAlteracaoEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagemNaoEncontrado(NotificacoesUsuario.NaoEncontrado), Times.Once);
+        }
 
         [Fact]
         internal async Task DeveAutenticar()

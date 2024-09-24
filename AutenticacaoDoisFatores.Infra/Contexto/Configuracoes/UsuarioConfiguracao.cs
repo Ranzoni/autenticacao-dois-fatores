@@ -32,7 +32,7 @@ namespace AutenticacaoDoisFatores.Infra.Contexto.Configuracoes
             builder
                 .HasOne(p => p.EntidadeAcesso)
                 .WithMany()
-                .HasForeignKey(p => p.Id)
+                .HasForeignKey("IdEntidadeAcesso")
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
         }
