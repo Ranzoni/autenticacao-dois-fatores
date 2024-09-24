@@ -157,7 +157,7 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             return true;
         }
 
-        public async Task<UsuarioResposta?> AlterarSenhaAsync(string token)
+        public async Task<bool> AlterarSenhaAsync(string token)
         {
             var dadosToken = Token.RetornarIdSenhaAlteracaoSenhaUsuario(token);
             var id = dadosToken.id ?? 0;
@@ -168,16 +168,14 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             if (usuarioCadastrado is null)
             {
                 _validacao.UsuarioNaoEncontrado();
-                return null;
+                return false;
             }
 
             usuarioCadastrado.AlterarSenha(senha);
 
             await _dominio.AlterarAsync(usuarioCadastrado);
 
-            var usuarioResposta = _mapeador.Map<UsuarioResposta>(usuarioCadastrado);
-
-            return usuarioResposta;
+            return true;
         }
     }
 }

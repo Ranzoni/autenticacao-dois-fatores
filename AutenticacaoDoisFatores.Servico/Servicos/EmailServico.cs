@@ -126,5 +126,13 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
             Enviar(para, titulo, conteudo);
         }
+
+        public void EnviarEmailConfirmacaoAlteracaoSenha(string para, string nomeUsuario, string linkConfirmacao)
+        {
+            var titulo = "Alteração de Senha";
+            var conteudo = HtmlMensagem($"<p>Olá, {nomeUsuario}.<br/ ><br />Para confirmar a nova senha do seu usuário clique no seguinte link: <a href='{linkConfirmacao}'>Clique aqui!</a></p>");
+
+            Enviar(para, titulo, conteudo);
+        }
     }
 }
