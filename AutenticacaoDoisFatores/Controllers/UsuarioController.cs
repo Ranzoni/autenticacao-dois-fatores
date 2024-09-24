@@ -2,6 +2,7 @@
 using AutenticacaoDoisFatores.Servico.DTO.Usuario;
 using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
 using Mensageiro;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -49,6 +50,7 @@ namespace AutenticacaoDoisFatores.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut("Alterar/{id}")]
         public async Task<ActionResult<UsuarioResposta?>> AlterarAsync(int id, UsuarioAlterarNome usuarioAlterar)
         {
@@ -64,6 +66,7 @@ namespace AutenticacaoDoisFatores.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut("AlterarEmail/{id}")]
         public async Task<ActionResult> AlterarEmailAsync(int id, UsuarioAlterarEmail usuarioAlterar)
         {
