@@ -136,5 +136,48 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
             return usuarioAutenticado;
         }
+
+        public async Task<bool> EnviarEmailAlteracaoSenhaAsync(int id, UsuarioAlterarSenha usuarioAlterarSenha, string urlBase)
+        {
+            if (!_validacao.AlteracaoSenhaEhValida(usuarioAlterarSenha))
+                return false;
+
+            var usuario = await _dominio.BuscarAsync(id, usuarioAlterarSenha.Chave);
+            if (usuario is null)
+            {
+                _validacao.UsuarioNaoEncontrado();
+                return false;
+            }
+
+            var token = Token.GerarTokenAlterarSenhaUsuario(id, usuarioAlterarSenha.Senha, usuarioAlterarSenha.Chave);
+            var linkConfirmacao = $"{urlBase}{token}";
+
+            _email.EnviarEmailConfirmacaoAlteracaoSenha(usuario.Email, usuario.Nome, linkConfirmacao);
+
+            return true;
+        }
+
+        public async Task<UsuarioResposta?> AlterarSenhaAsync(string token)
+        {
+            var dadosToken = Token.RetornarIdSenhaAlteracaoSenhaUsuario(token);
+            var id = dadosToken.id ?? 0;
+            var senha = dadosToken.senha ?? "";
+            var chave = dadosToken.chave ?? Guid.Empty;
+
+            var usuarioCadastrado = await _dominio.BuscarAsync(id, chave);
+            if (usuarioCadastrado is null)
+            {
+                _validacao.UsuarioNaoEncontrado();
+                return null;
+            }
+
+            usuarioCadastrado.AlterarSenha(senha);
+
+            await _dominio.AlterarAsync(usuarioCadastrado);
+
+            var usuarioResposta = _mapeador.Map<UsuarioResposta>(usuarioCadastrado);
+
+            return usuarioResposta;
+        }
     }
 }

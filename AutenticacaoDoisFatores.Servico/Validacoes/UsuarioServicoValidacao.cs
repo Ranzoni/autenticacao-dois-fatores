@@ -89,6 +89,17 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
             return true;
         }
 
+        public bool AlteracaoSenhaEhValida(UsuarioAlterarSenha usuarioAlterarSenha)
+        {
+            if (!UsuarioValidador.SenhaEhValida(usuarioAlterarSenha.Senha))
+            {
+                _notificador.AddMensagem(NotificacoesUsuario.SenhaInvalida);
+                return false;
+            }
+
+            return true;
+        }
+
         public bool AutenticacaoEhValida(UsuarioAutenticar usuarioAutenticar, Usuario usuario)
         {
             var senhasIguais = Criptografia.SaoIguais(usuarioAutenticar.Senha, usuario.Senha);
