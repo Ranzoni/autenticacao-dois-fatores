@@ -349,6 +349,42 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
+        internal async Task DeveAlterarEmail()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var novoEmail = $"novo_{_faker.Person.Email}";
+            var chave = _faker.Random.Guid();
+            var usuarioCadastrado = new UsuarioConstrutor()
+                .CriarCompleto();
+            var token = Token.GerarTokenAlterarEmailUsuario(usuarioCadastrado.Id, novoEmail, chave);
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(usuarioCadastrado.Id, chave)).ReturnsAsync(usuarioCadastrado);
+            var usuarioResposta = new UsuarioResposta(usuarioCadastrado.Nome, novoEmail, usuarioCadastrado.DataCadastro);
+            _mocker.GetMock<IMapper>().Setup(m => m.Map<UsuarioResposta>(usuarioCadastrado)).Returns(usuarioResposta);
+
+            var retorno = await servico.AlterarEmailAsync(token);
+
+            Assert.NotNull(retorno);
+            Assert.Equal(novoEmail, retorno.Email);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(usuarioCadastrado), Times.Once);
+        }
+
+        [Fact]
+        internal async Task NaoDeveAlterarEmailComUsuarioInexistente()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var id = _faker.Random.Int(1);
+            var novoEmail = $"novo_{_faker.Person.Email}";
+            var chave = _faker.Random.Guid();
+            var token = Token.GerarTokenAlterarEmailUsuario(id, novoEmail, chave);
+
+            var retorno = await servico.AlterarEmailAsync(token);
+
+            Assert.Null(retorno);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Never);
+            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagemNaoEncontrado(NotificacoesUsuario.NaoEncontrado), Times.Once);
+        }
+
+        [Fact]
         internal async Task DeveAutenticar()
         {
             var servico = _mocker.CreateInstance<UsuarioServico>();
