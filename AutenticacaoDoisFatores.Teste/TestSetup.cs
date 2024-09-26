@@ -9,6 +9,8 @@ namespace AutenticacaoDoisFatores.Teste
             var faker = new Faker();
             var tokenKey = faker.System.ApplePushToken();
             Environment.SetEnvironmentVariable("TOKEN_KEY", tokenKey);
+            var chaveAdmin = "###teste_chave_admin$$$";
+            Environment.SetEnvironmentVariable("CHAVE_ADMIN", chaveAdmin);
         }
     }
 }

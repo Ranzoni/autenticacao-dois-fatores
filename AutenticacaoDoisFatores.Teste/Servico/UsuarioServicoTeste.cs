@@ -217,6 +217,57 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
+        internal async Task DeveInativar()
+        {
+            var chave = Guid.NewGuid();
+            var chaveAdmin = "###teste_chave_admin$$$";
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var usuario = new UsuarioConstrutor()
+                .ComAtivo(true)
+                .CriarCompleto();
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(usuario.Id, chave)).ReturnsAsync(usuario);
+
+            var retorno = await servico.InativarAsync(usuario.Id, chave, chaveAdmin);
+
+            Assert.True(retorno);
+            Assert.False(usuario.Ativo);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(usuario), Times.Once);
+        }
+
+        [Fact]
+        internal async Task NaoDeveInativarQuandoChaveAdminIncorreta()
+        {
+            var chave = Guid.NewGuid();
+            var chaveAdmin = "###incorreta_chave_admin$$$";
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var usuario = new UsuarioConstrutor()
+                .ComAtivo(true)
+                .CriarCompleto();
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(usuario.Id, chave)).ReturnsAsync(usuario);
+
+            var retorno = await servico.InativarAsync(usuario.Id, chave, chaveAdmin);
+
+            Assert.False(retorno);
+            Assert.True(usuario.Ativo);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Never);
+        }
+
+        [Fact]
+        internal async Task NaoDeveInativarQuandoUsuarioNaoExiste()
+        {
+            var chave = Guid.NewGuid();
+            var chaveAdmin = "###teste_chave_admin$$$";
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var id = _faker.Random.Int(1);
+
+            var retorno = await servico.InativarAsync(id, chave, chaveAdmin);
+
+            Assert.False(retorno);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Never);
+            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagemNaoEncontrado(NotificacoesUsuario.NaoEncontrado), Times.Once);
+        }
+
+        [Fact]
         internal async Task DeveAlterarNome()
         {
             var servico = _mocker.CreateInstance<UsuarioServico>();
