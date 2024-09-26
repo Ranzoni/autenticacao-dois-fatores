@@ -160,5 +160,22 @@ namespace AutenticacaoDoisFatores.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [Authorize]
+        [HttpPut("Inativar/{id}")]
+        public async Task<ActionResult> InativarAsync(int id)
+        {
+            try
+            {
+                var chave = RetornarDadosTokenAutenticacao().chave;
+                var retorno = await _servico.InativarAsync(id, chave);
+
+                return Sucesso("Usuário inativado");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

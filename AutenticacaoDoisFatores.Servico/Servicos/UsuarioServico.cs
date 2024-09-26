@@ -193,11 +193,8 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             return true;
         }
 
-        public async Task<bool> InativarAsync(int id, Guid chave, string chaveAdmin)
+        public async Task<bool> InativarAsync(int id, Guid chave)
         {
-            if (!ChaveAcesso.RetornarChaveAdmin().Equals(chaveAdmin))
-                return false;
-
             var usuario = await _dominio.BuscarAsync(id, chave);
             if (usuario is null)
             {
