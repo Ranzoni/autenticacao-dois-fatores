@@ -1,4 +1,4 @@
-﻿namespace AutenticacaoDoisFatores.Servico.DTO.Usuario
+﻿namespace AutenticacaoDoisFatores.Servico.DTO.Autenticacao
 {
     public class UsuarioAutenticar(string email, string senha, Guid chave)
     {

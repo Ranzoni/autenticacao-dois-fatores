@@ -4,9 +4,7 @@ using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Core.Validadores;
 using AutenticacaoDoisFatores.Servico.DTO.Usuario;
-using AutenticacaoDoisFatores.Servico.Utilitarios;
 using Mensageiro;
-using System.Security;
 
 namespace AutenticacaoDoisFatores.Servico.Validacoes
 {
@@ -108,11 +106,6 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
             }
 
             return true;
-        }
-
-        public void NaoAutorizado()
-        {
-            _notificador.AddMensagemNaoAutorizado(NotificacoesUsuario.SenhaIncorreta);
         }
     }
 }

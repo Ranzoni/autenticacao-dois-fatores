@@ -1,5 +1,5 @@
 ﻿using AutenticacaoDoisFatores.Controllers.Base;
-using AutenticacaoDoisFatores.Servico.DTO.Usuario;
+using AutenticacaoDoisFatores.Servico.DTO.Autenticacao;
 using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
 using Mensageiro;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +9,7 @@ namespace AutenticacaoDoisFatores.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class AutenticacaoController(INotificador _notificador, IConfiguration _configuration, IUsuarioServico _servico) : BaseController(_notificador, _configuration)
+    public class AutenticacaoController(INotificador _notificador, IConfiguration _configuration, IAutenticacaoServico _servico) : BaseController(_notificador, _configuration)
     {
         [HttpPost("Autenticar")]
         public async Task<ActionResult<UsuarioAutenticado?>> AutenticarAsync(UsuarioAutenticar usuarioAutenticar)

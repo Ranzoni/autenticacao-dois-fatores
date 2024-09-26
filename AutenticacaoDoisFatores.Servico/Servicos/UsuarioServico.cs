@@ -8,7 +8,7 @@ using AutoMapper;
 
 namespace AutenticacaoDoisFatores.Servico.Servicos
 {
-    public class UsuarioServico(IUsuarioDominio _dominio, IEntidadeAcessoDominio _dominioAcesso, IMapper _mapeador, UsuarioServicoValidacao _validacao, IEmailServico _email) : IUsuarioServico
+    public class UsuarioServico(IUsuarioDominio _dominio, IEntidadeAcessoDominio _dominioAcesso, UsuarioServicoValidacao _validacao, IMapper _mapeador, IEmailServico _email) : IUsuarioServico
     {
         public async Task<bool> EnviarEmailAlteracaoEmailAsync(int id, Guid chave, UsuarioAlterarEmail usuarioAlterarEmail, string urlBase)
         {
@@ -55,25 +55,6 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             var usuarioResposta = _mapeador.Map<UsuarioResposta>(usuarioCadastrado);
 
             return usuarioResposta;
-        }
-
-        public async Task<bool> AtivarAsync(string token)
-        {
-            var dadosToken = Token.RetornarIdEChaveConfirmacaoCadastro(token);
-            var id = dadosToken.id ?? 0;
-            var chave = dadosToken.chave ?? Guid.Empty;
-
-            var usuario = await _dominio.BuscarNaoAtivoAsync(id, chave);
-            if (!_validacao.AtivacaoEhValida(usuario))
-                return false;
-
-            if (usuario is null)
-                return false;
-
-            usuario.Ativar(true);
-            await _dominio.AlterarAsync(usuario);
-
-            return true;
         }
 
         public async Task<UsuarioResposta?> CadastrarAsync(UsuarioCadastrar usuarioCadastrar, string urlBase)
@@ -125,32 +106,6 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             return usuarioResposta;
         }
 
-        public async Task<UsuarioAutenticado?> AutenticarAsync(UsuarioAutenticar usuarioAutenticar)
-        {
-            var usuario = await _dominio.BuscarPorEmailAsync(usuarioAutenticar.Email, usuarioAutenticar.Chave);
-            if (usuario is null)
-            {
-                _validacao.UsuarioNaoEncontrado();
-                return null;
-            }
-
-            var senhasIguais = Criptografia.SaoIguais(usuarioAutenticar.Senha, usuario.Senha);
-            if (!senhasIguais)
-            {
-                _validacao.NaoAutorizado();
-                return null;
-            }
-
-            var token = Token.GerarTokenAutenticacaoUsuario(usuario.Id, usuarioAutenticar.Chave);
-
-            usuario.AtualizarDataUltimoAcesso();
-            await _dominio.AlterarAsync(usuario);
-
-            var usuarioAutenticado = new UsuarioAutenticado(usuario.Id, usuario.Email, token);
-
-            return usuarioAutenticado;
-        }
-
         public async Task<bool> EnviarEmailAlteracaoSenhaAsync(int id, UsuarioAlterarSenha usuarioAlterarSenha, string urlBase)
         {
             if (!_validacao.AlteracaoSenhaEhValida(usuarioAlterarSenha))
@@ -189,21 +144,6 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             usuarioCadastrado.AlterarSenha(senhaCriptografada);
 
             await _dominio.AlterarAsync(usuarioCadastrado);
-
-            return true;
-        }
-
-        public async Task<bool> InativarAsync(int id, Guid chave)
-        {
-            var usuario = await _dominio.BuscarAsync(id, chave);
-            if (usuario is null)
-            {
-                _validacao.UsuarioNaoEncontrado();
-                return false;
-            }
-
-            usuario.Ativar(false);
-            await _dominio.AlterarAsync(usuario);
 
             return true;
         }
