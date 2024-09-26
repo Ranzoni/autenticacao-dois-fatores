@@ -6,6 +6,7 @@ namespace AutenticacaoDoisFatores.Servico.Servicos.Interfaces
     {
         Task<UsuarioResposta?> CadastrarAsync(UsuarioCadastrar usuarioCadastrar, string urlBase);
         Task<bool> AtivarAsync(string token);
+        Task<bool> InativarAsync(int id, Guid chave, string chaveAdmin);
         Task<UsuarioResposta?> AlterarAsync(int id, Guid chave, UsuarioAlterar usuarioAlterar);
         Task<bool> EnviarEmailAlteracaoEmailAsync(int id, Guid chave, UsuarioAlterarEmail usuarioAlterarEmail, string urlBase);
         Task<UsuarioResposta?> AlterarEmailAsync(string token);

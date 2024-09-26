@@ -1,5 +1,4 @@
 ﻿using AutenticacaoDoisFatores.Core.Entidades;
-using AutenticacaoDoisFatores.Core.Enum;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Servico.DTO.Usuario;
 using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
@@ -190,6 +189,24 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             usuarioCadastrado.AlterarSenha(senhaCriptografada);
 
             await _dominio.AlterarAsync(usuarioCadastrado);
+
+            return true;
+        }
+
+        public async Task<bool> InativarAsync(int id, Guid chave, string chaveAdmin)
+        {
+            if (!ChaveAcesso.RetornarChaveAdmin().Equals(chaveAdmin))
+                return false;
+
+            var usuario = await _dominio.BuscarAsync(id, chave);
+            if (usuario is null)
+            {
+                _validacao.UsuarioNaoEncontrado();
+                return false;
+            }
+
+            usuario.Ativar(false);
+            await _dominio.AlterarAsync(usuario);
 
             return true;
         }
