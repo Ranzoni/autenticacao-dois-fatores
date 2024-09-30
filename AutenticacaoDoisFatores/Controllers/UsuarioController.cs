@@ -10,7 +10,7 @@ namespace AutenticacaoDoisFatores.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UsuarioController(INotificador notificador, IConfiguration configuration, IUsuarioServico _servico) : BaseController(notificador, configuration)
+    public class UsuarioController(INotificador notificador, IConfiguration configuration, IUsuarioServico _servico, IAutenticacaoServico _servicoAutenticacao) : BaseController(notificador, configuration)
     {
         [HttpPost("Cadastrar")]
         public async Task<ActionResult<UsuarioResposta?>> CadastrarAsync(UsuarioCadastrar usuarioCadastrar)
@@ -34,7 +34,7 @@ namespace AutenticacaoDoisFatores.Controllers
         {
             try
             {
-                var retorno = await _servico.AtivarAsync(token);
+                var retorno = await _servicoAutenticacao.AtivarAsync(token);
                 if (!retorno)
                     return MensagemHtml("Falha", "Não encontrada", "Não foi encontrado um usuário com este token");
 
