@@ -13,6 +13,10 @@ namespace AutenticacaoDoisFatores.Servico.Utilitarios
         private const string EMAIL_REENVIO_CHAVE = "REENVIO_EMAIL_CHAVE";
         private const string EMAIL_ALTERACAO_NOME_ENTIDADE_ACESSO = "EMAIL_ALTERACAO_NOME_ENTIDADE_ACESSO";
         private const string EMAIL_ALTERACAO_EMAIL_ENTIDADE_ACESSO = "EMAIL_ALTERACAO_EMAIL_ENTIDADE_ACESSO";
+        private const string EMAIL_CONFIRMACAO_CADASTRO_USUARIO = "EMAIL_CONFIRMACAO_CADASTRO_USUARIO";
+        private const string EMAIL_ALTERACAO_EMAIL_USUARIO = "EMAIL_ALTERACAO_EMAIL_USUARIO";
+        private const string EMAIL_ALTERACAO_SENHA_USUARIO = "EMAIL_ALTERACAO_SENHA_USUARIO";
+        private const string AUTENTICAO_USUARIO = "AUTENTICAO_USUARIO";
 
         private static string GerarToken(string sub, Claim claim)
         {
@@ -86,7 +90,7 @@ namespace AutenticacaoDoisFatores.Servico.Utilitarios
                 TokenException.ChaveNaoEncontrada();
 
             var segurancaToken = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(chaveToken);
+            var key = Encoding.UTF8.GetBytes(chaveToken);
 
             var parametrosValidacao = new TokenValidationParameters
             {
@@ -171,14 +175,143 @@ namespace AutenticacaoDoisFatores.Servico.Utilitarios
             if (subjectClaim?.Value != EMAIL_ALTERACAO_EMAIL_ENTIDADE_ACESSO)
                 return (null, null);
 
-            var nomeClaim = principal.FindFirst(ClaimTypes.Hash);
-            var idString = nomeClaim?.Value;
+            var idClaim = principal.FindFirst(ClaimTypes.Hash);
+            var idString = idClaim?.Value;
             int? id = idString is not null ? int.Parse(idString) : null;
 
             var emailClaim = principal.FindFirst(ClaimTypes.Email);
             var email = emailClaim?.Value;
 
             return (id, email);
+        }
+        
+        public static string GerarTokenConfirmacaoCadastro(int id, Guid chave)
+        {
+            var listaClaims = new List<Claim>();
+            var idClaim = new Claim(ClaimTypes.Hash, id.ToString());
+            listaClaims.Add(idClaim);
+            var chaveClaim = new Claim(ClaimTypes.Authentication, chave.ToString());
+            listaClaims.Add(chaveClaim);
+
+            var token = GerarToken(EMAIL_CONFIRMACAO_CADASTRO_USUARIO, listaClaims);
+
+            return token;
+        }
+
+        public static (int? id, Guid? chave) RetornarIdEChaveConfirmacaoCadastro(string token)
+        {
+            var principal = ValidarToken(token);
+            var subjectClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
+            if (subjectClaim?.Value != EMAIL_CONFIRMACAO_CADASTRO_USUARIO)
+                return (null, null);
+
+            var idClaim = principal.FindFirst(ClaimTypes.Hash);
+            var idString = idClaim?.Value;
+            int? id = idString is not null ? int.Parse(idString) : null;
+
+            var chaveClaim = principal.FindFirst(ClaimTypes.Authentication);
+            var chaveString = chaveClaim?.Value;
+            Guid? chave = chaveString is not null ? Guid.Parse(chaveString) : null;
+
+            return (id, chave);
+        }
+
+        public static string GerarTokenAlterarEmailUsuario(int id, string email, Guid chave)
+        {
+            var claims = new List<Claim>()
+            {
+                new(ClaimTypes.Hash, id.ToString()),
+                new(ClaimTypes.Email, email),
+                new(ClaimTypes.Authentication, chave.ToString())
+            };
+            var token = GerarToken(EMAIL_ALTERACAO_EMAIL_USUARIO, claims);
+
+            return token;
+        }
+
+        public static (int? id, string? email, Guid? chave) RetornarIdEmailAlteracaoEmailUsuario(string token)
+        {
+            var principal = ValidarToken(token);
+            var subjectClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
+            if (subjectClaim?.Value != EMAIL_ALTERACAO_EMAIL_USUARIO)
+                return (null, null, null);
+
+            var idClaim = principal.FindFirst(ClaimTypes.Hash);
+            var idString = idClaim?.Value;
+            int? id = idString is not null ? int.Parse(idString) : null;
+
+            var emailClaim = principal.FindFirst(ClaimTypes.Email);
+            var email = emailClaim?.Value;
+
+            var chaveClaim = principal.FindFirst(ClaimTypes.Authentication);
+            var chaveString = chaveClaim?.Value;
+            Guid? chave = chaveString is not null ? Guid.Parse(chaveString) : null;
+
+            return (id, email, chave);
+        }
+
+        public static string GerarTokenAlterarSenhaUsuario(int id, string senha, Guid chave)
+        {
+            var claims = new List<Claim>()
+            {
+                new(ClaimTypes.Hash, id.ToString()),
+                new(ClaimTypes.AuthorizationDecision, senha),
+                new(ClaimTypes.Authentication, chave.ToString())
+            };
+            var token = GerarToken(EMAIL_ALTERACAO_SENHA_USUARIO, claims);
+
+            return token;
+        }
+
+        public static (int? id, string? senha, Guid? chave) RetornarIdSenhaAlteracaoSenhaUsuario(string token)
+        {
+            var principal = ValidarToken(token);
+            var subjectClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
+            if (subjectClaim?.Value != EMAIL_ALTERACAO_SENHA_USUARIO)
+                return (null, null, null);
+
+            var idClaim = principal.FindFirst(ClaimTypes.Hash);
+            var idString = idClaim?.Value;
+            int? id = idString is not null ? int.Parse(idString) : null;
+
+            var senhaClaim = principal.FindFirst(ClaimTypes.AuthorizationDecision);
+            var senha = senhaClaim?.Value;
+
+            var chaveClaim = principal.FindFirst(ClaimTypes.Authentication);
+            var chaveString = chaveClaim?.Value;
+            Guid? chave = chaveString is not null ? Guid.Parse(chaveString) : null;
+
+            return (id, senha, chave);
+        }
+
+        public static string GerarTokenAutenticacaoUsuario(int id, Guid chave)
+        {
+            var claims = new List<Claim>()
+            {
+                new(ClaimTypes.Hash, id.ToString()),
+                new(ClaimTypes.Authentication, chave.ToString())
+            };
+            var token = GerarToken(AUTENTICAO_USUARIO, claims);
+
+            return token;
+        }
+
+        public static (int? id, Guid? chave) RetornarIdChaveAutenticacaoUsuario(string token)
+        {
+            var principal = ValidarToken(token);
+            var subjectClaim = principal.FindFirst(ClaimTypes.NameIdentifier);
+            if (subjectClaim?.Value != AUTENTICAO_USUARIO)
+                return (null, null);
+
+            var idClaim = principal.FindFirst(ClaimTypes.Hash);
+            var idString = idClaim?.Value;
+            int? id = idString is not null ? int.Parse(idString) : null;
+
+            var chaveClaim = principal.FindFirst(ClaimTypes.Authentication);
+            var chaveString = chaveClaim?.Value;
+            Guid? chave = chaveString is not null ? Guid.Parse(chaveString) : null;
+
+            return (id, chave);
         }
     }
 }

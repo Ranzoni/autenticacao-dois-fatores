@@ -1,54 +1,25 @@
-﻿using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
+﻿using AutenticacaoDoisFatores.Servico.Utilitarios;
+using Mensageiro;
+using Mensageiro.WebApi;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace AutenticacaoDoisFatores.Controllers
+namespace AutenticacaoDoisFatores.Controllers.Base
 {
-    public abstract class BaseController(INotificadorServico notificador) : ControllerBase
+    public abstract class BaseController(INotificador notificador, IConfiguration config) : MensageiroControllerBase(notificador)
     {
-        private readonly INotificadorServico _notificador = notificador;
-
-        public ActionResult<T?> CriadoComSucesso<T>(T? retorno)
-        {
-            if (_notificador.ExisteMensagem())
-                return UnprocessableEntity(_notificador.Mensagens());
-
-            return StatusCode(201, retorno);
-        }
-
-        protected ActionResult Sucesso(string mensagem)
-        {
-            if (_notificador.ExisteMensagem())
-                return UnprocessableEntity(_notificador.Mensagens());
-
-            return Ok(mensagem);
-        }
-
-        protected ActionResult Sucesso(object modelo)
-        {
-            if (_notificador.ExisteMensagem())
-                return UnprocessableEntity(_notificador.Mensagens());
-
-            return Ok(modelo);
-        }
-
-        protected ActionResult NaoEncontrado(string mensagem)
-        {
-            if (_notificador.ExisteMensagem())
-                return UnprocessableEntity(_notificador.Mensagens());
-
-            return NotFound(mensagem);
-        }
+        private readonly IConfiguration _config = config;
 
         protected ContentResult MensagemHtml(string cabecalho, string titulo, string mensagem)
         {
             var httpStatusCode = HttpStatusCode.OK;
-            if (_notificador.ExisteMensagem())
+            var notificadorMensagem = Notificador(); 
+            if (notificadorMensagem.ExisteMensagem())
             {
                 httpStatusCode = HttpStatusCode.UnprocessableEntity;
                 cabecalho = "Atenção";
                 titulo = "Operação não realizada";
-                mensagem = _notificador.Mensagens().First();
+                mensagem = notificadorMensagem.Mensagens().First();
             }
 
             var style = @"
@@ -106,6 +77,24 @@ namespace AutenticacaoDoisFatores.Controllers
                 StatusCode = (int)httpStatusCode,
                 Content = html
             };
+        }
+
+        protected string RetornarUrlFormatada(string acao)
+        {
+            var urlAplicacao = _config.GetValue<string>("AutenticacaoDoisFatores:UrlBase");
+            var urlFormatada = $"{urlAplicacao}{acao}";
+
+            return urlFormatada;
+        }
+
+        protected (int id, Guid chave) RetornarDadosTokenAutenticacao()
+        {
+            var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+            var dadosToken = Token.RetornarIdChaveAutenticacaoUsuario(token);
+            var id = dadosToken.id ?? 0;
+            var chave = dadosToken.chave ?? Guid.Empty;
+
+            return (id, chave);
         }
     }
 }

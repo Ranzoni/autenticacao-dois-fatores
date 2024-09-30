@@ -1,6 +1,7 @@
 ﻿using AutenticacaoDoisFatores.Core.Entidades;
 using AutenticacaoDoisFatores.Core.Repositorios;
 using AutenticacaoDoisFatores.Infra.Contexto;
+using AutenticacaoDoisFatores.Infra.Repositorios.Base;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutenticacaoDoisFatores.Infra.Repositorios
@@ -15,6 +16,11 @@ namespace AutenticacaoDoisFatores.Infra.Repositorios
         public async Task<EntidadeAcesso?> BuscarAsync(int id)
         {
             return await _contexto.EntidadesAcesso.FirstOrDefaultAsync(e => e.Id.Equals(id));
+        }
+
+        public async Task<EntidadeAcesso?> BuscarPorChaveAsync(Guid chave)
+        {
+            return await _contexto.EntidadesAcesso.FirstOrDefaultAsync(e => e.Chave.Equals(chave));
         }
 
         public async Task<EntidadeAcesso?> BuscarPorEmailAsync(string email)
@@ -38,6 +44,11 @@ namespace AutenticacaoDoisFatores.Infra.Repositorios
             _contexto.EntidadesAcesso.Remove(entidade);
 
             return true;
+        }
+
+        public async Task<bool> ExisteEntidadeComChaveAsync(Guid chave)
+        {
+            return await _contexto.EntidadesAcesso.AnyAsync(e => e.Chave.Equals(chave));
         }
 
         public async Task<bool> ExisteEntidadeComEmailAsync(string email)

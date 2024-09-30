@@ -48,5 +48,15 @@ namespace AutenticacaoDoisFatores.Core.Servicos
 
             return excluida;
         }
+
+        public async Task<EntidadeAcesso?> BuscarComChaveAsync(Guid chave)
+        {
+            return await _repositorio.BuscarPorChaveAsync(chave);
+        }
+
+        public async Task<bool> ExisteEntidadeComChaveAsync(Guid chave)
+        {
+            return await _repositorio.ExisteEntidadeComChaveAsync(chave);
+        }
     }
 }

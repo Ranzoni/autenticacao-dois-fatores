@@ -19,7 +19,7 @@ namespace AutenticacaoDoisFatores.Servico.Utilitarios
             return Convert.ToBase64String(hashBytes);
         }
 
-        internal static bool SaoIguais(string valor, string valorCriptografado)
+        public static bool SaoIguais(string valor, string valorCriptografado)
         {
             var hashBytes = Convert.FromBase64String(valorCriptografado);
 

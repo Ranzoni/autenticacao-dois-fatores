@@ -17,7 +17,7 @@ namespace AutenticacaoDoisFatores.Infra.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.7")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -33,9 +33,8 @@ namespace AutenticacaoDoisFatores.Infra.Migrations
                     b.Property<bool>("Ativo")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Chave")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("Chave")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("DataCadastro")
                         .HasColumnType("timestamp with time zone");
@@ -55,10 +54,71 @@ namespace AutenticacaoDoisFatores.Infra.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Chave")
+                        .IsUnique();
+
                     b.HasIndex("Email")
                         .IsUnique();
 
                     b.ToTable("EntidadesAcesso");
+                });
+
+            modelBuilder.Entity("AutenticacaoDoisFatores.Core.Entidades.Usuario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("DataAlteracao")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("DataCadastro")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DataUltimoAcesso")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<int>("IdEntidadeAcesso")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Senha")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("IdEntidadeAcesso");
+
+                    b.ToTable("Usuarios");
+                });
+
+            modelBuilder.Entity("AutenticacaoDoisFatores.Core.Entidades.Usuario", b =>
+                {
+                    b.HasOne("AutenticacaoDoisFatores.Core.Entidades.EntidadeAcesso", "EntidadeAcesso")
+                        .WithMany()
+                        .HasForeignKey("IdEntidadeAcesso")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EntidadeAcesso");
                 });
 #pragma warning restore 612, 618
         }

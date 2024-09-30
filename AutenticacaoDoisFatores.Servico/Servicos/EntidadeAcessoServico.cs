@@ -16,15 +16,13 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
                 return null;
 
             var chave = ChaveAcesso.GerarChave();
-            var chaveCriptografada = Criptografia.Criptografar(chave);
-
-            var entidade = new EntidadeAcesso(entidadeCadastrar.Nome, chaveCriptografada, entidadeCadastrar.Email);
+            var entidade = new EntidadeAcesso(entidadeCadastrar.Nome, chave, entidadeCadastrar.Email);
             var entidadeCadastrada = await _dominio.CadastrarAsync(entidade);
 
             var token = Token.GerarTokenEnvioChaveAcesso(entidade.Email);
             var urlConfirmacaoCadastro = $"{urlBase}{token}";
 
-            _email.EnviarSucessoCadastroDeAcesso(entidade.Email, chave, urlConfirmacaoCadastro);
+            _email.EnviarSucessoCadastroDeAcesso(entidade.Email, chave.ToString(), urlConfirmacaoCadastro);
 
             var entidadeResposta = _mapeador.Map<EntidadeAcessoResposta>(entidadeCadastrada);
 
@@ -36,10 +34,10 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             var email = Token.RetornarEmailConfirmacaoCadastroEntidadeAcesso(token) ?? "";
 
             var entidadeParaAlterar = await _dominio.BuscarComEmailAsync(email);
-            if (entidadeParaAlterar is null)
+            if (!_validador.AtivacaoEhValida(entidadeParaAlterar))
                 return null;
 
-            if (!_validador.AtivacaoEhValida(entidadeParaAlterar))
+            if (entidadeParaAlterar is null)
                 return null;
 
             entidadeParaAlterar.Ativar(true);
@@ -54,7 +52,10 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
         {
             var entidade = await _dominio.BuscarComEmailAsync(reenviarChave.Email);
             if (entidade is null)
+            {
+                _validador.NaoEncontrada();
                 return false;
+            }
 
             var token = Token.GerarTokenReenvioChave(entidade.Id);
             var urlConfirmacaoGeracaoNovaChave = $"{urlBase}{token}";
@@ -70,14 +71,16 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
             var entidadeParaAlterar = await _dominio.BuscarAsync(id);
             if (entidadeParaAlterar is null)
+            {
+                _validador.NaoEncontrada();
                 return false;
+            }
 
             var chave = ChaveAcesso.GerarChave();
-            var chaveCriptografada = Criptografia.Criptografar(chave);
-            entidadeParaAlterar.AlterarChave(chaveCriptografada);
+            entidadeParaAlterar.AlterarChave(chave);
             await _dominio.AlterarAsync(entidadeParaAlterar);
 
-            _email.ReenviarChaveDeAcesso(entidadeParaAlterar.Email, chave);
+            _email.ReenviarChaveDeAcesso(entidadeParaAlterar.Email, chave.ToString());
 
             return true;
         }
@@ -86,7 +89,10 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
         {
             var entidade = await _dominio.BuscarComEmailAsync(entidadeAlterar.Email);
             if (entidade is null)
+            {
+                _validador.NaoEncontrada();
                 return false;
+            }
 
             if (!_validador.AlteracaoNomeEhValida(entidadeAlterar))
                 return false;
@@ -107,7 +113,10 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
             var entidadeParaAlterar = await _dominio.BuscarAsync(id);
             if (entidadeParaAlterar is null)
+            {
+                _validador.NaoEncontrada();
                 return null;
+            }
 
             entidadeParaAlterar.AlterarNome(novoNome);
             var entidadeAlterada = await _dominio.AlterarAsync(entidadeParaAlterar);
@@ -120,14 +129,13 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
         public async Task<bool> EnviarEmailAlteracaoEmailAsync(EntidadeAcessoAlterarEmail entidadeAlterarEmail, string urlBase)
         {
             var entidade = await _dominio.BuscarComEmailAsync(entidadeAlterarEmail.EmailAtual);
-            if (entidade is null)
+            if (entidade is null || entidadeAlterarEmail.Chave != entidade.Chave)
+            {
+                _validador.NaoEncontrada();
                 return false;
+            }
 
             if (!_validador.AlteracaoEmailEhValida(entidadeAlterarEmail))
-                return false;
-
-            var chaveRecebida = entidadeAlterarEmail.Chave;
-            if (!Criptografia.SaoIguais(chaveRecebida, entidade.Chave))
                 return false;
 
             var token = Token.GerarTokenAlterarEmailEntidadeAcesso(entidade.Id, entidadeAlterarEmail.EmailNovo);
@@ -146,7 +154,10 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
             var entidadeParaAlterar = await _dominio.BuscarAsync(id);
             if (entidadeParaAlterar is null)
+            {
+                _validador.NaoEncontrada();
                 return null;
+            }
 
             entidadeParaAlterar.AlterarEmail(novoEmail);
             var entidadeAlterada = await _dominio.AlterarAsync(entidadeParaAlterar);
@@ -159,12 +170,11 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
         public async Task<bool> ExcluirAsync(EntidadeAcessoExcluir entidadeAcessoExcluir)
         {
             var entidadeAcesso = await _dominio.BuscarComEmailAsync(entidadeAcessoExcluir.Email);
-            if (entidadeAcesso is null)
+            if (entidadeAcesso is null || entidadeAcessoExcluir.Chave != entidadeAcesso.Chave)
+            {
+                _validador.NaoEncontrada();
                 return false;
-
-            var senhasSaoIguais = Criptografia.SaoIguais(entidadeAcessoExcluir.Chave, entidadeAcesso.Chave);
-            if (!senhasSaoIguais)
-                return false;
+            }
 
             var excluida = await _dominio.ExcluirAsync(entidadeAcesso.Id);
 

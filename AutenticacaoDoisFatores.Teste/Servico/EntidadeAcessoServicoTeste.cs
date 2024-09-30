@@ -6,13 +6,16 @@ using AutenticacaoDoisFatores.Servico.Mapeadores;
 using AutenticacaoDoisFatores.Servico.Servicos;
 using AutenticacaoDoisFatores.Servico.Servicos.Interfaces;
 using AutenticacaoDoisFatores.Servico.Utilitarios;
+using AutenticacaoDoisFatores.Teste.Construtores;
 using AutoMapper;
 using Bogus;
+using Mensageiro;
 using Moq;
 using Moq.AutoMock;
 
 namespace AutenticacaoDoisFatores.Teste.Servico
 {
+    [Collection("Test collection")]
     public class EntidadeAcessoServicoTeste
     {
         private readonly AutoMocker _mock = new();
@@ -21,9 +24,6 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
         public EntidadeAcessoServicoTeste()
         {
-            var tokenKey = _faker.System.ApplePushToken();
-            Environment.SetEnvironmentVariable("TOKEN_KEY", tokenKey);
-
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile<EntidadeAcessoMapeamento>();
@@ -69,7 +69,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             Assert.Null(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.CadastrarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
             _mock.GetMock<IEmailServico>().Verify(d => d.EnviarSucessoCadastroDeAcesso(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _mock.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.NomeInvalido), Times.Once);
+            _mock.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.NomeInvalido), Times.Once);
         }
 
         [Theory]
@@ -92,7 +92,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             Assert.Null(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.CadastrarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
             _mock.GetMock<IEmailServico>().Verify(d => d.EnviarSucessoCadastroDeAcesso(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _mock.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido), Times.Once);
+            _mock.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido), Times.Once);
         }
 
         [Fact]
@@ -110,18 +110,17 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             Assert.Null(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.CadastrarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
             _mock.GetMock<IEmailServico>().Verify(d => d.EnviarSucessoCadastroDeAcesso(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _mock.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.EmailJaCadastrado), Times.Once);
+            _mock.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.EmailJaCadastrado), Times.Once);
         }
 
         [Fact]
         internal async Task DeveAtivarCadastro()
         {
-            var id = _faker.Random.Int(1);
-            var nome = _faker.Company.CompanyName();
-            var chave = _faker.Random.AlphaNumeric(16);
             var email = _faker.Person.Email;
-            var dataCadastro = _faker.Date.Past();
-            var entidadeCadastrada = new EntidadeAcesso(id, nome, chave, email, dataCadastro, null, false);
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeCadastrada = construtor
+                .ComEmail(email)
+                .CriarEntidadeAcesso();
             var entidadeResposta = _mapeador.Map<EntidadeAcessoResposta>(entidadeCadastrada);
             var token = Token.GerarTokenEnvioChaveAcesso(email);
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
@@ -137,7 +136,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveAtivarCadastroQuandoNaoEncontrarEntidade()
+        internal async Task DeveRetornarMensagemQuandoTentarAtivarCadastroQueNaoEncontrarEntidade()
         {
             var email = _faker.Person.Email;
             var token = Token.GerarTokenEnvioChaveAcesso(email);
@@ -147,17 +146,18 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.Null(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.AlterarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Fact]
         internal async Task NaoDeveAtivarCadastroQuandoEntidadeJaAtiva()
         {
-            var id = _faker.Random.Int(1);
-            var nome = _faker.Company.CompanyName();
-            var chave = _faker.Random.AlphaNumeric(16);
             var email = _faker.Person.Email;
-            var dataCadastro = _faker.Date.Past();
-            var entidadeCadastrada = new EntidadeAcesso(id, nome, chave, email, dataCadastro, null, true);
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeCadastrada = construtor
+                .ComEmail(email)
+                .ComAtivo(true)
+                .CriarEntidadeAcessoCompleta();
             var token = Token.GerarTokenEnvioChaveAcesso(email);
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
             _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComEmailAsync(email)).ReturnsAsync(entidadeCadastrada);
@@ -166,7 +166,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.Null(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.AlterarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
-            _mock.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.JaAtiva), Times.Once);
+            _mock.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.JaAtiva), Times.Once);
         }
 
         [Fact]
@@ -176,11 +176,10 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var reenviarChaveAcesso = new ReenviarChaveAcesso(email);
             var url = _faker.Internet.Url();
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
-            var id = _faker.Random.Int(1);
-            var nome = _faker.Company.CompanyName();
-            var chave = _faker.Random.AlphaNumeric(16);
-            var dataCadastro = _faker.Date.Past();
-            var entidadeCadastrada = new EntidadeAcesso(id, nome, chave, email, dataCadastro, null, true);
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeCadastrada = construtor
+                .ComEmail(email)
+                .CriarEntidadeAcesso();
             _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComEmailAsync(email)).ReturnsAsync(entidadeCadastrada);
 
             var retorno = await servico.ReenviarChaveAcessoAsync(reenviarChaveAcesso, url);
@@ -190,7 +189,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveReenviarChaveAcessoQuandoEntidadeNaoExiste()
+        internal async Task DeveRetornarMensagemAoTentarReenviarChaveAcessoQuandoEntidadeNaoExiste()
         {
             var email = _faker.Person.Email;
             var reenviarChaveAcesso = new ReenviarChaveAcesso(email);
@@ -201,6 +200,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.False(retorno);
             _mock.GetMock<IEmailServico>().Verify(e => e.EnviarConfirmacaoAlteracaoChaveAcesso(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Fact]
@@ -209,11 +209,14 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var id = _faker.Random.Int(1);
             var token = Token.GerarTokenReenvioChave(id);
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
-            var nome = _faker.Company.CompanyName();
-            var chave = _faker.Random.AlphaNumeric(16);
+            var chave = Guid.NewGuid();
             var email = _faker.Person.Email;
-            var dataCadastro = _faker.Date.Past();
-            var entidadeCadastrada = new EntidadeAcesso(id, nome, chave, email, dataCadastro, null, true);
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeCadastrada = construtor
+                .ComId(id)
+                .ComChave(chave)
+                .ComEmail(email)
+                .CriarEntidadeAcesso();
             _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarAsync(id)).ReturnsAsync(entidadeCadastrada);
 
             var retorno = await servico.AlterarChaveAcessoAsync(token);
@@ -225,7 +228,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveAlterarChaveAcessoQuandoEntidadeNaoExiste()
+        internal async Task DeveRetornarMensagemAoAlterarChaveAcessoQuandoEntidadeNaoExiste()
         {
             var id = _faker.Random.Int(1);
             var token = Token.GerarTokenReenvioChave(id);
@@ -236,6 +239,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             Assert.False(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.AlterarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
             _mock.GetMock<IEmailServico>().Verify(e => e.ReenviarChaveDeAcesso(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Fact]
@@ -246,11 +250,12 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var entidadeAlterarNome = new EntidadeAcessoAlterarNome(email, novoNome);
             var url = _faker.Internet.Url();
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
-            var id = _faker.Random.Int(1);
             var nomeAtual = _faker.Company.CompanyName();
-            var chave = _faker.Random.AlphaNumeric(16);
-            var dataCadastro = _faker.Date.Past();
-            var entidadeCadastrada = new EntidadeAcesso(id, nomeAtual, chave, email, dataCadastro, null, true);
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeCadastrada = construtor
+                .ComNome(nomeAtual)
+                .ComEmail(email)
+                .CriarEntidadeAcesso();
             _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComEmailAsync(email)).ReturnsAsync(entidadeCadastrada);
 
             var retorno = await servico.EnviarEmailAlteracaoNomeAsync(entidadeAlterarNome, url);
@@ -260,7 +265,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveEnviarEmailAlteracaoNomeQuandoEntidadeNaoExiste()
+        internal async Task DeveRetornarMensagemAoEnviarEmailAlteracaoNomeQuandoEntidadeNaoExiste()
         {
             var email = _faker.Person.Email;
             var nome = _faker.Company.CompanyName();
@@ -272,6 +277,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.False(retorno);
             _mock.GetMock<IEmailServico>().Verify(e => e.EnviarConfirmacaoAlteracaoEntidadeAcesso(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Theory]
@@ -287,18 +293,19 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var entidadeAlterarNome = new EntidadeAcessoAlterarNome(email, nomeInvalido);
             var url = _faker.Internet.Url();
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
-            var id = _faker.Random.Int(1);
             var nomeAtual = _faker.Company.CompanyName();
-            var chave = _faker.Random.AlphaNumeric(16);
-            var dataCadastro = _faker.Date.Past();
-            var entidadeCadastrada = new EntidadeAcesso(id, nomeAtual, chave, email, dataCadastro, null, true);
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeCadastrada = construtor
+                .ComNome(nomeAtual)
+                .ComEmail(email)
+                .CriarEntidadeAcesso();
             _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComEmailAsync(email)).ReturnsAsync(entidadeCadastrada);
 
             var retorno = await servico.EnviarEmailAlteracaoNomeAsync(entidadeAlterarNome, url);
 
             Assert.False(retorno);
             _mock.GetMock<IEmailServico>().Verify(e => e.EnviarConfirmacaoAlteracaoEntidadeAcesso(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _mock.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.NomeInvalido), Times.Once);
+            _mock.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.NomeInvalido), Times.Once);
         }
 
         [Fact]
@@ -310,9 +317,14 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var email = _faker.Person.Email;
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
             var nomeAtual = _faker.Company.CompanyName();
-            var chave = _faker.Random.AlphaNumeric(16);
-            var dataCadastro = _faker.Date.Past();
-            var entidadeCadastrada = new EntidadeAcesso(id, nomeAtual, chave, email, dataCadastro, null, true);
+            var chave = Guid.NewGuid();
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeCadastrada = construtor
+                .ComId(id)
+                .ComNome(nomeAtual)
+                .ComChave(chave)
+                .ComEmail(email)
+                .CriarEntidadeAcessoCompleta();
             _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarAsync(id)).ReturnsAsync(entidadeCadastrada);
             _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.AlterarAsync(entidadeCadastrada)).ReturnsAsync(entidadeCadastrada);
             var entidadeResposta = new EntidadeAcessoResposta(id, novoNome, email);
@@ -327,7 +339,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveAlterarNomeQuandoEntidadeNaoExiste()
+        internal async Task DeveRetornarMensagemAoAlterarNomeQuandoEntidadeNaoExiste()
         {
             var id = _faker.Random.Int(1);
             var novoNome = _faker.Company.CompanyName();
@@ -338,6 +350,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.Null(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.AlterarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Fact]
@@ -345,16 +358,14 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         {
             var emailAtual = _faker.Person.Email;
             var emailNovo = $"novo_{_faker.Person.Email}";
-            var chave = _faker.Random.AlphaNumeric(32);
+            var chave = Guid.NewGuid();
             var entidadeAlterarEmail = new EntidadeAcessoAlterarEmail(emailAtual, emailNovo, chave);
             var url = _faker.Internet.Url();
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
-            var id = _faker.Random.Int(1);
-            var nome = _faker.Company.CompanyName();
-            var nomeAtual = _faker.Company.CompanyName();
-            var chaveCriptografada = Criptografia.Criptografar(chave);
-            var dataCadastro = _faker.Date.Past();
-            var entidadeCadastrada = new EntidadeAcesso(id, nomeAtual, chaveCriptografada, emailAtual, dataCadastro, null, true);
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeCadastrada = construtor
+                .ComChave(chave)
+                .CriarEntidadeAcessoCompleta();
             _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComEmailAsync(emailAtual)).ReturnsAsync(entidadeCadastrada);
 
             var retorno = await servico.EnviarEmailAlteracaoEmailAsync(entidadeAlterarEmail, url);
@@ -364,11 +375,11 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveEnviarEmailAlteracaoEmailQuandoEntidadeNaoExiste()
+        internal async Task DeveRetornarMensagemAoEnviarEmailAlteracaoEmailQuandoEntidadeNaoExiste()
         {
             var emailAtual = _faker.Person.Email;
             var emailNovo = $"novo_{_faker.Person.Email}";
-            var chave = _faker.Random.AlphaNumeric(32);
+            var chave = Guid.NewGuid();
             var entidadeAlterarEmail = new EntidadeAcessoAlterarEmail(emailAtual, emailNovo, chave);
             var url = _faker.Internet.Url();
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
@@ -377,6 +388,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.False(retorno);
             _mock.GetMock<IEmailServico>().Verify(e => e.EnviarConfirmacaoAlteracaoEntidadeAcesso(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Theory]
@@ -390,44 +402,22 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         internal async Task NaoDeveEnviarEmailAlteracaoEmailQuandoEhInvalido(string emailInvalido)
         {
             var emailAtual = _faker.Person.Email;
-            var chave = _faker.Random.AlphaNumeric(32);
+            var chave = Guid.NewGuid();
             var entidadeAlterarEmail = new EntidadeAcessoAlterarEmail(emailAtual, emailInvalido, chave);
             var url = _faker.Internet.Url();
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
-            var id = _faker.Random.Int(1);
-            var nome = _faker.Company.CompanyName();
-            var dataCadastro = _faker.Date.Past();
-            var entidadeCadastrada = new EntidadeAcesso(id, nome, chave, emailAtual, dataCadastro, null, true);
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeCadastrada = construtor
+                .ComEmail(emailAtual)
+                .ComChave(chave)
+                .CriarEntidadeAcessoCompleta();
             _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComEmailAsync(emailAtual)).ReturnsAsync(entidadeCadastrada);
 
             var retorno = await servico.EnviarEmailAlteracaoEmailAsync(entidadeAlterarEmail, url);
 
             Assert.False(retorno);
             _mock.GetMock<IEmailServico>().Verify(e => e.EnviarConfirmacaoAlteracaoEntidadeAcesso(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _mock.GetMock<INotificadorServico>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido), Times.Once);
-        }
-
-        [Fact]
-        internal async Task NaoDeveEnviarEmailAlteracaoEmailQuandoChaveNaoValida()
-        {
-            var emailAtual = _faker.Person.Email;
-            var emailNovo = $"novo_{_faker.Person.Email}";
-            var chave = _faker.Random.AlphaNumeric(32);
-            var entidadeAlterarEmail = new EntidadeAcessoAlterarEmail(emailAtual, emailNovo, chave);
-            var url = _faker.Internet.Url();
-            var servico = _mock.CreateInstance<EntidadeAcessoServico>();
-            var id = _faker.Random.Int(1);
-            var nome = _faker.Company.CompanyName();
-            var nomeAtual = _faker.Company.CompanyName();
-            var chaveCriptografada = Criptografia.Criptografar($"{_faker.Random.AlphaNumeric(28)}novo");
-            var dataCadastro = _faker.Date.Past();
-            var entidadeCadastrada = new EntidadeAcesso(id, nomeAtual, chaveCriptografada, emailAtual, dataCadastro, null, true);
-            _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComEmailAsync(emailAtual)).ReturnsAsync(entidadeCadastrada);
-
-            var retorno = await servico.EnviarEmailAlteracaoEmailAsync(entidadeAlterarEmail, url);
-
-            Assert.False(retorno);
-            _mock.GetMock<IEmailServico>().Verify(e => e.EnviarConfirmacaoAlteracaoEntidadeAcesso(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(n => n.AddMensagem(NotificacoesEntidadeAcesso.EmailInvalido), Times.Once);
         }
 
         [Fact]
@@ -438,10 +428,13 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var token = Token.GerarTokenAlterarEmailEntidadeAcesso(id, novoEmail);
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
             var nome = _faker.Company.CompanyName();
-            var chave = _faker.Random.AlphaNumeric(16);
             var emailAtual = _faker.Person.Email;
-            var dataCadastro = _faker.Date.Past();
-            var entidadeCadastrada = new EntidadeAcesso(id, nome, chave, emailAtual, dataCadastro, null, true);
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeCadastrada = construtor
+                .ComId(id)
+                .ComNome(nome)
+                .ComEmail(emailAtual)
+                .CriarEntidadeAcessoCompleta();
             _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarAsync(id)).ReturnsAsync(entidadeCadastrada);
             _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.AlterarAsync(entidadeCadastrada)).ReturnsAsync(entidadeCadastrada);
             var entidadeResposta = new EntidadeAcessoResposta(id, nome, novoEmail);
@@ -456,7 +449,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveAlterarEmailQuandoEntidadeNaoExiste()
+        internal async Task DeveRetornarMensagemAoAlterarEmailQuandoEntidadeNaoExiste()
         {
             var id = _faker.Random.Int(1);
             var novoEmail = $"novo_{_faker.Person.Email}";
@@ -467,6 +460,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.Null(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.AlterarAsync(It.IsAny<EntidadeAcesso>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Fact]
@@ -474,12 +468,15 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         {
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
             var id = _faker.Random.Int(1);
-            var nome = _faker.Company.CompanyName();
-            var chave = _faker.Random.AlphaNumeric(16);
-            var chaveCriptografada = Criptografia.Criptografar(chave);
+            var chave = Guid.NewGuid();
             var email = _faker.Person.Email;
             var dataCadastro = _faker.Date.Past();
-            var entidadeCadastrada = new EntidadeAcesso(id, nome, chaveCriptografada, email, dataCadastro, null, true);
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeCadastrada = construtor
+                .ComId(id)
+                .ComEmail(email)
+                .ComChave(chave)
+                .CriarEntidadeAcessoCompleta();
             _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComEmailAsync(email)).ReturnsAsync(entidadeCadastrada);
             _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.ExcluirAsync(id)).ReturnsAsync(true);
             var entidadeAcessoExcluir = new EntidadeAcessoExcluir(email, chave);
@@ -491,11 +488,11 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         }
 
         [Fact]
-        internal async Task NaoDeveExcluirQuandoEntidadeNaoExiste()
+        internal async Task DeveRetornarMensagemAoExcluirQuandoEntidadeNaoExiste()
         {
             var id = _faker.Random.Int(1);
             var email = _faker.Person.Email;
-            var chave = _faker.Random.AlphaNumeric(16);
+            var chave = Guid.NewGuid();
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
             var entidadeAcessoExcluir = new EntidadeAcessoExcluir(email, chave);
 
@@ -503,6 +500,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
 
             Assert.False(retorno);
             _mock.GetMock<IEntidadeAcessoDominio>().Verify(d => d.ExcluirAsync(It.IsAny<int>()), Times.Never);
+            _mock.GetMock<INotificador>().Verify(d => d.AddMensagemNaoEncontrado(NotificacoesEntidadeAcesso.NaoEncontrada), Times.Once);
         }
 
         [Fact]
@@ -510,15 +508,17 @@ namespace AutenticacaoDoisFatores.Teste.Servico
         {
             var servico = _mock.CreateInstance<EntidadeAcessoServico>();
             var id = _faker.Random.Int(1);
-            var nome = _faker.Company.CompanyName();
-            var chave = _faker.Random.AlphaNumeric(16);
-            var chaveCriptografada = Criptografia.Criptografar(chave);
+            var chave = Guid.NewGuid();
             var email = _faker.Person.Email;
-            var dataCadastro = _faker.Date.Past();
-            var entidadeCadastrada = new EntidadeAcesso(id, nome, chaveCriptografada, email, dataCadastro, null, true);
+            var construtor = new EntidadeAcessoConstrutor();
+            var entidadeCadastrada = construtor
+                .ComId(id)
+                .ComEmail(email)
+                .ComChave(chave)
+                .CriarEntidadeAcessoCompleta();
             _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.BuscarComEmailAsync(email)).ReturnsAsync(entidadeCadastrada);
             _mock.GetMock<IEntidadeAcessoDominio>().Setup(d => d.ExcluirAsync(id)).ReturnsAsync(true);
-            chave += "diferente";
+            chave = Guid.NewGuid();
             var entidadeAcessoExcluir = new EntidadeAcessoExcluir(email, chave);
 
             var retorno = await servico.ExcluirAsync(entidadeAcessoExcluir);

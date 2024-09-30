@@ -1,4 +1,5 @@
-﻿using AutenticacaoDoisFatores.Core.Excecoes;
+﻿using AutenticacaoDoisFatores.Core.Entidades.Base;
+using AutenticacaoDoisFatores.Core.Excecoes;
 using AutenticacaoDoisFatores.Core.Extensoes;
 using AutenticacaoDoisFatores.Core.Validadores;
 
@@ -7,13 +8,13 @@ namespace AutenticacaoDoisFatores.Core.Entidades
     public class EntidadeAcesso: EntidadeBase
     {
         public string Nome { get; private set; }
-        public string Chave { get; private set; }
+        public Guid Chave { get; private set; }
         public string Email { get; private set; }
         public DateTime DataCadastro { get; private set; }
         public DateTime? DataUltimoAcesso { get; private set; }
         public bool Ativo { get; private set; }
 
-        public EntidadeAcesso(string nome, string chave, string email)
+        public EntidadeAcesso(string nome, Guid chave, string email)
         {
             EntidadeAcessoValidador.ValidarNovaEntidade(nome, chave, email);
 
@@ -24,7 +25,7 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             Ativo = false;
         }
 
-        public EntidadeAcesso(int id, string nome, string chave, string email, DateTime dataCadastro, DateTime? dataUltimoAcesso, bool ativo)
+        public EntidadeAcesso(int id, string nome, Guid chave, string email, DateTime dataCadastro, DateTime? dataUltimoAcesso, bool ativo)
         {
             EntidadeAcessoValidador.ValidarEntidadeCompleta(id, nome, chave, email);
 
@@ -53,11 +54,8 @@ namespace AutenticacaoDoisFatores.Core.Entidades
             Email = email;
         }
         
-        public void AlterarChave(string chave)
+        public void AlterarChave(Guid chave)
         {
-            if (chave.IsNullOrEmptyOrWhiteSpaces())
-                EntidadeAcessoException.ChaveInvalida();
-
             Chave = chave;
         }
 

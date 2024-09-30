@@ -1,4 +1,5 @@
 ﻿using AutenticacaoDoisFatores.Core.Entidades;
+using AutenticacaoDoisFatores.Core.Repositorios.Base;
 
 namespace AutenticacaoDoisFatores.Core.Repositorios
 {
@@ -10,5 +11,7 @@ namespace AutenticacaoDoisFatores.Core.Repositorios
         Task<EntidadeAcesso?> BuscarPorEmailAsync(string email);
         void Alterar(EntidadeAcesso entidadeAcesso);
         Task<bool> ExcluirAsync(int id);
+        Task<EntidadeAcesso?> BuscarPorChaveAsync(Guid chave);
+        Task<bool> ExisteEntidadeComChaveAsync(Guid chave);
     }
 }
