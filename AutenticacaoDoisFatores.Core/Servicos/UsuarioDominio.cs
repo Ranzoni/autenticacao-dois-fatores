@@ -1,4 +1,5 @@
 ﻿using AutenticacaoDoisFatores.Core.Entidades;
+using AutenticacaoDoisFatores.Core.Excecoes;
 using AutenticacaoDoisFatores.Core.Repositorios;
 using AutenticacaoDoisFatores.Core.Servicos.Interfaces;
 
@@ -30,6 +31,19 @@ namespace AutenticacaoDoisFatores.Core.Servicos
         public async Task CadastrarAsync(Usuario usuario)
         {
             await _repositorio.CadastrarAsync(usuario);
+            await _repositorio.SalvarAlteracoesAsync();
+        }
+
+        public async Task ExcluirAsync(int id, Guid chave)
+        {
+            var usuario = await BuscarAsync(id, chave);
+            if (usuario is null)
+            {
+                UsuarioException.UsuarioNaoEncontrado();
+                return;
+            }
+
+            _repositorio.Excluir(usuario);
             await _repositorio.SalvarAlteracoesAsync();
         }
 

@@ -40,6 +40,11 @@ namespace AutenticacaoDoisFatores.Infra.Repositorios
             await _contexto.Usuarios.AddAsync(usuario);
         }
 
+        public void Excluir(Usuario usuario)
+        {
+            _contexto.Usuarios.Remove(usuario);
+        }
+
         public async Task<bool> ExisteUsuarioComEmailAsync(string email, Guid chave)
         {
             return await _contexto.Usuarios.AnyAsync(u => u.Email.Equals(email) && u.EntidadeAcesso.Chave.Equals(chave));

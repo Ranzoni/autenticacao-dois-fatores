@@ -11,5 +11,6 @@ namespace AutenticacaoDoisFatores.Core.Repositorios
         Task<Usuario?> BuscarAsync(int id, Guid chave);
         Task<Usuario?> BuscarNaoAtivoAsync(int id, Guid chave);
         Task<Usuario?> BuscarPorEmailAsync(string email, Guid chave);
+        void Excluir(Usuario usuario);
     }
 }

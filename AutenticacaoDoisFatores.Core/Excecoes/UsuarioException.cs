@@ -29,5 +29,10 @@ namespace AutenticacaoDoisFatores.Core.Excecoes
         {
             throw new UsuarioException(NotificacoesUsuario.ChaveAcessoNaoInformada);
         }
+
+        internal static void UsuarioNaoEncontrado()
+        {
+            throw new UsuarioException(NotificacoesUsuario.NaoEncontrado);
+        }
     }
 }
