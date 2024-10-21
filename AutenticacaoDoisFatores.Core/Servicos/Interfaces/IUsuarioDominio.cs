@@ -8,6 +8,7 @@ namespace AutenticacaoDoisFatores.Core.Servicos.Interfaces
         Task<bool> ExisteUsuarioComEmailAsync(string email, Guid chave);
         Task AlterarAsync(Usuario usuario);
         Task<Usuario?> BuscarAsync(int id, Guid chave);
+        Task<Usuario?> BuscarAtivoAsync(int id, Guid chave);
         Task<Usuario?> BuscarNaoAtivoAsync(int id, Guid chave);
         Task<Usuario?> BuscarPorEmailAsync(string email, Guid chave);
         Task ExcluirAsync(int id, Guid chave);

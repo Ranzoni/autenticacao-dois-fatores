@@ -15,7 +15,7 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             if (!_validacao.AlteracaoEmailEhValida(usuarioAlterarEmail))
                 return false;
 
-            var usuarioCadastrado = await _dominio.BuscarAsync(id, chave);
+            var usuarioCadastrado = await _dominio.BuscarAtivoAsync(id, chave);
             if (usuarioCadastrado is null)
             {
                 _validacao.UsuarioNaoEncontrado();
@@ -34,7 +34,7 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             if (!_validacao.AlteracaoEhValida(usuarioAlterar))
                 return null;
 
-            var usuarioCadastrado = await _dominio.BuscarAsync(id, chave);
+            var usuarioCadastrado = await _dominio.BuscarAtivoAsync(id, chave);
             if (usuarioCadastrado is null)
             {
                 _validacao.UsuarioNaoEncontrado();
@@ -90,7 +90,7 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             var email = dadosToken.email ?? "";
             var chave = dadosToken.chave ?? Guid.Empty;
 
-            var usuarioCadastrado = await _dominio.BuscarAsync(id, chave);
+            var usuarioCadastrado = await _dominio.BuscarAtivoAsync(id, chave);
             if (usuarioCadastrado is null)
             {
                 _validacao.UsuarioNaoEncontrado();
@@ -111,7 +111,7 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             if (!_validacao.AlteracaoSenhaEhValida(usuarioAlterarSenha))
                 return false;
 
-            var usuario = await _dominio.BuscarAsync(id, usuarioAlterarSenha.Chave);
+            var usuario = await _dominio.BuscarAtivoAsync(id, usuarioAlterarSenha.Chave);
             if (usuario is null)
             {
                 _validacao.UsuarioNaoEncontrado();
@@ -133,7 +133,7 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             var senha = dadosToken.senha ?? "";
             var chave = dadosToken.chave ?? Guid.Empty;
 
-            var usuarioCadastrado = await _dominio.BuscarAsync(id, chave);
+            var usuarioCadastrado = await _dominio.BuscarAtivoAsync(id, chave);
             if (usuarioCadastrado is null)
             {
                 _validacao.UsuarioNaoEncontrado();
@@ -144,6 +144,15 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
             usuarioCadastrado.AlterarSenha(senhaCriptografada);
 
             await _dominio.AlterarAsync(usuarioCadastrado);
+
+            return true;
+        }
+
+        public async Task<bool> ExcluirAsync(int id, Guid chave)
+        {
+
+
+            await _dominio.ExcluirAsync(id, chave);
 
             return true;
         }

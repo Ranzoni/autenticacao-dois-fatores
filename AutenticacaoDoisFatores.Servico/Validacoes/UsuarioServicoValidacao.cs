@@ -107,5 +107,17 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
 
             return true;
         }
+
+        public async Task<bool> ExclusaoEhValidaAsync(int id, Guid chave)
+        {
+            var usuario = await _dominio.BuscarAsync(id, chave);
+            if (usuario is null)
+            {
+                _notificador.AddMensagem(NotificacoesUsuario.NaoEncontrado);
+                return false;
+            }
+
+            return true;
+        }
     }
 }

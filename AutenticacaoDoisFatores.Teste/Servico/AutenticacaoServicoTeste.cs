@@ -139,7 +139,7 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             var usuario = new UsuarioConstrutor()
                 .ComAtivo(true)
                 .CriarCompleto();
-            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(usuario.Id, chave)).ReturnsAsync(usuario);
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAtivoAsync(usuario.Id, chave)).ReturnsAsync(usuario);
 
             var retorno = await servico.InativarAsync(usuario.Id, chave);
 

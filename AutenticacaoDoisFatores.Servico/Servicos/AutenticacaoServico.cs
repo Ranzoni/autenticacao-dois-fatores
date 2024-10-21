@@ -55,7 +55,7 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
         public async Task<bool> InativarAsync(int id, Guid chave)
         {
-            var usuario = await _dominio.BuscarAsync(id, chave);
+            var usuario = await _dominio.BuscarAtivoAsync(id, chave);
             if (usuario is null)
             {
                 _validacao.UsuarioNaoEncontrado();
