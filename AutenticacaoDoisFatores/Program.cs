@@ -62,6 +62,8 @@ builder.Services.AddTransient<IEntidadeAcessoServico, EntidadeAcessoServico>();
 builder.Services.AddTransient<EntidadeAcessoServicoValidacao>();
 builder.Services.AddTransient<IUsuarioServico, UsuarioServico>();
 builder.Services.AddTransient<UsuarioServicoValidacao>();
+builder.Services.AddTransient<IAutenticacaoServico, AutenticacaoServico>();
+builder.Services.AddTransient<AutenticacaoServicoValidacao>();
 
 var config = new MapperConfiguration(cfg =>
 {

@@ -150,7 +150,8 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
         public async Task<bool> ExcluirAsync(int id, Guid chave)
         {
-
+            if (!await _validacao.ExclusaoEhValidaAsync(id, chave))
+                return false;
 
             await _dominio.ExcluirAsync(id, chave);
 

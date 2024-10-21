@@ -144,5 +144,20 @@ namespace AutenticacaoDoisFatores.Controllers
                 return MensagemHtml("Falha", "Falha ao completar a solicitação", $"Por favor, entre em contato com o responsável pelo sistema. Erro: {e.Message}");
             }
         }
+
+        [HttpDelete("Excluir/{chave}/Id/{id}")]
+        public async Task<ActionResult> ExcluirAsync(Guid chave, int id)
+        {
+            try
+            {
+                var retorno = await _servico.ExcluirAsync(id, chave);
+
+                return Sucesso("O usuário foi excluído com sucesso");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

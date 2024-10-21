@@ -446,5 +446,34 @@ namespace AutenticacaoDoisFatores.Teste.Servico
             _mocker.GetMock<IUsuarioDominio>().Verify(d => d.AlterarAsync(It.IsAny<Usuario>()), Times.Never);
             _mocker.GetMock<INotificador>().Verify(n => n.AddMensagemNaoEncontrado(NotificacoesUsuario.NaoEncontrado), Times.Once);
         }
+
+        [Fact]
+        internal async Task DeveExcluir()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var chave = Guid.NewGuid();
+            var usuario = new UsuarioConstrutor()
+                .CriarCompleto();
+            _mocker.GetMock<IUsuarioDominio>().Setup(d => d.BuscarAsync(usuario.Id, chave)).ReturnsAsync(usuario);
+
+            var resposta = await servico.ExcluirAsync(usuario.Id, chave);
+
+            Assert.True(resposta);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.ExcluirAsync(usuario.Id, chave), Times.Once);
+        }
+
+        [Fact]
+        internal async Task NaoDeveExcluirQuandoUsuarioNaoExiste()
+        {
+            var servico = _mocker.CreateInstance<UsuarioServico>();
+            var id = _faker.Random.Int(1);
+            var chave = Guid.NewGuid();
+
+            var resposta = await servico.ExcluirAsync(id, chave);
+
+            Assert.False(resposta);
+            _mocker.GetMock<IUsuarioDominio>().Verify(d => d.ExcluirAsync(It.IsAny<int>(), It.IsAny<Guid>()), Times.Never);
+            _mocker.GetMock<INotificador>().Verify(n => n.AddMensagemNaoEncontrado(NotificacoesUsuario.NaoEncontrado), Times.Once);
+        }
     }
 }

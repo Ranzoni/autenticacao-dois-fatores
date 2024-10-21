@@ -113,7 +113,7 @@ namespace AutenticacaoDoisFatores.Servico.Validacoes
             var usuario = await _dominio.BuscarAsync(id, chave);
             if (usuario is null)
             {
-                _notificador.AddMensagem(NotificacoesUsuario.NaoEncontrado);
+                _notificador.AddMensagemNaoEncontrado(NotificacoesUsuario.NaoEncontrado);
                 return false;
             }
 
