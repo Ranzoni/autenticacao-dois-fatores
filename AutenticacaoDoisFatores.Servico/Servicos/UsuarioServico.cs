@@ -157,5 +157,13 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
 
             return true;
         }
+
+        public async Task<UsuarioResposta?> BuscarAsync(int id, Guid chave)
+        {
+            var usuario = await _dominio.BuscarAsync(id, chave);
+
+            var usuarioResposta = _mapeador.Map<UsuarioResposta?>(usuario);
+            return usuarioResposta;
+        }
     }
 }
