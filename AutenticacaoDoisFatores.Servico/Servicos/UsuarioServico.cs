@@ -161,6 +161,11 @@ namespace AutenticacaoDoisFatores.Servico.Servicos
         public async Task<UsuarioResposta?> BuscarAsync(int id, Guid chave)
         {
             var usuario = await _dominio.BuscarAsync(id, chave);
+            if (usuario is null)
+            {
+                _validacao.UsuarioNaoEncontrado();
+                return null;
+            }
 
             var usuarioResposta = _mapeador.Map<UsuarioResposta?>(usuario);
             return usuarioResposta;

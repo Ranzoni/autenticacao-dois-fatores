@@ -159,5 +159,20 @@ namespace AutenticacaoDoisFatores.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpGet("Buscar/{chave}/Id/{id}")]
+        public async Task<ActionResult> BuscarAsync(Guid chave, int id)
+        {
+            try
+            {
+                var retorno = await _servico.BuscarAsync(id, chave);
+
+                return Sucesso(retorno);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }
